@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Donate | Bless This Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <img class="floatingLogo" id="floatingLogo" src="floating-logo.png" alt="Bless This Home floating logo" />
+
+  <header class="topbar">
+    <div class="wrap">
+      <div class="topbarInner">
+        <div class="brand">
+          <img class="brandMark" src="logo.png" alt="Bless This Home logo" />
+          <div class="brandText">
+            <span class="brandScript">Bless This Home</span>
+          </div>
+        </div>
+
+        <div class="topActions">
+          <a class="btn" href="index.html">Home</a>
+          <a class="btn btnPrimary" href="volunteer.html">Volunteer</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="section" style="padding-top:120px;">
+    <div class="wrap">
+      <div class="card formCard">
+        <div class="kicker">Make A Donation To Bless This Home</div>
+        <h1 class="sectionTitle" style="margin-top:14px;">Financial Donation</h1>
+        <p class="sectionLead">Submit your donor information below, then choose a Stripe payment option.</p>
+
+        <form class="supportForm" action="https://formspree.io/f/YOUR_DONATION_FORM_ID" method="POST">
+          <div class="formRow">
+  <label for="d_organization">Organization (optional)</label>
+  <input id="d_organization" name="organization" type="text" />
+</div>
+
+          <div class="formRow">
+            <label for="firstName">First Name</label>
+            <input id="firstName" name="firstName" type="text" required />
+          </div>
+
+          <div class="formRow">
+            <label for="lastName">Last Name</label>
+            <input id="lastName" name="lastName" type="text" required />
+          </div>
+
+          <div class="formRow">
+            <label for="email">Email Address</label>
+            <input id="email" name="email" type="email" required />
+          </div>
+
+          <div class="formRow">
+            <label for="address">Address</label>
+            <input id="address" name="address" type="text" required />
+          </div>
+
+          <div class="formRow">
+            <label for="address2">Address Line 2</label>
+            <input id="address2" name="address2" type="text" />
+          </div>
+
+          <div class="formRow">
+            <label for="city">City</label>
+            <input id="city" name="city" type="text" required />
+          </div>
+
+          <div class="formRow">
+            <label for="state">State</label>
+            <input id="state" name="state" type="text" required />
+          </div>
+
+          <div class="formRow">
+            <label for="postalCode">Postal Code</label>
+            <input id="postalCode" name="postalCode" type="text" required />
+          </div>
+
+          <div class="formRow">
+            <label for="cellPhone">Cell Phone</label>
+            <input id="cellPhone" name="cellPhone" type="tel" />
+          </div>
+
+          <div class="formRow">
+            <label for="homePhone">Home Phone</label>
+            <input id="homePhone" name="homePhone" type="tel" />
+          </div>
+
+          <div class="formRow">
+            <label for="workPhone">Work Phone</label>
+            <input id="workPhone" name="workPhone" type="tel" />
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="formRow">
+  <label>Is this in honor of another person?</label>
+  <div class="checkboxGrid compactChecks">
+    <label><input type="radio" name="tribute" value="No" checked /> No</label>
+    <label><input type="radio" name="tribute" value="Yes" /> Yes</label>
+  </div>
+</div>
+
+          <div class="formRow">
+            <label for="tributeName">If Yes, Enter The Person's Name</label>
+            <input id="tributeName" name="tributeName" type="text" />
+          </div>
+
+          <div class="formRow">
+            <label for="tributeNote">Tribute Note</label>
+            <textarea id="tributeNote" name="tributeNote" rows="4"></textarea>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="formRow">
+  <label>Donation Frequency</label>
+  <div class="checkboxGrid compactChecks">
+    <label><input type="radio" name="frequency" value="One Time" checked /> One Time</label>
+    <label><input type="radio" name="frequency" value="Monthly" /> Monthly</label>
+    <label><input type="radio" name="frequency" value="Annually" /> Annually</label>
+  </div>
+</div>
+
+          <div class="formRow">
+            <label><input type="checkbox" name="coverFees" value="Yes" /> I would like to donate the additional bank fees for this donation</label>
+          </div>
+
+          <div class="formRow">
+            <label><input type="checkbox" name="anonymousDonation" value="Yes" /> Make this an anonymous donation</label>
+          </div>
+
+          <div class="formActions">
+            <button class="btn" type="submit">Submit Donor Info</button>
+            <div class="formHint">Replace the Formspree action with your real donation info endpoint.</div>
+          </div>
+        </form>
+
+        <div class="divider"></div>
+
+        <div class="cardBody">
+          After submitting donor information, choose your Stripe payment option below.
+        </div>
+
+        <div class="linkRow" style="margin-top:16px;">
+          <a class="btn btnPrimary" href="YOUR_STRIPE_ONE_TIME_LINK" target="_blank" rel="noopener noreferrer">Pay One Time</a>
+          <a class="btn btnPrimary" href="YOUR_STRIPE_MONTHLY_LINK" target="_blank" rel="noopener noreferrer">Pay Monthly</a>
+          <a class="btn btnPrimary" href="YOUR_STRIPE_ANNUAL_LINK" target="_blank" rel="noopener noreferrer">Pay Annually</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+ <footer class="footer">
+    <div class="wrap">
+      <div class="footerRow">
+        <div class="footerLeft">
+          <div class="footerBrand">
+            <span class="footerScript">Bless This Home</span>
+          </div>
+
+          <div class="footerTag">
+            Furnishing the Home, Filling the Heart
+          </div>
+
+          <div class="footerLegal">
+            © 2026 Bless This Home. All rights reserved.
+          </div>
+
+          <div class="footerDisclosure">
+            Bless This Home is a nonprofit organization serving families through donated furniture, household necessities, volunteer support and financial contributions.
+          </div>
+        </div>
+
+        <div class="footerRight">
+  <div class="footerLinks">
+    <a href="about.html">About</a>
+    <a href="who-we-help.html">Who We Help</a>
+    <a href="testimonials.html">Testimonials</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <div class="footerExternal">
+    <a href="https://www.facebook.com/BlessThisHomeMinistry" target="_blank" rel="noopener noreferrer">
+      Facebook
+    </a>
+    <a href="mailto:donate@blessthishome.org">
+      Email
+    </a>
+  </div>
+</div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast">Copied</div>
+
+  <script src="main.js"></script>
+</body>
+</html>
