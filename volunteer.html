@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Volunteer | Bless This Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <img class="floatingLogo" id="floatingLogo" src="floating-logo.png" alt="Bless This Home floating logo" />
+
+  <header class="topbar">
+    <div class="wrap">
+      <div class="topbarInner">
+        <div class="brand">
+          <img class="brandMark" src="logo.png" alt="Bless This Home logo" />
+          <div class="brandText">
+            <span class="brandScript">Bless This Home</span>
+          </div>
+        </div>
+
+        <div class="topActions">
+          <a class="btn" href="index.html">Home</a>
+          <a class="btn btnPrimary" href="donate.html">Donate</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="section" style="padding-top:120px;">
+    <div class="wrap">
+      <div class="card formCard">
+        <div class="kicker">Volunteer with Bless This Home</div>
+        <h1 class="sectionTitle" style="margin-top:14px;">Volunteer Application</h1>
+        <p class="sectionLead">Fill out the form below to volunteer with Bless This Home.</p>
+
+        <form class="supportForm" action="https://formspree.io/f/YOUR_VOLUNTEER_FORM_ID" method="POST">
+          <div class="formRow">
+            <label for="firstName">First Name</label>
+            <input id="firstName" name="firstName" type="text" required />
+          </div>
+
+          <div class="formRow">
+            <label for="lastName">Last Name</label>
+            <input id="lastName" name="lastName" type="text" required />
+          </div>
+
+          <div class="formRow">
+            <label for="email">Email Address</label>
+            <input id="email" name="email" type="email" required />
+          </div>
+
+          <div class="formRow">
+            <label for="primaryPhone">Primary Phone</label>
+            <input id="primaryPhone" name="primaryPhone" type="tel" required />
+          </div>
+
+          <div class="formRow">
+            <label for="mailingAddress">Mailing Address</label>
+            <textarea id="mailingAddress" name="mailingAddress" rows="3" required></textarea>
+          </div>
+
+          <div class="formRow">
+            <label for="city">City</label>
+            <input id="city" name="city" type="text" required />
+          </div>
+
+          <div class="formRow">
+            <label for="state">State</label>
+            <input id="state" name="state" type="text" required />
+          </div>
+
+          <div class="formRow">
+            <label for="postalCode">Postal Code</label>
+            <input id="postalCode" name="postalCode" type="text" required />
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="formRow">
+            <label for="emergencyFirstName">Emergency Contact First Name</label>
+            <input id="emergencyFirstName" name="emergencyFirstName" type="text" required />
+          </div>
+
+          <div class="formRow">
+            <label for="emergencyLastName">Emergency Contact Last Name</label>
+            <input id="emergencyLastName" name="emergencyLastName" type="text" required />
+          </div>
+
+          <div class="formRow">
+            <label for="emergencyPhone">Emergency Contact Phone Number</label>
+            <input id="emergencyPhone" name="emergencyPhone" type="tel" required />
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="formRow">
+            <label>Skills: Check Any of These You Can Do</label>
+            <div class="checkboxGrid">
+              <label><input type="checkbox" name="skills[]" value="Hang Curtains or Artwork" /> Hang Curtains or Artwork</label>
+              <label><input type="checkbox" name="skills[]" value="Haul As High School Hauler" /> Haul As High School Hauler</label>
+              <label><input type="checkbox" name="skills[]" value="Lift Over 30 Lbs" /> Lift Over 30 Lbs</label>
+              <label><input type="checkbox" name="skills[]" value="Make Beds or Arrange Room Decor" /> Make Beds or Arrange Room Decor</label>
+              <label><input type="checkbox" name="skills[]" value="Move or Lift Furniture" /> Move or Lift Furniture</label>
+              <label><input type="checkbox" name="skills[]" value="Organize or Clean Kitchenware" /> Organize or Clean Kitchenware</label>
+              <label><input type="checkbox" name="skills[]" value="Pray Out Loud Over The Space And Family" /> Pray Out Loud Over The Space And Family</label>
+              <label><input type="checkbox" name="skills[]" value="Take Photos or Video Reveal" /> Take Photos or Video Reveal</label>
+              <label><input type="checkbox" name="skills[]" value="Transport Big or Small Items" /> Transport Big or Small Items</label>
+              <label><input type="checkbox" name="skills[]" value="Unload or Unpack Boxes" /> Unload or Unpack Boxes</label>
+            </div>
+          </div>
+
+          <div class="formRow">
+            <label for="otherSkills">Other Skills</label>
+            <textarea id="otherSkills" name="otherSkills" rows="4"></textarea>
+          </div>
+
+          <div class="formRow">
+            <label for="comments">Additional Comments</label>
+            <textarea id="comments" name="comments" rows="5"></textarea>
+          </div>
+
+          <div class="formActions">
+            <button class="btn btnPrimary" type="submit">Submit Volunteer Form</button>
+            <div class="formHint">Replace the Formspree action with your real volunteer endpoint.</div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+ <footer class="footer">
+    <div class="wrap">
+      <div class="footerRow">
+        <div class="footerLeft">
+          <div class="footerBrand">
+            <span class="footerScript">Bless This Home</span>
+          </div>
+
+          <div class="footerTag">
+            Furnishing the Home, Filling the Heart
+          </div>
+
+          <div class="footerLegal">
+            © 2026 Bless This Home. All rights reserved.
+          </div>
+
+          <div class="footerDisclosure">
+            Bless This Home is a nonprofit organization serving families through donated furniture, household necessities, volunteer support and financial contributions.
+          </div>
+        </div>
+
+        <div class="footerRight">
+  <div class="footerLinks">
+    <a href="about.html">About</a>
+    <a href="who-we-help.html">Who We Help</a>
+    <a href="testimonials.html">Testimonials</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <div class="footerExternal">
+    <a href="https://www.facebook.com/BlessThisHomeMinistry" target="_blank" rel="noopener noreferrer">
+      Facebook
+    </a>
+    <a href="mailto:donate@blessthishome.org">
+      Email
+    </a>
+  </div>
+</div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast">Copied</div>
+
+  <script src="main.js"></script>
+</body>
+</html>
