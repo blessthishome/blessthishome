@@ -990,10 +990,11 @@ img{
   }
 
   /* 3. Keep large special images from taking over desktop */
+    /* 3. Keep large special images from taking over desktop (reduced 50%) */
   img[src*="scripture"]{
     width:100%;
-    max-width:760px;
-    max-height:820px;
+    max-width:380px;
+    max-height:410px;
     object-fit:contain;
     margin-left:auto;
     margin-right:auto;
@@ -1001,8 +1002,8 @@ img{
 
   img[src*="needs-graphic"]{
     width:100%;
-    max-width:760px;
-    max-height:560px;
+    max-width:380px;
+    max-height:280px;
     object-fit:contain;
     margin-left:auto;
     margin-right:auto;
@@ -1010,8 +1011,8 @@ img{
 
   img[src*="contact-general"]{
     width:100%;
-    max-width:760px;
-    max-height:560px;
+    max-width:380px;
+    max-height:280px;
     object-fit:cover;
     margin-left:auto;
     margin-right:auto;
