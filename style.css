@@ -761,11 +761,13 @@ img{
 
 @media (min-width:900px){
   .navDesktop{
-    display:flex;
+    display:none;
   }
 
   #menuBtn{
-    display:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
   }
 
   .heroGrid{
@@ -1025,4 +1027,42 @@ img{
     margin-left:auto;
     margin-right:auto;
   }
+}
+
+.priorityNeedsCard{
+  text-align:center;
+}
+
+.priorityNeedsTitle{
+  text-align:center;
+}
+
+.priorityNeedsImage{
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.priorityNeedsList{
+  display:inline-block;
+  text-align:left;
+  margin-top:10px;
+}
+
+/* Index only: tighten scripture sections */
+#index-page #scripture-one,
+#index-page #scripture-five{
+  padding-top:18px;
+  padding-bottom:18px;
+}
+
+#index-page #scripture-one .wrap,
+#index-page #scripture-five .wrap{
+  display:flex;
+  justify-content:center;
+}
+
+#index-page #scripture-one img,
+#index-page #scripture-five img{
+  margin-top:0;
+  margin-bottom:0;
 }
