@@ -959,3 +959,69 @@ img{
     padding-top: 95px;
   }
 }
+
+/* 1. Fix page title + subheader alignment on linked pages */
+  .pageTitleBlock{
+    text-align:center;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  .pageTitleBlock .sectionTitle{
+    text-align:center;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  .pageTitleBlock .sectionLead{
+    text-align:center;
+    margin-left:auto;
+    margin-right:auto;
+    max-width:720px;
+  }
+
+  /* 2. Make form submit buttons normal sized on desktop */
+  .formActions .btn,
+  .cardActions .btn{
+    width:auto;
+    min-width:220px;
+    align-self:flex-start;
+    padding:10px 18px;
+  }
+
+  /* 3. Keep large special images from taking over desktop */
+  img[src*="scripture"]{
+    width:100%;
+    max-width:760px;
+    max-height:820px;
+    object-fit:contain;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  img[src*="needs-graphic"]{
+    width:100%;
+    max-width:760px;
+    max-height:560px;
+    object-fit:contain;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  img[src*="contact-general"]{
+    width:100%;
+    max-width:760px;
+    max-height:560px;
+    object-fit:cover;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  /* 4. Make image sections sit cleaner on desktop */
+  .infoImage{
+    width:100%;
+    height:auto;
+    margin-left:auto;
+    margin-right:auto;
+  }
+}
