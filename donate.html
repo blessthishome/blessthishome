@@ -38,110 +38,118 @@
         <p class="sectionLead">Submit your donor information below, then choose a Stripe payment option.</p>
 
         <form class="supportForm" action="https://formspree.io/f/YOUR_DONATION_FORM_ID" method="POST">
-          <div class="formRow">
-  <label for="d_organization">Organization (optional)</label>
-  <input id="d_organization" name="organization" type="text" />
-</div>
+  <input type="hidden" name="form_type" value="financial" />
+  <input type="hidden" name="stripe_link" value="YOUR_STRIPE_LINK_REFERENCE" />
 
-          <div class="formRow">
-            <label for="firstName">First Name</label>
-            <input id="firstName" name="firstName" type="text" required />
-          </div>
-
-          <div class="formRow">
-            <label for="lastName">Last Name</label>
-            <input id="lastName" name="lastName" type="text" required />
-          </div>
-
-          <div class="formRow">
-            <label for="email">Email Address</label>
-            <input id="email" name="email" type="email" required />
-          </div>
-
-          <div class="formRow">
-            <label for="address">Address</label>
-            <input id="address" name="address" type="text" required />
-          </div>
-
-          <div class="formRow">
-            <label for="address2">Address Line 2</label>
-            <input id="address2" name="address2" type="text" />
-          </div>
-
-          <div class="formRow">
-            <label for="city">City</label>
-            <input id="city" name="city" type="text" required />
-          </div>
-
-          <div class="formRow">
-            <label for="state">State</label>
-            <input id="state" name="state" type="text" required />
-          </div>
-
-          <div class="formRow">
-            <label for="postalCode">Postal Code</label>
-            <input id="postalCode" name="postalCode" type="text" required />
-          </div>
-
-          <div class="formRow">
-            <label for="cellPhone">Cell Phone</label>
-            <input id="cellPhone" name="cellPhone" type="tel" />
-          </div>
-
-          <div class="formRow">
-            <label for="homePhone">Home Phone</label>
-            <input id="homePhone" name="homePhone" type="tel" />
-          </div>
-
-          <div class="formRow">
-            <label for="workPhone">Work Phone</label>
-            <input id="workPhone" name="workPhone" type="tel" />
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="formRow">
-  <label>Is this in honor of another person?</label>
-  <div class="checkboxGrid compactChecks">
-    <label><input type="radio" name="tribute" value="No" checked /> No</label>
-    <label><input type="radio" name="tribute" value="Yes" /> Yes</label>
+  <div class="formRow">
+    <label for="organization">Organization (optional)</label>
+    <input id="organization" name="organization" type="text" />
   </div>
-</div>
 
-          <div class="formRow">
-            <label for="tributeName">If Yes, Enter The Person's Name</label>
-            <input id="tributeName" name="tributeName" type="text" />
-          </div>
-
-          <div class="formRow">
-            <label for="tributeNote">Tribute Note</label>
-            <textarea id="tributeNote" name="tributeNote" rows="4"></textarea>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="formRow">
-  <label>Donation Frequency</label>
-  <div class="checkboxGrid compactChecks">
-    <label><input type="radio" name="frequency" value="One Time" checked /> One Time</label>
-    <label><input type="radio" name="frequency" value="Monthly" /> Monthly</label>
-    <label><input type="radio" name="frequency" value="Annually" /> Annually</label>
+  <div class="formRow">
+    <label for="first_name">First Name</label>
+    <input id="first_name" name="first_name" type="text" required />
   </div>
-</div>
 
-          <div class="formRow">
-            <label><input type="checkbox" name="coverFees" value="Yes" /> I would like to donate the additional bank fees for this donation</label>
-          </div>
+  <div class="formRow">
+    <label for="last_name">Last Name</label>
+    <input id="last_name" name="last_name" type="text" required />
+  </div>
 
-          <div class="formRow">
-            <label><input type="checkbox" name="anonymousDonation" value="Yes" /> Make this an anonymous donation</label>
-          </div>
+  <div class="formRow">
+    <label for="email">Email Address</label>
+    <input id="email" name="email" type="email" required />
+  </div>
 
-          <div class="formActions">
-            <button class="btn" type="submit">Submit Donor Info</button>
-            <div class="formHint">Replace the Formspree action with your real donation info endpoint.</div>
-          </div>
-        </form>
+  <div class="formRow">
+    <label for="address">Address</label>
+    <input id="address" name="address" type="text" required />
+  </div>
+
+  <div class="formRow">
+    <label for="address2">Address Line 2</label>
+    <input id="address2" name="address2" type="text" />
+  </div>
+
+  <div class="formRow">
+    <label for="city">City</label>
+    <input id="city" name="city" type="text" required />
+  </div>
+
+  <div class="formRow">
+    <label for="state">State</label>
+    <input id="state" name="state" type="text" required />
+  </div>
+
+  <div class="formRow">
+    <label for="postal_code">Postal Code</label>
+    <input id="postal_code" name="postal_code" type="text" required />
+  </div>
+
+  <div class="formRow">
+    <label for="cell_phone">Cell Phone</label>
+    <input id="cell_phone" name="cell_phone" type="tel" />
+  </div>
+
+  <div class="formRow">
+    <label for="home_phone">Home Phone</label>
+    <input id="home_phone" name="home_phone" type="tel" />
+  </div>
+
+  <div class="formRow">
+    <label for="work_phone">Work Phone</label>
+    <input id="work_phone" name="work_phone" type="tel" />
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="formRow">
+    <label>Is this in honor of another person?</label>
+    <div class="checkboxGrid compactChecks">
+      <label><input type="radio" name="tribute" value="No" checked /> No</label>
+      <label><input type="radio" name="tribute" value="Yes" /> Yes</label>
+    </div>
+  </div>
+
+  <div class="formRow">
+    <label for="tribute_name">If Yes, Enter The Person's Name</label>
+    <input id="tribute_name" name="tribute_name" type="text" />
+  </div>
+
+  <div class="formRow">
+    <label for="tribute_note">Tribute Note</label>
+    <textarea id="tribute_note" name="tribute_note" rows="4"></textarea>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="formRow">
+    <label for="amount">Donation Amount</label>
+    <input id="amount" name="amount" type="number" min="1" step="0.01" placeholder="Enter donation amount" required />
+  </div>
+
+  <div class="formRow">
+    <label>Donation Frequency</label>
+    <div class="checkboxGrid compactChecks">
+      <label><input type="radio" name="frequency" value="one-time" checked /> One Time</label>
+      <label><input type="radio" name="frequency" value="monthly" /> Monthly</label>
+      <label><input type="radio" name="frequency" value="annually" /> Annually</label>
+    </div>
+  </div>
+
+  <div class="formRow">
+    <label><input type="checkbox" name="cover_fees" value="true" /> I would like to donate the additional bank fees for this donation</label>
+  </div>
+
+  <div class="formRow">
+    <label><input type="checkbox" name="anonymous" value="true" /> Make this an anonymous donation</label>
+  </div>
+
+  <div class="formActions">
+    <button class="btn" type="submit">Submit Donor Info</button>
+    <div class="formHint">Replace the Formspree action with your real donation info endpoint.</div>
+  </div>
+</form>
 
         <div class="divider"></div>
 
