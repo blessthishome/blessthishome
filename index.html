@@ -420,57 +420,64 @@
           </div>
 
           <form
-            id="furnitureDonationForm"
-            class="supportForm"
-            action="https://formspree.io/f/your-placeholder-id"
-            method="POST"
-            enctype="multipart/form-data"
-          >
-            <div class="formRow">
-              <label for="name">Full Name</label>
-              <input id="name" name="name" type="text" required />
-            </div>
+  id="furnitureDonationForm"
+  class="supportForm"
+  action="https://formspree.io/f/your-placeholder-id"
+  method="POST"
+  enctype="multipart/form-data"
+>
+  <input type="hidden" name="form_type" value="furniture" />
 
-            <div class="formRow">
-              <label for="email">Email</label>
-              <input id="email" name="email" type="email" required />
-            </div>
+  <div class="formRow">
+    <label for="first_name">First Name</label>
+    <input id="first_name" name="first_name" type="text" required />
+  </div>
 
-            <div class="formRow">
-              <label for="phone">Phone</label>
-              <input id="phone" name="phone" type="tel" />
-            </div>
+  <div class="formRow">
+    <label for="last_name">Last Name</label>
+    <input id="last_name" name="last_name" type="text" required />
+  </div>
 
-            <div class="formRow">
-              <label for="itemType">Item Type</label>
-              <input id="itemType" name="itemType" type="text" placeholder="Sofa, dresser, microwave, table, etc." required />
-            </div>
+  <div class="formRow">
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" required />
+  </div>
 
-            <div class="formRow">
-              <label for="dimensions">Dimensions</label>
-              <input id="dimensions" name="dimensions" type="text" placeholder="Example: 84 x 36 x 32 inches" required />
-            </div>
+  <div class="formRow">
+    <label for="phone">Phone</label>
+    <input id="phone" name="phone" type="tel" />
+  </div>
 
-            <div class="formRow">
-              <label for="condition">Condition</label>
-              <textarea id="condition" name="condition" rows="4" placeholder="Describe the condition of the item" required></textarea>
-            </div>
+  <div class="formRow">
+    <label for="item_type">Item Type</label>
+    <input id="item_type" name="item_type" type="text" placeholder="Sofa, dresser, microwave, table, etc." required />
+  </div>
 
-            <div class="formRow">
-              <label for="pickup">Drop Off or Pickup Notes</label>
-              <textarea id="pickup" name="pickup" rows="3" placeholder="Add any timing or location notes"></textarea>
-            </div>
+  <div class="formRow">
+    <label for="dimensions">Dimensions</label>
+    <input id="dimensions" name="dimensions" type="text" placeholder="Example: 84 x 36 x 32 inches" required />
+  </div>
 
-            <div class="formRow">
-              <label for="itemImage">Upload Image</label>
-              <input id="itemImage" name="itemImage" type="file" accept="image/*" />
-            </div>
+  <div class="formRow">
+    <label for="condition">Condition</label>
+    <textarea id="condition" name="condition" rows="4" placeholder="Describe the condition of the item" required></textarea>
+  </div>
 
-            <div class="formActions">
-              <button class="btn btnPrimary" type="submit">Send Furniture Request</button>
-              <div class="formHint" id="formHint">Replace the Formspree action with your real endpoint before launch.</div>
-            </div>
-          </form>
+  <div class="formRow">
+    <label for="pickup_notes">Drop Off or Pickup Notes</label>
+    <textarea id="pickup_notes" name="pickup_notes" rows="3" placeholder="Add any timing or location notes"></textarea>
+  </div>
+
+  <div class="formRow">
+    <label for="item_image">Upload Image</label>
+    <input id="item_image" name="item_image" type="file" accept="image/*" />
+  </div>
+
+  <div class="formActions">
+    <button class="btn btnPrimary" type="submit">Send Furniture Request</button>
+    <div class="formHint" id="formHint">Replace the Formspree action with your real endpoint before launch.</div>
+  </div>
+</form>
         </div>
       </div>
     </section>
