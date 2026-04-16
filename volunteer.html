@@ -38,96 +38,113 @@
         <p class="sectionLead">Fill out the form below to volunteer with Bless This Home.</p>
 
         <form class="supportForm" action="https://formspree.io/f/YOUR_VOLUNTEER_FORM_ID" method="POST">
-          <div class="formRow">
-            <label for="firstName">First Name</label>
-            <input id="firstName" name="firstName" type="text" required />
-          </div>
+  <input type="hidden" name="form_type" value="volunteer" />
 
-          <div class="formRow">
-            <label for="lastName">Last Name</label>
-            <input id="lastName" name="lastName" type="text" required />
-          </div>
+  <div class="formRow">
+    <label for="organization">Organization (Optional)</label>
+    <input id="organization" name="organization" type="text" />
+  </div>
 
-          <div class="formRow">
-            <label for="email">Email Address</label>
-            <input id="email" name="email" type="email" required />
-          </div>
+  <div class="formRow">
+    <label for="first_name">First Name</label>
+    <input id="first_name" name="first_name" type="text" required />
+  </div>
 
-          <div class="formRow">
-            <label for="primaryPhone">Primary Phone</label>
-            <input id="primaryPhone" name="primaryPhone" type="tel" required />
-          </div>
+  <div class="formRow">
+    <label for="middle_name">Middle Name</label>
+    <input id="middle_name" name="middle_name" type="text" />
+  </div>
 
-          <div class="formRow">
-            <label for="mailingAddress">Mailing Address</label>
-            <textarea id="mailingAddress" name="mailingAddress" rows="3" required></textarea>
-          </div>
+  <div class="formRow">
+    <label for="last_name">Last Name</label>
+    <input id="last_name" name="last_name" type="text" required />
+  </div>
 
-          <div class="formRow">
-            <label for="city">City</label>
-            <input id="city" name="city" type="text" required />
-          </div>
+  <div class="formRow">
+    <label for="email">Email Address</label>
+    <input id="email" name="email" type="email" required />
+  </div>
 
-          <div class="formRow">
-            <label for="state">State</label>
-            <input id="state" name="state" type="text" required />
-          </div>
+  <div class="formRow">
+    <label for="primary_phone">Primary Phone</label>
+    <input id="primary_phone" name="primary_phone" type="tel" required />
+  </div>
 
-          <div class="formRow">
-            <label for="postalCode">Postal Code</label>
-            <input id="postalCode" name="postalCode" type="text" required />
-          </div>
+  <div class="formRow">
+    <label for="mailing_address">Mailing Address</label>
+    <textarea id="mailing_address" name="mailing_address" rows="3" required></textarea>
+  </div>
 
-          <div class="divider"></div>
+  <div class="formRow">
+    <label for="city">City</label>
+    <input id="city" name="city" type="text" required />
+  </div>
 
-          <div class="formRow">
-            <label for="emergencyFirstName">Emergency Contact First Name</label>
-            <input id="emergencyFirstName" name="emergencyFirstName" type="text" required />
-          </div>
+  <div class="formRow">
+    <label for="state">State</label>
+    <input id="state" name="state" type="text" required />
+  </div>
 
-          <div class="formRow">
-            <label for="emergencyLastName">Emergency Contact Last Name</label>
-            <input id="emergencyLastName" name="emergencyLastName" type="text" required />
-          </div>
+  <div class="formRow">
+    <label for="postal_code">Postal Code</label>
+    <input id="postal_code" name="postal_code" type="text" required />
+  </div>
 
-          <div class="formRow">
-            <label for="emergencyPhone">Emergency Contact Phone Number</label>
-            <input id="emergencyPhone" name="emergencyPhone" type="tel" required />
-          </div>
+  <div class="divider"></div>
 
-          <div class="divider"></div>
+  <div class="formRow">
+    <label for="emergency_first_name">Emergency Contact First Name</label>
+    <input id="emergency_first_name" name="emergency_first_name" type="text" required />
+  </div>
 
-          <div class="formRow">
-            <label>Skills: Check Any of These You Can Do</label>
-            <div class="checkboxGrid">
-              <label><input type="checkbox" name="skills[]" value="Hang Curtains or Artwork" /> Hang Curtains or Artwork</label>
-              <label><input type="checkbox" name="skills[]" value="Haul As High School Hauler" /> Haul As High School Hauler</label>
-              <label><input type="checkbox" name="skills[]" value="Lift Over 30 Lbs" /> Lift Over 30 Lbs</label>
-              <label><input type="checkbox" name="skills[]" value="Make Beds or Arrange Room Decor" /> Make Beds or Arrange Room Decor</label>
-              <label><input type="checkbox" name="skills[]" value="Move or Lift Furniture" /> Move or Lift Furniture</label>
-              <label><input type="checkbox" name="skills[]" value="Organize or Clean Kitchenware" /> Organize or Clean Kitchenware</label>
-              <label><input type="checkbox" name="skills[]" value="Pray Out Loud Over The Space And Family" /> Pray Out Loud Over The Space And Family</label>
-              <label><input type="checkbox" name="skills[]" value="Take Photos or Video Reveal" /> Take Photos or Video Reveal</label>
-              <label><input type="checkbox" name="skills[]" value="Transport Big or Small Items" /> Transport Big or Small Items</label>
-              <label><input type="checkbox" name="skills[]" value="Unload or Unpack Boxes" /> Unload or Unpack Boxes</label>
-            </div>
-          </div>
+  <div class="formRow">
+    <label for="emergency_last_name">Emergency Contact Last Name</label>
+    <input id="emergency_last_name" name="emergency_last_name" type="text" required />
+  </div>
 
-          <div class="formRow">
-            <label for="otherSkills">Other Skills</label>
-            <textarea id="otherSkills" name="otherSkills" rows="4"></textarea>
-          </div>
+  <div class="formRow">
+    <label for="emergency_phone">Emergency Contact Phone Number</label>
+    <input id="emergency_phone" name="emergency_phone" type="tel" required />
+  </div>
 
-          <div class="formRow">
-            <label for="comments">Additional Comments</label>
-            <textarea id="comments" name="comments" rows="5"></textarea>
-          </div>
+  <div class="divider"></div>
 
-          <div class="formActions">
-            <button class="btn btnPrimary" type="submit">Submit Volunteer Form</button>
-            <div class="formHint">Replace the Formspree action with your real volunteer endpoint.</div>
-          </div>
-        </form>
+  <div class="formRow">
+    <label>Skills: Check Any of These You Can Do</label>
+    <div class="checkboxGrid">
+      <label><input type="checkbox" name="skills" value="Hang Curtains or Artwork" /> Hang Curtains or Artwork</label>
+      <label><input type="checkbox" name="skills" value="Haul As High School Hauler" /> Haul As High School Hauler</label>
+      <label><input type="checkbox" name="skills" value="Lift Over 30 Lbs" /> Lift Over 30 Lbs</label>
+      <label><input type="checkbox" name="skills" value="Make Beds or Arrange Room Decor" /> Make Beds or Arrange Room Decor</label>
+      <label><input type="checkbox" name="skills" value="Move or Lift Furniture" /> Move or Lift Furniture</label>
+      <label><input type="checkbox" name="skills" value="Organize or Clean Kitchenware" /> Organize or Clean Kitchenware</label>
+      <label><input type="checkbox" name="skills" value="Pray Out Loud Over The Space And Family" /> Pray Out Loud Over The Space And Family</label>
+      <label><input type="checkbox" name="skills" value="Take Photos or Video Reveal" /> Take Photos or Video Reveal</label>
+      <label><input type="checkbox" name="skills" value="Transport Big or Small Items" /> Transport Big or Small Items</label>
+      <label><input type="checkbox" name="skills" value="Unload or Unpack Boxes" /> Unload or Unpack Boxes</label>
+    </div>
+  </div>
+
+  <div class="formRow">
+    <label for="other_skills">Other Skills</label>
+    <textarea id="other_skills" name="other_skills" rows="4"></textarea>
+  </div>
+
+  <div class="formRow">
+    <label for="additional_comments">Additional Comments</label>
+    <textarea id="additional_comments" name="additional_comments" rows="5"></textarea>
+  </div>
+
+  <div class="formRow">
+    <label for="availability">Availability</label>
+    <textarea id="availability" name="availability" rows="4" placeholder="Example: Saturdays 10am to 2pm, Wednesdays evenings, or any scheduling notes"></textarea>
+  </div>
+
+  <div class="formActions">
+    <button class="btn btnPrimary" type="submit">Submit Volunteer Form</button>
+    <div class="formHint">Replace the Formspree action with your real volunteer endpoint.</div>
+  </div>
+</form>
       </div>
     </div>
   </main>
