@@ -137,14 +137,136 @@
     <textarea id="additional_comments" name="additional_comments" rows="5"></textarea>
   </div>
 
-  <div class="formRow">
+    <div class="formRow">
     <label for="availability">Availability</label>
     <textarea id="availability" name="availability" rows="4" placeholder="Example: Saturdays 10am to 2pm, Wednesdays evenings, or any scheduling notes"></textarea>
   </div>
 
+  <div class="divider"></div>
+
+  <div class="formRow">
+    <label>Volunteer Guidelines</label>
+    <div style="max-height:260px; overflow:auto; border:1px solid rgba(45,37,37,0.12); background:rgba(255,255,255,0.72); padding:14px; border-radius:12px; line-height:1.7; color:var(--muted);">
+      <p><strong>Volunteer with Bless This Home</strong></p>
+      <p>Thank you for giving your time and talents to the ministry of Bless This Home. We appreciate the chance to get to know you and work alongside you to serve women and families in our area who could use our help.</p>
+      <p>Wear sturdy and comfortable shoes and layered clothing. Please do not wear jewelry that you care to lose or bring personal belongings into the space. Keep them locked in your car.</p>
+      <p>We often have fun jobs to do, and sometimes there are some not so fun tasks to accomplish. Keeping a positive attitude and remembering with gratitude our own lives of relative ease will help get through the necessary tasks.</p>
+      <p>Be very mindful of social conversation while working in the space, especially if the client is there. Avoid conversations about money, spending, travel, and do not discuss the client's choices, decisions, style, lifestyle, or family members.</p>
+      <p>Keep a sense of humor and be flexible. Things can go awry. God has a beautiful way of taking our best efforts and working everything out for His good.</p>
+      <p>Maintain safety. We never work alone in a space. Please wait in your vehicle until another volunteer has arrived. If work ends when light is fading, walk together to vehicles and drive a volunteer to another car if needed.</p>
+      <p>When in doubt, give a shout. Call or text the Team Lead for the day with any questions.</p>
+      <p>“So, let’s not get tired of doing what is good. At just the right time we will reap a harvest of blessing if we don’t give up.” ~ Galatians 6:9 NLT</p>
+    </div>
+  </div>
+
+  <div class="formRow">
+    <label>Volunteer Waiver and Code of Conduct</label>
+    <div style="max-height:300px; overflow:auto; border:1px solid rgba(45,37,37,0.12); background:rgba(255,255,255,0.72); padding:14px; border-radius:12px; line-height:1.7; color:var(--muted);">
+      <p><strong>Waiver</strong></p>
+      <p>In consideration of being permitted to volunteer in any capacity with Bless This Home, I, for myself, my heirs, personal representatives or assigns, do hereby release, waive, discharge, and covenant not to sue Bless This Home from liability from any and all claims resulting in personal injury, accidents, or illnesses, including death, and property loss arising from, but not limited to volunteering with Bless This Home.</p>
+
+      <p><strong>Indemnification and Hold Harmless</strong></p>
+      <p>I also agree to indemnify and hold Bless This Home, and its officers, employees, volunteers, and agents harmless from any and all claims, actions, suits, procedures, costs, expenses, damages, and liabilities, including attorney’s fees, brought as a result of my involvement with Bless This Home and to reimburse them for any such expense incurred.</p>
+
+      <p><strong>Severability</strong></p>
+      <p>The undersigned further expressly agrees that the foregoing waiver and assumption of risks agreement is intended to be as broad and inclusive as permitted by the law of New Hampshire and that if any portion thereof is held invalid, the balance shall continue in full legal force and effect.</p>
+
+      <p><strong>Photo Release</strong></p>
+      <p>I authorize Bless This Home and or parties designated by this organization to use my photo and or story for reproduction in any manner Bless This Home desires, for advertising, display, audio visual, exhibition, or editorial use.</p>
+
+      <p><strong>Acknowledgement of Understanding</strong></p>
+      <p>I have read this waiver of liability, assumption of risk, and indemnity agreement, fully understand its terms, and understand that I am giving up substantial rights, including any right to sue. I acknowledge that I am signing the agreement freely and voluntarily and intend with my signature to have a complete and unconditional release of liability to the greatest extent allowed by law.</p>
+
+      <p><strong>Volunteer Code of Conduct</strong></p>
+      <p>Treat everyone with kindness, empathy, and respect regardless of background, beliefs, or circumstances.</p>
+      <p>Respect confidentiality. Do not disclose confidential information without proper authorization.</p>
+      <p>Maintain professionalism and the highest standards of integrity and ethical behavior.</p>
+      <p>Discrimination, harassment, bullying, gossip, and rumor spreading are strictly prohibited.</p>
+      <p>Communicate honestly and through appropriate channels.</p>
+      <p>Be punctual for your volunteer commitments and communicate in advance if you cannot fulfill them.</p>
+      <p>Use Bless This Home resources responsibly and only in ways aligned with the mission.</p>
+      <p>Refrain from alcohol or substance use during volunteer activities and do not volunteer while under the influence.</p>
+      <p>Familiarize yourself with and comply with Bless This Home policies and guidelines.</p>
+      <p>Embrace the values of this faith based organization and be mindful of your language and actions.</p>
+      <p>By signing below, I represent that I am at least 18 years of age, have read and understand the foregoing statements, and am competent to execute this agreement. I acknowledge that I have read, understood, and agree to abide by the Bless This Home Volunteer Code of Conduct.</p>
+    </div>
+  </div>
+
+  <div class="formRow">
+    <label for="volunteer_name">Volunteer Name</label>
+    <input id="volunteer_name" name="volunteer_name" type="text" required />
+  </div>
+
+  <div class="formRow">
+    <label for="guardian_name">Guardian Name if under 18</label>
+    <input id="guardian_name" name="guardian_name" type="text" />
+  </div>
+
+  <div class="formRow">
+    <label for="electronic_signature">Electronic Signature</label>
+    <input id="electronic_signature" name="electronic_signature" type="text" placeholder="Type your full name" required />
+  </div>
+
+  <div class="formRow">
+    <label for="signature_date">Date</label>
+    <input id="signature_date" name="signature_date" type="date" required />
+  </div>
+
+  <div class="formRow">
+    <label><input type="checkbox" name="waiver_agreed" value="yes" required /> I have read and agree to the Volunteer Guidelines, Waiver, Photo Release, and Volunteer Code of Conduct.</label>
+  </div>
+
+  <div class="formRow">
+    <label><input type="checkbox" name="age_confirmed" value="yes" required /> I confirm that I am at least 18 years old, or that a guardian will be identified above where applicable.</label>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="formRow">
+    <label>Volunteer Background Authorization Form</label>
+    <div style="max-height:260px; overflow:auto; border:1px solid rgba(45,37,37,0.12); background:rgba(255,255,255,0.72); padding:14px; border-radius:12px; line-height:1.7; color:var(--muted);">
+      <p><strong>FCRA Notice and Background Investigation</strong></p>
+      <p>In order to volunteer, four forms need to be filled out and submitted. One of these forms is permission from you for us to perform a background check.</p>
+      <p>In connection with your application to serve as a volunteer with Bless This Home, this notice is intended to inform you that a consumer report may be obtained on you from a consumer reporting agency for volunteer service purposes. These purposes may include placement, retention, reassignment, or continued service. The report may contain information relating to criminal information or history, driving and motor vehicle records, verification of education or employment history, social media, or other background checks.</p>
+
+      <p><strong>Authorization for Background Investigation</strong></p>
+      <p>By signing below, you authorize the obtaining of consumer reports by Bless This Home at any time after receipt of this authorization and throughout the course of your volunteer service as permitted by law, unless revoked by you in writing.</p>
+      <p>You authorize any law enforcement agency, administrator, state or federal agency, institution, school or university, information service bureau, employer, or insurance company to furnish any and all background information requested by Protect My Ministry and or Bless This Home.</p>
+    </div>
+  </div>
+
+  <div class="formRow">
+    <label for="date_of_birth">Date of Birth</label>
+    <input id="date_of_birth" name="date_of_birth" type="date" required />
+  </div>
+
+  <div class="formRow">
+    <label for="drivers_license_number">Driver's License Number</label>
+    <input id="drivers_license_number" name="drivers_license_number" type="text" required />
+  </div>
+
+  <div class="formRow">
+    <label for="drivers_license_state">Driver's License State of Issue</label>
+    <input id="drivers_license_state" name="drivers_license_state" type="text" required />
+  </div>
+
+  <div class="formRow">
+    <label for="background_signature">Electronic Signature for Background Authorization</label>
+    <input id="background_signature" name="background_signature" type="text" placeholder="Type your full name" required />
+  </div>
+
+  <div class="formRow">
+    <label for="background_signature_date">Date</label>
+    <input id="background_signature_date" name="background_signature_date" type="date" required />
+  </div>
+
+  <div class="formRow">
+    <label><input type="checkbox" name="background_check_authorized" value="yes" required /> I authorize Bless This Home to perform a background check and obtain consumer reports as described above.</label>
+  </div>
+
   <div class="formActions">
     <button class="btn btnPrimary" type="submit">Submit Volunteer Form</button>
-    <div class="formHint">Replace the Formspree action with your real volunteer endpoint.</div>
+    <div class="formHint">Submit your volunteer application and Bless This Home will follow up with next steps.</div>
   </div>
 </form>
       </div>
