@@ -4,6 +4,7 @@ const el = (id) => document.getElementById(id)
 
 const statusMessage = el('statusMessage')
 const authMessage = el('authMessage')
+const authStateLabel = el('authStateLabel')
 
 function setStatus(msg){
   if (statusMessage) statusMessage.textContent = msg
@@ -13,12 +14,74 @@ function setAuth(msg){
   if (authMessage) authMessage.textContent = msg
 }
 
+function setAuthStateLabel(msg){
+  if (authStateLabel) authStateLabel.textContent = msg
+}
+
 function safeText(value){
   return value == null ? '' : String(value)
 }
 
 function money(value){
   return value == null || value === '' ? '' : `$${Number(value).toFixed(2)}`
+}
+
+function setAdminUiLocked(isLocked){
+  const protectedIds = [
+    'inventorySku',
+    'inventoryName',
+    'inventoryCategory',
+    'inventoryQty',
+    'inventoryThreshold',
+    'inventoryLocation',
+    'inventoryDescription',
+    'saveInventoryBtn',
+    'recipientName',
+    'recipientEmail',
+    'distributionItemName',
+    'distributionQty',
+    'distributionDestination',
+    'distributionNotes',
+    'logDistributionBtn',
+    'constituentType',
+    'constituentOrg',
+    'constituentFirstName',
+    'constituentLastName',
+    'constituentEmail',
+    'constituentPhone',
+    'constituentNotes',
+    'saveConstituentBtn',
+    'exportInventoryBtn',
+    'exportDistributionBtn',
+    'exportDonorBtn',
+    'exportAllBtn',
+    'refreshBtn',
+    'inviteFullName',
+    'inviteEmail',
+    'inviteRole',
+    'inviteUserBtn',
+    'quickAddCouchBtn',
+    'quickAddBedBtn',
+    'quickAddTableBtn',
+    'quickAddChairBtn',
+    'searchInput',
+    'filterType'
+  ]
+
+  protectedIds.forEach((id) => {
+    const node = el(id)
+    if (node) node.disabled = isLocked
+  })
+}
+
+function updateAdminAuthButtons(isSignedIn){
+  const loginBtn = el('loginBtn')
+  const logoutBtn = el('logoutBtn')
+  const staffEmail = el('staffEmail')
+
+  if (loginBtn) loginBtn.style.display = isSignedIn ? 'none' : 'inline-flex'
+  if (logoutBtn) logoutBtn.style.display = isSignedIn ? 'inline-flex' : 'none'
+  if (staffEmail) staffEmail.disabled = isSignedIn
 }
 
 async function getCurrentSessionUser(){
@@ -48,6 +111,24 @@ async function getCurrentProfile(){
   return { user, profile: data }
 }
 
+async function applyAdminAuthState(){
+  const current = await getCurrentProfile()
+
+  if (!current) {
+    updateAdminAuthButtons(false)
+    setAdminUiLocked(true)
+    setAuth('Signed out.')
+    setAuthStateLabel('')
+    return
+  }
+
+  updateAdminAuthButtons(true)
+  setAdminUiLocked(false)
+  setAuth('Signed in.')
+  setAuthStateLabel(`Signed in as ${current.user.email}`)
+  await refresh()
+}
+
 // AUTH
 async function sendMagicLink(){
   const email = safeText(el('staffEmail')?.value).trim()
@@ -61,13 +142,16 @@ async function sendMagicLink(){
     options: { emailRedirectTo: window.location.href }
   })
 
-  setAuth(error ? error.message : 'Check your email')
+  setAuth(error ? error.message : 'Magic link sent. Check your email.')
 }
 
 async function logout(){
   await supabase.auth.signOut()
-  setAuth('Logged out')
+  setAuth('Signed out.')
+  setAuthStateLabel('')
   setStatus('Signed out')
+  updateAdminAuthButtons(false)
+  setAdminUiLocked(true)
 }
 
 // DASHBOARD
@@ -87,7 +171,6 @@ async function loadSummary(){
   el('statDonationTotal').textContent = money(data.financial_donations_total || 0)
 }
 
-// INVENTORY TABLE
 async function loadInventory(){
   const { data, error } = await supabase
     .from('v_inventory_status')
@@ -115,7 +198,6 @@ async function loadInventory(){
   return data
 }
 
-// DISTRIBUTION TABLE
 async function loadDistribution(){
   const { data, error } = await supabase
     .from('v_distribution_log')
@@ -141,7 +223,6 @@ async function loadDistribution(){
   return data
 }
 
-// DONOR TABLE
 async function loadDonors(){
   const { data, error } = await supabase
     .from('v_donor_log')
@@ -219,7 +300,6 @@ async function findInventoryBySkuOrName(sku, itemName){
   return null
 }
 
-// FULL INVENTORY SAVE
 function quickAddItem(itemName, categoryName){
   if (el('inventoryName')) el('inventoryName').value = itemName
   if (el('inventoryCategory')) el('inventoryCategory').value = categoryName
@@ -369,7 +449,6 @@ async function findInventoryItemByName(itemName){
   return data?.id || null
 }
 
-// FULL DISTRIBUTION LOGGING
 async function distribute(){
   try {
     const sessionData = await getCurrentProfile()
@@ -444,7 +523,6 @@ async function distribute(){
   }
 }
 
-// CONSTITUENT QUICK ADD
 async function saveConstituent(){
   const email = safeText(el('constituentEmail')?.value).trim()
 
@@ -463,7 +541,6 @@ async function saveConstituent(){
     notes: safeText(el('constituentNotes')?.value).trim() || null
   }
 
-  // 🔍 CHECK IF EXISTS
   const { data: existing, error: lookupError } = await supabase
     .from('constituents')
     .select('id')
@@ -476,7 +553,6 @@ async function saveConstituent(){
   }
 
   if (existing?.id) {
-    // 🔁 UPDATE
     const { error } = await supabase
       .from('constituents')
       .update(payload)
@@ -489,7 +565,6 @@ async function saveConstituent(){
 
     setStatus('Updated existing constituent')
   } else {
-    // ➕ INSERT
     const { error } = await supabase
       .from('constituents')
       .insert(payload)
@@ -518,9 +593,11 @@ function exportRows(filename, headers, rows){
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
   const link = document.createElement('a')
-  link.href = URL.createObjectURL(blob)
+  const url = URL.createObjectURL(blob)
+  link.href = url
   link.download = filename
   link.click()
+  URL.revokeObjectURL(url)
 }
 
 async function exportInventory(){
@@ -576,8 +653,10 @@ async function exportAll(){
   setStatus('Reports exported')
 }
 
-// REFRESH
 async function refresh(){
+  const current = await getCurrentProfile()
+  if (!current) return
+
   await loadSummary()
   await loadInventory()
   await loadDistribution()
@@ -615,7 +694,7 @@ async function invitePortalUser(){
     })
   })
 
-  const result = await response.json()
+  const result = await response.json().catch(() => ({}))
 
   if (!response.ok) {
     setStatus(result.error || 'Invite failed')
@@ -625,7 +704,6 @@ async function invitePortalUser(){
   setStatus(`Invite sent to ${email}`)
 }
 
-// EVENTS
 if (el('loginBtn')) el('loginBtn').onclick = sendMagicLink
 if (el('logoutBtn')) el('logoutBtn').onclick = logout
 if (el('saveInventoryBtn')) el('saveInventoryBtn').onclick = saveInventory
@@ -641,4 +719,11 @@ if (el('quickAddCouchBtn')) el('quickAddCouchBtn').onclick = () => quickAddItem(
 if (el('quickAddBedBtn')) el('quickAddBedBtn').onclick = () => quickAddItem('Bed', 'Bedroom')
 if (el('quickAddTableBtn')) el('quickAddTableBtn').onclick = () => quickAddItem('Kitchen Table', 'Kitchen')
 if (el('quickAddChairBtn')) el('quickAddChairBtn').onclick = () => quickAddItem('Chair', 'Living Room')
-refresh()
+
+supabase.auth.onAuthStateChange(() => {
+  applyAdminAuthState()
+})
+
+setAdminUiLocked(true)
+updateAdminAuthButtons(false)
+applyAdminAuthState()
