@@ -48,3 +48,17 @@ th{font-family:var(--head);font-size:13px;letter-spacing:.05em;text-transform:up
   color:#b42318;
   font-weight:800;
 }
+
+.topActions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled,
+button:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+}
