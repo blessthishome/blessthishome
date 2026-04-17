@@ -17,20 +17,26 @@
       <div class="subtitle">Admin Portal</div>
     </div>
     <div class="topActions">
-      <button class="btn" id="loginBtn">Send Magic Link</button>
-      <button class="btn btnPrimary" id="logoutBtn">Logout</button>
-    </div>
+  <button class="btn btnPrimary" id="signinBtn" type="button">Sign In</button>
+  <button class="btn" id="loginBtn" type="button">Send Magic Link</button>
+  <button class="btn" id="logoutBtn" type="button">Logout</button>
+</div>
   </header>
 
   <main class="shell">
     <section class="authCard panel">
   <h1>Secure Access</h1>
   <p>Only authorized Bless This Home staff and administrators may access this system. Use your approved email address to receive a secure magic link.</p>
-  <div class="row">
-    <input id="staffEmail" type="email" placeholder="staff@example.org" />
-  </div>
-  <div class="hint" id="authMessage">Signed out.</div>
-  <div class="hint" id="authStateLabel" style="margin-top:8px;"></div>
+  <div class="formGrid">
+  <input id="staffEmail" type="email" placeholder="staff@example.org" />
+  <input id="staffPassword" type="password" placeholder="Password" />
+</div>
+<div class="actions" style="margin-top:14px;">
+  <button class="btn btnPrimary" id="signinCardBtn" type="button">Sign In With Password</button>
+  <button class="btn" id="magicCardBtn" type="button">Send Magic Link</button>
+</div>
+<div class="hint" id="authMessage">Signed out.</div>
+<div class="hint" id="authStateLabel" style="margin-top:8px;"></div>
 </section>
 
     <section class="summaryGrid">
