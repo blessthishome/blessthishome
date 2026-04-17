@@ -1,9 +1,32 @@
 import { supabase } from './supabase-config.js'
 
 const msg = document.getElementById('volunteerMessage')
+const volunteerStateLabel = document.getElementById('volunteerStateLabel')
 
 function setMsg(t){
   if (msg) msg.textContent = t
+}
+
+function setVolunteerStateLabel(t){
+  if (volunteerStateLabel) volunteerStateLabel.textContent = t
+}
+
+function setVolunteerUiLocked(isLocked){
+  const ids = ['volunteerEmail', 'saveAvailabilityBtn', 'availabilityText']
+  ids.forEach((id) => {
+    const node = document.getElementById(id)
+    if (node && id !== 'volunteerEmail') node.disabled = isLocked
+  })
+}
+
+function updateVolunteerAuthButtons(isSignedIn){
+  const loginBtn = document.getElementById('volunteerLoginBtn')
+  const logoutBtn = document.getElementById('volunteerLogoutBtn')
+  const emailField = document.getElementById('volunteerEmail')
+
+  if (loginBtn) loginBtn.style.display = isSignedIn ? 'none' : 'inline-flex'
+  if (logoutBtn) logoutBtn.style.display = isSignedIn ? 'inline-flex' : 'none'
+  if (emailField) emailField.disabled = isSignedIn
 }
 
 async function getCurrentUser(){
@@ -13,6 +36,24 @@ async function getCurrentUser(){
     return null
   }
   return data?.session?.user || null
+}
+
+async function applyVolunteerAuthState(){
+  const user = await getCurrentUser()
+
+  if (!user) {
+    updateVolunteerAuthButtons(false)
+    setVolunteerUiLocked(true)
+    setMsg('Signed out.')
+    setVolunteerStateLabel('')
+    return
+  }
+
+  updateVolunteerAuthButtons(true)
+  setVolunteerUiLocked(false)
+  setMsg('Signed in.')
+  setVolunteerStateLabel(`Signed in as ${user.email}`)
+  await loadOpenNeeds()
 }
 
 async function login(){
@@ -28,12 +69,15 @@ async function login(){
     options: { emailRedirectTo: window.location.href }
   })
 
-  setMsg(error ? error.message : 'Check email')
+  setMsg(error ? error.message : 'Magic link sent. Check your email.')
 }
 
 async function logout(){
   await supabase.auth.signOut()
-  setMsg('Logged out')
+  setMsg('Signed out.')
+  setVolunteerStateLabel('')
+  updateVolunteerAuthButtons(false)
+  setVolunteerUiLocked(true)
 }
 
 async function findVolunteerConstituentByEmail(email){
@@ -85,7 +129,6 @@ async function saveAvailability(){
   const constituentId = await ensureVolunteerConstituent(user)
   if (!constituentId) return
 
-  // 🔍 CHECK IF PROFILE EXISTS
   const { data: existing, error: checkError } = await supabase
     .from('volunteer_profiles')
     .select('constituent_id')
@@ -98,7 +141,6 @@ async function saveAvailability(){
   }
 
   if (existing?.constituent_id) {
-    // 🔁 UPDATE EXISTING PROFILE
     const { error } = await supabase
       .from('volunteer_profiles')
       .update({
@@ -111,7 +153,6 @@ async function saveAvailability(){
       return
     }
   } else {
-    // ➕ CREATE PROFILE
     const { error } = await supabase
       .from('volunteer_profiles')
       .insert({
@@ -129,6 +170,9 @@ async function saveAvailability(){
 }
 
 async function loadOpenNeeds(){
+  const user = await getCurrentUser()
+  if (!user) return
+
   const { data, error } = await supabase
     .from('inventory_items')
     .select('item_name, quantity_on_hand')
@@ -153,8 +197,14 @@ async function loadOpenNeeds(){
   `).join('')
 }
 
-document.getElementById('volunteerLoginBtn').onclick = login
-document.getElementById('volunteerLogoutBtn').onclick = logout
-document.getElementById('saveAvailabilityBtn').onclick = saveAvailability
+if (document.getElementById('volunteerLoginBtn')) document.getElementById('volunteerLoginBtn').onclick = login
+if (document.getElementById('volunteerLogoutBtn')) document.getElementById('volunteerLogoutBtn').onclick = logout
+if (document.getElementById('saveAvailabilityBtn')) document.getElementById('saveAvailabilityBtn').onclick = saveAvailability
 
-loadOpenNeeds()
+supabase.auth.onAuthStateChange(() => {
+  applyVolunteerAuthState()
+})
+
+setVolunteerUiLocked(true)
+updateVolunteerAuthButtons(false)
+applyVolunteerAuthState()
