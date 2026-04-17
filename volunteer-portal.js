@@ -12,21 +12,30 @@ function setVolunteerStateLabel(t){
 }
 
 function setVolunteerUiLocked(isLocked){
-  const ids = ['volunteerEmail', 'saveAvailabilityBtn', 'availabilityText']
+  const ids = ['saveAvailabilityBtn', 'availabilityText']
   ids.forEach((id) => {
     const node = document.getElementById(id)
-    if (node && id !== 'volunteerEmail') node.disabled = isLocked
+    if (node) node.disabled = isLocked
   })
 }
 
 function updateVolunteerAuthButtons(isSignedIn){
+  const signinBtn = document.getElementById('volunteerSigninBtn')
   const loginBtn = document.getElementById('volunteerLoginBtn')
   const logoutBtn = document.getElementById('volunteerLogoutBtn')
+  const signinCardBtn = document.getElementById('volunteerSigninCardBtn')
+  const magicCardBtn = document.getElementById('volunteerMagicCardBtn')
   const emailField = document.getElementById('volunteerEmail')
+  const passwordField = document.getElementById('volunteerPassword')
 
+  if (signinBtn) signinBtn.style.display = isSignedIn ? 'none' : 'inline-flex'
   if (loginBtn) loginBtn.style.display = isSignedIn ? 'none' : 'inline-flex'
   if (logoutBtn) logoutBtn.style.display = isSignedIn ? 'inline-flex' : 'none'
+  if (signinCardBtn) signinCardBtn.style.display = isSignedIn ? 'none' : 'inline-flex'
+  if (magicCardBtn) magicCardBtn.style.display = isSignedIn ? 'none' : 'inline-flex'
+
   if (emailField) emailField.disabled = isSignedIn
+  if (passwordField) passwordField.disabled = isSignedIn
 }
 
 async function getCurrentUser(){
@@ -54,6 +63,23 @@ async function applyVolunteerAuthState(){
   setMsg('Signed in.')
   setVolunteerStateLabel(`Signed in as ${user.email}`)
   await loadOpenNeeds()
+}
+
+async function signInVolunteerWithPassword(){
+  const email = document.getElementById('volunteerEmail').value.trim()
+  const password = document.getElementById('volunteerPassword').value
+
+  if (!email || !password) {
+    setMsg('Enter email and password')
+    return
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  })
+
+  setMsg(error ? error.message : 'Signed in successfully.')
 }
 
 async function login(){
@@ -197,7 +223,10 @@ async function loadOpenNeeds(){
   `).join('')
 }
 
+if (document.getElementById('volunteerSigninBtn')) document.getElementById('volunteerSigninBtn').onclick = signInVolunteerWithPassword
+if (document.getElementById('volunteerSigninCardBtn')) document.getElementById('volunteerSigninCardBtn').onclick = signInVolunteerWithPassword
 if (document.getElementById('volunteerLoginBtn')) document.getElementById('volunteerLoginBtn').onclick = login
+if (document.getElementById('volunteerMagicCardBtn')) document.getElementById('volunteerMagicCardBtn').onclick = login
 if (document.getElementById('volunteerLogoutBtn')) document.getElementById('volunteerLogoutBtn').onclick = logout
 if (document.getElementById('saveAvailabilityBtn')) document.getElementById('saveAvailabilityBtn').onclick = saveAvailability
 
