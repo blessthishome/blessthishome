@@ -416,7 +416,7 @@
         <div class="card reveal formCard" id="furniture-form">
           <div class="cardTitle">Furniture Donation Request</div>
           <div class="cardBody">
-            Bless This Home asks donors to send pictures and dimensions of items to make sure there is enough space. Use this form as the furniture donation request intake. The Formspree action is currently a placeholder.
+            Bless This Home asks donors to send pictures and dimensions of items to make sure there is enough space.
           </div>
 
           <form
@@ -427,6 +427,8 @@
   enctype="multipart/form-data"
 >
   <input type="hidden" name="form_type" value="furniture" />
+
+<input type="hidden" name="tag" value="furniture_donor" />
 
   <div class="formRow">
     <label for="first_name">First Name</label>
