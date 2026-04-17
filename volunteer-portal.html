@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bless This Home Volunteer Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="script">Bless This Home</div>
+      <div class="subtitle">Volunteer Portal</div>
+    </div>
+    <div class="topActions">
+      <button class="btn" id="volunteerLoginBtn">Send Magic Link</button>
+      <button class="btn btnPrimary" id="volunteerLogoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="panel">
+      <h1>Volunteer Access</h1>
+      <p>Only authorized Bless This Home volunteers may access this portal. Sign in with your approved email address to update your availability and view current needs.</p>
+      <div class="row">
+        <input id="volunteerEmail" type="email" placeholder="volunteer@example.org" />
+      </div>
+      <div class="hint" id="volunteerMessage">Waiting for sign in.</div>
+    </section>
+
+    <section class="gridTwo" style="margin-top:18px;">
+      <section class="panel">
+        <div class="panelHead"><h2>My Availability</h2></div>
+        <textarea id="availabilityText" placeholder="Example: Saturdays 10am to 2pm, Wednesdays evenings, can lift furniture"></textarea>
+        <div class="actions">
+          <button class="btn btnPrimary" id="saveAvailabilityBtn">Save Availability</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panelHead"><h2>Open Volunteer Needs</h2></div>
+        <ul id="openNeedsList" class="hint"></ul>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="volunteer-portal.js"></script>
+</body>
+</html>
