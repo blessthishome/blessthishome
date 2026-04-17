@@ -75,13 +75,22 @@ function setAdminUiLocked(isLocked){
 }
 
 function updateAdminAuthButtons(isSignedIn){
+  const signinBtn = el('signinBtn')
   const loginBtn = el('loginBtn')
   const logoutBtn = el('logoutBtn')
+  const signinCardBtn = el('signinCardBtn')
+  const magicCardBtn = el('magicCardBtn')
   const staffEmail = el('staffEmail')
+  const staffPassword = el('staffPassword')
 
+  if (signinBtn) signinBtn.style.display = isSignedIn ? 'none' : 'inline-flex'
   if (loginBtn) loginBtn.style.display = isSignedIn ? 'none' : 'inline-flex'
   if (logoutBtn) logoutBtn.style.display = isSignedIn ? 'inline-flex' : 'none'
+  if (signinCardBtn) signinCardBtn.style.display = isSignedIn ? 'none' : 'inline-flex'
+  if (magicCardBtn) magicCardBtn.style.display = isSignedIn ? 'none' : 'inline-flex'
+
   if (staffEmail) staffEmail.disabled = isSignedIn
+  if (staffPassword) staffPassword.disabled = isSignedIn
 }
 
 async function getCurrentSessionUser(){
@@ -129,7 +138,23 @@ async function applyAdminAuthState(){
   await refresh()
 }
 
-// AUTH
+async function signInWithPassword(){
+  const email = safeText(el('staffEmail')?.value).trim()
+  const password = safeText(el('staffPassword')?.value)
+
+  if (!email || !password) {
+    setAuth('Enter email and password')
+    return
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  })
+
+  setAuth(error ? error.message : 'Signed in successfully.')
+}
+
 async function sendMagicLink(){
   const email = safeText(el('staffEmail')?.value).trim()
   if (!email) {
@@ -154,7 +179,6 @@ async function logout(){
   setAdminUiLocked(true)
 }
 
-// DASHBOARD
 async function loadSummary(){
   const { data, error } = await supabase.rpc('dashboard_summary')
   if (error) {
@@ -431,7 +455,7 @@ async function ensureRecipient(fullName, email){
     .select('id')
     .single()
 
-  if (inserted.error) throw inserted.error
+    if (inserted.error) throw inserted.error
   return inserted.data.id
 }
 
@@ -704,7 +728,10 @@ async function invitePortalUser(){
   setStatus(`Invite sent to ${email}`)
 }
 
+if (el('signinBtn')) el('signinBtn').onclick = signInWithPassword
+if (el('signinCardBtn')) el('signinCardBtn').onclick = signInWithPassword
 if (el('loginBtn')) el('loginBtn').onclick = sendMagicLink
+if (el('magicCardBtn')) el('magicCardBtn').onclick = sendMagicLink
 if (el('logoutBtn')) el('logoutBtn').onclick = logout
 if (el('saveInventoryBtn')) el('saveInventoryBtn').onclick = saveInventory
 if (el('logDistributionBtn')) el('logDistributionBtn').onclick = distribute
