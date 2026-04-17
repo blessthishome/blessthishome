@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bless This Home Admin Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="script">Bless This Home</div>
+      <div class="subtitle">Admin Portal</div>
+    </div>
+    <div class="topActions">
+      <button class="btn" id="loginBtn">Send Magic Link</button>
+      <button class="btn btnPrimary" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="authCard panel">
+      <h1>Secure Access</h1>
+      <p>Only authorized Bless This Home staff and administrators may access this system. Use your approved email address to receive a secure magic link.</p>
+      <div class="row">
+        <input id="staffEmail" type="email" placeholder="staff@example.org" />
+      </div>
+      <div class="hint" id="authMessage">Waiting for sign in.</div>
+    </section>
+
+    <section class="summaryGrid">
+      <article class="panel stat"><div class="label">Constituents</div><div class="value" id="statConstituents">0</div></article>
+      <article class="panel stat"><div class="label">Donors</div><div class="value" id="statDonors">0</div></article>
+      <article class="panel stat"><div class="label">Volunteers</div><div class="value" id="statVolunteers">0</div></article>
+      <article class="panel stat"><div class="label">Recipients</div><div class="value" id="statRecipients">0</div></article>
+      <article class="panel stat"><div class="label">Inventory Items</div><div class="value" id="statInventory">0</div></article>
+      <article class="panel stat"><div class="label">Low Stock</div><div class="value" id="statLowStock">0</div></article>
+      <article class="panel stat full"><div class="label">Financial Donations Total</div><div class="value" id="statDonationTotal">$0.00</div></article>
+    </section>
+
+<input id="searchInput" placeholder="Search name, email..." />
+<select id="filterType">
+  <option value="">All</option>
+  <option value="donor">Donors</option>
+  <option value="volunteer">Volunteers</option>
+  <option value="recipient">Recipients</option>
+</select>
+
+
+    <section class="gridTwo">
+      <section class="panel">
+        <div class="panelHead"><h2>Add or Update Inventory</h2></div>
+<div class="actions" style="margin-top:0;margin-bottom:14px;">
+  <button class="btn" type="button" id="quickAddCouchBtn">Quick Add Couch</button>
+  <button class="btn" type="button" id="quickAddBedBtn">Quick Add Bed</button>
+  <button class="btn" type="button" id="quickAddTableBtn">Quick Add Table</button>
+  <button class="btn" type="button" id="quickAddChairBtn">Quick Add Chair</button>
+</div>
+        <div class="formGrid">
+          <input id="inventorySku" placeholder="SKU (optional)" />
+          <input id="inventoryName" placeholder="Item name" />
+          <input id="inventoryCategory" placeholder="Category name, ex: Living Room" />
+          <input id="inventoryQty" type="number" min="0" placeholder="Quantity on hand" />
+          <input id="inventoryThreshold" type="number" min="0" placeholder="Reorder threshold" />
+          <input id="inventoryLocation" placeholder="Storage location" />
+          <textarea id="inventoryDescription" placeholder="Description"></textarea>
+        </div>
+        <div class="actions">
+          <button class="btn btnPrimary" id="saveInventoryBtn">Save Inventory Item</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panelHead"><h2>Log Distribution Event</h2></div>
+        <div class="formGrid">
+          <input id="recipientName" placeholder="Recipient full name" />
+          <input id="recipientEmail" placeholder="Recipient email" />
+          <input id="distributionItemName" placeholder="Inventory item name, ex: Couch" />
+          <input id="distributionQty" type="number" min="1" placeholder="Quantity" />
+          <input id="distributionDestination" placeholder="Destination label, ex: John Doe home" />
+          <textarea id="distributionNotes" placeholder="Notes"></textarea>
+        </div>
+        <div class="actions">
+          <button class="btn btnPrimary" id="logDistributionBtn">Log Distribution</button>
+        </div>
+      </section>
+    </section>
+
+    <section class="gridTwo">
+      <section class="panel">
+        <div class="panelHead"><h2>Inventory Status</h2><button class="btn" id="exportInventoryBtn">Export CSV</button></div>
+        <div class="tableWrap">
+          <table id="inventoryTable">
+            <thead><tr><th>Item</th><th>Category</th><th>On Hand</th><th>Location</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panelHead"><h2>Distribution Log</h2><button class="btn" id="exportDistributionBtn">Export CSV</button></div>
+        <div class="tableWrap">
+          <table id="distributionTable">
+            <thead><tr><th>Date</th><th>Recipient</th><th>Item</th><th>Qty</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <section class="gridTwo">
+      <section class="panel">
+        <div class="panelHead"><h2>Donor Log</h2><button class="btn" id="exportDonorBtn">Export CSV</button></div>
+        <div class="tableWrap">
+          <table id="donorTable">
+            <thead><tr><th>Date</th><th>Donor</th><th>Type</th><th>Amount</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panelHead"><h2>Constituent Quick Add</h2></div>
+        <div class="formGrid">
+          <select id="constituentType">
+            <option value="donor">Donor</option>
+            <option value="volunteer">Volunteer</option>
+            <option value="recipient">Recipient</option>
+            <option value="partner">Partner</option>
+            <option value="other">Other</option>
+          </select>
+          <input id="constituentOrg" placeholder="Organization name (optional)" />
+          <input id="constituentFirstName" placeholder="First name" />
+          <input id="constituentLastName" placeholder="Last name" />
+          <input id="constituentEmail" placeholder="Email" />
+          <input id="constituentPhone" placeholder="Phone" />
+          <textarea id="constituentNotes" placeholder="Notes"></textarea>
+        </div>
+        <div class="actions">
+          <button class="btn btnPrimary" id="saveConstituentBtn">Save Constituent</button>
+        </div>
+      </section>
+    </section>
+
+<section class="panel">
+  <div class="panelHead"><h2>Invite Portal User</h2></div>
+  <div class="formGrid">
+    <input id="inviteFullName" placeholder="Full name" />
+    <input id="inviteEmail" type="email" placeholder="Email" />
+    <select id="inviteRole">
+      <option value="staff">Staff</option>
+      <option value="volunteer">Volunteer</option>
+      <option value="admin">Admin</option>
+    </select>
+  </div>
+  <div class="actions">
+    <button class="btn btnPrimary" id="inviteUserBtn">Send Invite</button>
+  </div>
+</section>
+
+    <section class="panel">
+      <div class="panelHead"><h2>One Click Reports</h2></div>
+      <div class="actions wrapButtons">
+        <button class="btn btnPrimary" id="exportAllBtn">Export Full Operations Bundle</button>
+        <button class="btn" id="refreshBtn">Refresh Dashboard</button>
+      </div>
+      <div class="hint" id="statusMessage">Ready.</div>
+    </section>
+  </main>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
