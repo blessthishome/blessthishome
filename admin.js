@@ -6,6 +6,32 @@ const statusMessage = el('statusMessage')
 const authMessage = el('authMessage')
 const authStateLabel = el('authStateLabel')
 
+const inventoryStatusHint = el('inventoryStatusHint')
+const distributionStatusHint = el('distributionStatusHint')
+const constituentStatusHint = el('constituentStatusHint')
+const inviteStatusHint = el('inviteStatusHint')
+const reportsStatusHint = el('reportsStatusHint')
+
+function setInventoryHint(msg){
+  if (inventoryStatusHint) inventoryStatusHint.textContent = msg
+}
+
+function setDistributionHint(msg){
+  if (distributionStatusHint) distributionStatusHint.textContent = msg
+}
+
+function setConstituentHint(msg){
+  if (constituentStatusHint) constituentStatusHint.textContent = msg
+}
+
+function setInviteHint(msg){
+  if (inviteStatusHint) inviteStatusHint.textContent = msg
+}
+
+function setReportsHint(msg){
+  if (reportsStatusHint) reportsStatusHint.textContent = msg
+}
+
 function setStatus(msg){
   if (statusMessage) statusMessage.textContent = msg
 }
