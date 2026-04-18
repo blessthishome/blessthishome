@@ -63,6 +63,7 @@ async function applyVolunteerAuthState(){
   setMsg('Signed in.')
   setVolunteerStateLabel(`Signed in as ${user.email}`)
   await loadOpenNeeds()
+await loadTodayDeliveries()
 }
 
 async function signInVolunteerWithPassword(){
@@ -222,6 +223,95 @@ async function loadOpenNeeds(){
     <li>${row.item_name} is low. On hand: ${row.quantity_on_hand}</li>
   `).join('')
 }
+
+async function toggleDeliveryItemChecked(itemId, checked){
+  const { error } = await supabase
+    .from('delivery_batch_items')
+    .update({ is_checked: checked })
+    .eq('id', itemId)
+
+  if (error) {
+    setMsg(error.message)
+  }
+}
+
+async function loadTodayDeliveries(){
+  const user = await getCurrentUser()
+  if (!user) return
+
+  const container = document.getElementById('todayDeliveriesList')
+  if (!container) return
+
+  const today = new Date().toISOString().slice(0, 10)
+
+  const { data: batches, error: batchError } = await supabase
+    .from('delivery_batches')
+    .select('id, batch_name, recipient_name, scheduled_date, color_tag, destination_label')
+    .eq('scheduled_date', today)
+    .order('recipient_name', { ascending: true })
+
+  if (batchError) {
+    setMsg(batchError.message)
+    return
+  }
+
+  if (!batches || !batches.length) {
+    container.innerHTML = 'No deliveries scheduled for today.'
+    return
+  }
+
+  const batchIds = batches.map(row => row.id)
+
+  const { data: items, error: itemError } = await supabase
+    .from('delivery_batch_items')
+    .select('id, delivery_batch_id, item_number, description, piece_count, is_checked')
+    .in('delivery_batch_id', batchIds)
+    .order('created_at', { ascending: true })
+
+  if (itemError) {
+    setMsg(itemError.message)
+    return
+  }
+
+  container.innerHTML = batches.map(batch => {
+    const batchItems = items.filter(item => item.delivery_batch_id === batch.id)
+
+    return `
+      <details style="margin-bottom:14px;">
+        <summary style="font-weight:700; cursor:pointer;">
+          ${batch.recipient_name || batch.batch_name}
+          ${batch.color_tag ? ` • ${batch.color_tag}` : ''}
+          ${batch.destination_label ? ` • ${batch.destination_label}` : ''}
+        </summary>
+        <div style="margin-top:10px;">
+          ${batchItems.length ? batchItems.map(item => `
+            <label style="display:flex; gap:10px; align-items:flex-start; margin-bottom:10px;">
+              <input
+                type="checkbox"
+                data-delivery-item-id="${item.id}"
+                ${item.is_checked ? 'checked' : ''}
+              />
+              <span>
+                <strong>${item.item_number || ''}</strong>
+                ${item.description ? ` — ${item.description}` : ''}
+                ${item.piece_count ? ` (${item.piece_count} pieces)` : ''}
+              </span>
+            </label>
+          `).join('') : '<div>No pull items loaded.</div>'}
+        </div>
+      </details>
+    `
+  }).join('')
+
+  container.querySelectorAll('input[type="checkbox"][data-delivery-item-id]').forEach(box => {
+    box.addEventListener('change', async (e) => {
+      const id = e.target.getAttribute('data-delivery-item-id')
+      await toggleDeliveryItemChecked(id, e.target.checked)
+    })
+  })
+}
+
+
 
 if (document.getElementById('volunteerSigninBtn')) document.getElementById('volunteerSigninBtn').onclick = signInVolunteerWithPassword
 if (document.getElementById('volunteerSigninCardBtn')) document.getElementById('volunteerSigninCardBtn').onclick = signInVolunteerWithPassword
