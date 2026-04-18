@@ -82,10 +82,6 @@ function setAdminUiLocked(isLocked){
     'exportDonorBtn',
     'exportAllBtn',
     'refreshBtn',
-    'inviteFullName',
-    'inviteEmail',
-    'inviteRole',
-    'inviteUserBtn',
     'quickAddCouchBtn',
     'quickAddBedBtn',
     'quickAddTableBtn',
@@ -713,47 +709,6 @@ async function refresh(){
   await loadDonors()
 }
 
-async function invitePortalUser(){
-  const full_name = safeText(el('inviteFullName')?.value).trim()
-  const email = safeText(el('inviteEmail')?.value).trim()
-  const role = safeText(el('inviteRole')?.value).trim()
-
-  if (!email || !role) {
-    setStatus('Invite email and role are required')
-    return
-  }
-
-  const { data: sessionData } = await supabase.auth.getSession()
-  const accessToken = sessionData?.session?.access_token
-
-  if (!accessToken) {
-    setStatus('You must be signed in')
-    return
-  }
-
-  const response = await fetch('https://yuokztriptlugbmdoszb.supabase.co/functions/v1/invite-portal-user', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`
-    },
-    body: JSON.stringify({
-      full_name,
-      email,
-      role
-    })
-  })
-
-  const result = await response.json().catch(() => ({}))
-
-  if (!response.ok) {
-    setStatus(result.error || 'Invite failed')
-    return
-  }
-
-  setStatus(`Invite sent to ${email}`)
-}
-
 if (el('signinBtn')) el('signinBtn').onclick = signInWithPassword
 if (el('signinCardBtn')) el('signinCardBtn').onclick = signInWithPassword
 if (el('loginBtn')) el('loginBtn').onclick = sendMagicLink
@@ -767,7 +722,6 @@ if (el('exportDistributionBtn')) el('exportDistributionBtn').onclick = exportDis
 if (el('exportDonorBtn')) el('exportDonorBtn').onclick = exportDonors
 if (el('exportAllBtn')) el('exportAllBtn').onclick = exportAll
 if (el('refreshBtn')) el('refreshBtn').onclick = refresh
-if (el('inviteUserBtn')) el('inviteUserBtn').onclick = invitePortalUser
 if (el('quickAddCouchBtn')) el('quickAddCouchBtn').onclick = () => quickAddItem('Couch', 'Living Room')
 if (el('quickAddBedBtn')) el('quickAddBedBtn').onclick = () => quickAddItem('Bed', 'Bedroom')
 if (el('quickAddTableBtn')) el('quickAddTableBtn').onclick = () => quickAddItem('Kitchen Table', 'Kitchen')
