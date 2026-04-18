@@ -9,8 +9,9 @@ const authStateLabel = el('authStateLabel')
 const inventoryStatusHint = el('inventoryStatusHint')
 const distributionStatusHint = el('distributionStatusHint')
 const constituentStatusHint = el('constituentStatusHint')
-const inviteStatusHint = el('inviteStatusHint')
 const reportsStatusHint = el('reportsStatusHint')
+const deliveryBatchStatusHint = el('deliveryBatchStatusHint')
+const deliveryItemStatusHint = el('deliveryItemStatusHint')
 
 function setInventoryHint(msg){
   if (inventoryStatusHint) inventoryStatusHint.textContent = msg
@@ -22,10 +23,6 @@ function setDistributionHint(msg){
 
 function setConstituentHint(msg){
   if (constituentStatusHint) constituentStatusHint.textContent = msg
-}
-
-function setInviteHint(msg){
-  if (inviteStatusHint) inviteStatusHint.textContent = msg
 }
 
 function setReportsHint(msg){
@@ -42,6 +39,14 @@ function setAuth(msg){
 
 function setAuthStateLabel(msg){
   if (authStateLabel) authStateLabel.textContent = msg
+}
+
+function setDeliveryBatchHint(msg){
+  if (deliveryBatchStatusHint) deliveryBatchStatusHint.textContent = msg
+}
+
+function setDeliveryItemHint(msg){
+  if (deliveryItemStatusHint) deliveryItemStatusHint.textContent = msg
 }
 
 function safeText(value){
@@ -87,7 +92,22 @@ function setAdminUiLocked(isLocked){
     'quickAddTableBtn',
     'quickAddChairBtn',
     'searchInput',
-    'filterType'
+    'filterType',
+'deliveryBatchName',
+'deliveryRecipientName',
+'deliveryScheduledDate',
+'deliveryTeamLeadName',
+'deliveryTeamLeadPhone',
+'deliveryDestinationLabel',
+'deliveryColorTag',
+'deliveryNotes',
+'saveDeliveryBatchBtn',
+'deliveryBatchSelect',
+'deliveryItemSku',
+'deliveryItemDescription',
+'deliveryItemPieceCount',
+'addDeliveryItemBtn',
+'inventoryPieceCount'
   ]
 
   protectedIds.forEach((id) => {
@@ -349,6 +369,7 @@ async function findInventoryBySkuOrName(sku, itemName){
 function quickAddItem(itemName, categoryName){
   if (el('inventoryName')) el('inventoryName').value = itemName
   if (el('inventoryCategory')) el('inventoryCategory').value = categoryName
+  if (el('inventoryPieceCount')) el('inventoryPieceCount').value = '1'
   if (el('inventoryQty')) el('inventoryQty').value = '1'
   if (el('inventoryThreshold')) el('inventoryThreshold').value = '1'
 }
@@ -358,12 +379,14 @@ async function saveInventory(){
     const sessionData = await getCurrentProfile()
     if (!sessionData) {
       setStatus('You must be signed in')
+      setInventoryHint('You must be signed in')
       return
     }
 
     const sku = safeText(el('inventorySku')?.value).trim()
     const itemName = safeText(el('inventoryName')?.value).trim()
     const categoryName = safeText(el('inventoryCategory')?.value).trim()
+    const pieceCount = Number(el('inventoryPieceCount')?.value || 1)
     const qty = Number(el('inventoryQty')?.value || 0)
     const threshold = Number(el('inventoryThreshold')?.value || 0)
     const location = safeText(el('inventoryLocation')?.value).trim()
@@ -371,6 +394,7 @@ async function saveInventory(){
 
     if (!itemName) {
       setStatus('Item name is required')
+      setInventoryHint('Item name is required')
       return
     }
 
@@ -384,6 +408,7 @@ async function saveInventory(){
           sku: sku || null,
           item_name: itemName,
           category_id: categoryId,
+          piece_count: pieceCount,
           quantity_on_hand: qty,
           reorder_threshold: threshold,
           storage_location: location || null,
@@ -393,10 +418,12 @@ async function saveInventory(){
 
       if (error) {
         setStatus(error.message)
+        setInventoryHint(error.message)
         return
       }
 
       setStatus('Inventory item updated')
+      setInventoryHint('Inventory item updated')
     } else {
       const { error } = await supabase
         .from('inventory_items')
@@ -404,6 +431,7 @@ async function saveInventory(){
           sku: sku || null,
           item_name: itemName,
           category_id: categoryId,
+          piece_count: pieceCount,
           quantity_on_hand: qty,
           reorder_threshold: threshold,
           storage_location: location || null,
@@ -412,18 +440,20 @@ async function saveInventory(){
 
       if (error) {
         setStatus(error.message)
+        setInventoryHint(error.message)
         return
       }
 
       setStatus('Inventory item saved')
+      setInventoryHint('Inventory item saved')
     }
 
     await refresh()
   } catch (err) {
     setStatus(err.message || 'Inventory save failed')
+    setInventoryHint(err.message || 'Inventory save failed')
   }
 }
-
 async function findRecipientByEmailOrName(email, fullName){
   const emailTrim = safeText(email).trim()
   const nameTrim = safeText(fullName).trim()
@@ -500,6 +530,7 @@ async function distribute(){
     const sessionData = await getCurrentProfile()
     if (!sessionData) {
       setStatus('You must be signed in')
+      setDistributionHint('You must be signed in')
       return
     }
 
@@ -512,16 +543,19 @@ async function distribute(){
 
     if (!recipientName) {
       setStatus('Recipient name is required')
+      setDistributionHint('Recipient name is required')
       return
     }
 
     if (!itemName) {
       setStatus('Inventory item name is required')
+      setDistributionHint('Inventory item name is required')
       return
     }
 
     if (!qty || qty < 1) {
       setStatus('Quantity must be at least 1')
+      setDistributionHint('Quantity must be at least 1')
       return
     }
 
@@ -530,6 +564,7 @@ async function distribute(){
 
     if (!inventoryItemId) {
       setStatus('Item not found')
+      setDistributionHint('Item not found')
       return
     }
 
@@ -546,6 +581,7 @@ async function distribute(){
 
     if (eventInsert.error) {
       setStatus(eventInsert.error.message)
+      setDistributionHint(eventInsert.error.message)
       return
     }
 
@@ -559,13 +595,16 @@ async function distribute(){
 
     if (itemInsert.error) {
       setStatus(itemInsert.error.message)
+      setDistributionHint(itemInsert.error.message)
       return
     }
 
     setStatus('Distribution logged')
+    setDistributionHint('Distribution logged')
     await refresh()
   } catch (err) {
     setStatus(err.message || 'Distribution failed')
+    setDistributionHint(err.message || 'Distribution failed')
   }
 }
 
@@ -574,6 +613,7 @@ async function saveConstituent(){
 
   if (!email) {
     setStatus('Email required')
+    setConstituentHint('Email required')
     return
   }
 
@@ -595,6 +635,7 @@ async function saveConstituent(){
 
   if (lookupError) {
     setStatus(lookupError.message)
+    setConstituentHint(lookupError.message)
     return
   }
 
@@ -606,10 +647,12 @@ async function saveConstituent(){
 
     if (error) {
       setStatus(error.message)
+      setConstituentHint(error.message)
       return
     }
 
     setStatus('Updated existing constituent')
+    setConstituentHint('Updated existing constituent')
   } else {
     const { error } = await supabase
       .from('constituents')
@@ -617,13 +660,181 @@ async function saveConstituent(){
 
     if (error) {
       setStatus(error.message)
+      setConstituentHint(error.message)
       return
     }
 
     setStatus('New constituent added')
+    setConstituentHint('New constituent added')
   }
 
   await refresh()
+}
+
+async function loadDeliveryBatches(){
+  const { data, error } = await supabase
+    .from('delivery_batches')
+    .select('id, batch_name, recipient_name, scheduled_date')
+    .order('scheduled_date', { ascending: true })
+
+  if (error) {
+    setDeliveryBatchHint(error.message)
+    return []
+  }
+
+  const select = el('deliveryBatchSelect')
+  if (select) {
+    select.innerHTML = `
+      <option value="">Select delivery</option>
+      ${data.map(row => `
+        <option value="${row.id}">
+          ${safeText(row.batch_name)}${row.recipient_name ? ` — ${safeText(row.recipient_name)}` : ''}
+        </option>
+      `).join('')}
+    `
+  }
+
+  return data
+}
+
+async function saveDeliveryBatch(){
+  try {
+    const current = await getCurrentProfile()
+    if (!current) {
+      setDeliveryBatchHint('You must be signed in')
+      return
+    }
+
+    const batch_name = safeText(el('deliveryBatchName')?.value).trim()
+    const recipient_name = safeText(el('deliveryRecipientName')?.value).trim()
+    const scheduled_date = safeText(el('deliveryScheduledDate')?.value).trim()
+    const team_lead_name = safeText(el('deliveryTeamLeadName')?.value).trim()
+    const team_lead_phone = safeText(el('deliveryTeamLeadPhone')?.value).trim()
+    const destination_label = safeText(el('deliveryDestinationLabel')?.value).trim()
+    const color_tag = safeText(el('deliveryColorTag')?.value).trim()
+    const notes = safeText(el('deliveryNotes')?.value).trim()
+
+    if (!batch_name) {
+      setDeliveryBatchHint('Delivery name is required')
+      return
+    }
+
+    const { error } = await supabase
+      .from('delivery_batches')
+      .insert({
+        batch_name,
+        recipient_name: recipient_name || null,
+        scheduled_date: scheduled_date || null,
+        team_lead_name: team_lead_name || null,
+        team_lead_phone: team_lead_phone || null,
+        destination_label: destination_label || null,
+        color_tag: color_tag || null,
+        notes: notes || null
+      })
+
+    if (error) {
+      setDeliveryBatchHint(error.message)
+      return
+    }
+
+    setDeliveryBatchHint('Delivery saved')
+    await loadDeliveryBatches()
+  } catch (err) {
+    setDeliveryBatchHint(err.message || 'Delivery save failed')
+  }
+}
+
+async function addItemToDeliveryBatch(){
+  try {
+    const current = await getCurrentProfile()
+    if (!current) {
+      setDeliveryItemHint('You must be signed in')
+      return
+    }
+
+    const delivery_batch_id = safeText(el('deliveryBatchSelect')?.value).trim()
+    const item_number = safeText(el('deliveryItemSku')?.value).trim()
+    const description = safeText(el('deliveryItemDescription')?.value).trim()
+    const piece_count = Number(el('deliveryItemPieceCount')?.value || 1)
+
+    if (!delivery_batch_id) {
+      setDeliveryItemHint('Select a delivery first')
+      return
+    }
+
+    if (!item_number) {
+      setDeliveryItemHint('Item SKU / number is required')
+      return
+    }
+
+    const inventoryLookup = await supabase
+      .from('inventory_items')
+      .select('id, item_name, sku, piece_count')
+      .eq('sku', item_number)
+      .maybeSingle()
+
+    if (inventoryLookup.error) {
+      setDeliveryItemHint(inventoryLookup.error.message)
+      return
+    }
+
+    const inventory_item_id = inventoryLookup.data?.id || null
+    const finalDescription = description || inventoryLookup.data?.item_name || null
+    const finalPieceCount = piece_count || inventoryLookup.data?.piece_count || 1
+
+    const { error } = await supabase
+      .from('delivery_batch_items')
+      .insert({
+        delivery_batch_id,
+        inventory_item_id,
+        item_number,
+        piece_count: finalPieceCount,
+        description: finalDescription,
+        is_checked: false
+      })
+
+    if (error) {
+      setDeliveryItemHint(error.message)
+      return
+    }
+
+    setDeliveryItemHint('Item added to delivery')
+    await loadDeliveryBatchItems(delivery_batch_id)
+  } catch (err) {
+    setDeliveryItemHint(err.message || 'Failed to add item')
+  }
+}
+
+async function loadDeliveryBatchItems(batchId){
+  const tbody = document.querySelector('#deliveryItemsTable tbody')
+  if (!tbody) return []
+
+  if (!batchId) {
+    tbody.innerHTML = ''
+    return []
+  }
+
+  const { data, error } = await supabase
+    .from('delivery_batch_items')
+    .select('id, item_number, description, piece_count, is_checked')
+    .eq('delivery_batch_id', batchId)
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    setDeliveryItemHint(error.message)
+    return []
+  }
+
+  tbody.innerHTML = data.map(row => `
+    <tr>
+      <td>${safeText(row.item_number)}</td>
+      <td>${safeText(row.description)}</td>
+      <td>${safeText(row.piece_count)}</td>
+      <td>${row.is_checked ? 'Yes' : 'No'}</td>
+    </tr>
+  `).join('')
+
+  return data
 }
 
 function exportRows(filename, headers, rows){
@@ -697,6 +908,7 @@ async function exportAll(){
   )
 
   setStatus('Reports exported')
+setReportsHint('Reports exported')
 }
 
 async function refresh(){
@@ -707,6 +919,14 @@ async function refresh(){
   await loadInventory()
   await loadDistribution()
   await loadDonors()
+  await loadDeliveryBatches()
+
+  const selectedBatchId = safeText(el('deliveryBatchSelect')?.value).trim()
+  if (selectedBatchId) {
+    await loadDeliveryBatchItems(selectedBatchId)
+  }
+
+  setReportsHint('Dashboard refreshed')
 }
 
 if (el('signinBtn')) el('signinBtn').onclick = signInWithPassword
@@ -726,6 +946,9 @@ if (el('quickAddCouchBtn')) el('quickAddCouchBtn').onclick = () => quickAddItem(
 if (el('quickAddBedBtn')) el('quickAddBedBtn').onclick = () => quickAddItem('Bed', 'Bedroom')
 if (el('quickAddTableBtn')) el('quickAddTableBtn').onclick = () => quickAddItem('Kitchen Table', 'Kitchen')
 if (el('quickAddChairBtn')) el('quickAddChairBtn').onclick = () => quickAddItem('Chair', 'Living Room')
+if (el('saveDeliveryBatchBtn')) el('saveDeliveryBatchBtn').onclick = saveDeliveryBatch
+if (el('addDeliveryItemBtn')) el('addDeliveryItemBtn').onclick = addItemToDeliveryBatch
+if (el('deliveryBatchSelect')) el('deliveryBatchSelect').onchange = (e) => loadDeliveryBatchItems(e.target.value)
 
 supabase.auth.onAuthStateChange(() => {
   applyAdminAuthState()
