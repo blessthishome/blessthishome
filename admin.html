@@ -68,14 +68,15 @@
   <button class="btn" type="button" id="quickAddChairBtn">Quick Add Chair</button>
 </div>
         <div class="formGrid">
-          <input id="inventorySku" placeholder="SKU (optional)" />
-          <input id="inventoryName" placeholder="Item name" />
-          <input id="inventoryCategory" placeholder="Category name, ex: Living Room" />
-          <input id="inventoryQty" type="number" min="0" placeholder="Quantity on hand" />
-          <input id="inventoryThreshold" type="number" min="0" placeholder="Reorder threshold" />
-          <input id="inventoryLocation" placeholder="Storage location" />
-          <textarea id="inventoryDescription" placeholder="Description"></textarea>
-        </div>
+  <input id="inventorySku" placeholder="SKU / Item number" />
+  <input id="inventoryName" placeholder="Item name" />
+  <input id="inventoryCategory" placeholder="Category name, ex: Living Room" />
+  <input id="inventoryPieceCount" type="number" min="1" placeholder="Piece count" />
+  <input id="inventoryQty" type="number" min="0" placeholder="Quantity on hand" />
+  <input id="inventoryThreshold" type="number" min="0" placeholder="Reorder threshold" />
+  <input id="inventoryLocation" placeholder="Storage location" />
+  <textarea id="inventoryDescription" placeholder="Description"></textarea>
+</div>
         <div class="actions">
           <button class="btn btnPrimary" id="saveInventoryBtn">Save Inventory Item</button>
         </div>
@@ -156,15 +157,72 @@
       </section>
     </section>
 
+<section class="panel">
+  <div class="panelHead"><h2>Delivery Planner</h2></div>
 
+  <div class="gridTwo">
+    <section>
+      <div class="formGrid">
+        <input id="deliveryBatchName" placeholder="Delivery name, ex: Chelsea Delivery" />
+        <input id="deliveryRecipientName" placeholder="Recipient name" />
+        <input id="deliveryScheduledDate" type="date" />
+        <input id="deliveryTeamLeadName" placeholder="Team lead name" />
+        <input id="deliveryTeamLeadPhone" placeholder="Team lead phone" />
+        <input id="deliveryDestinationLabel" placeholder="Destination label" />
+        <input id="deliveryColorTag" placeholder="Color tag, ex: Purple" />
+        <textarea id="deliveryNotes" placeholder="Delivery notes"></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="btn btnPrimary" id="saveDeliveryBatchBtn" type="button">Save Delivery</button>
+      </div>
+
+      <div class="hint" id="deliveryBatchStatusHint" style="margin-top:10px;">Ready.</div>
+    </section>
+
+    <section>
+      <div class="formGrid">
+        <select id="deliveryBatchSelect">
+          <option value="">Select delivery</option>
+        </select>
+        <input id="deliveryItemSku" placeholder="Item SKU / number" />
+        <input id="deliveryItemDescription" placeholder="Item description" />
+        <input id="deliveryItemPieceCount" type="number" min="1" placeholder="Piece count" />
+      </div>
+
+      <div class="actions">
+        <button class="btn btnPrimary" id="addDeliveryItemBtn" type="button">Add Item To Delivery</button>
+      </div>
+
+      <div class="hint" id="deliveryItemStatusHint" style="margin-top:10px;">Ready.</div>
+    </section>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="panelHead"><h2>Delivery Pull List</h2></div>
+  <div class="tableWrap">
+    <table id="deliveryItemsTable">
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Description</th>
+          <th>Pieces</th>
+          <th>Checked</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
 
     <section class="panel">
       <div class="panelHead"><h2>One Click Reports</h2></div>
       <div class="actions wrapButtons">
-        <button class="btn btnPrimary" id="exportAllBtn">Export Full Operations Bundle</button>
-        <button class="btn" id="refreshBtn">Refresh Dashboard</button>
+  <button class="btn btnPrimary" id="exportAllBtn">Export Full Operations Bundle</button>
+  <button class="btn" id="refreshBtn">Refresh Dashboard</button>
+</div>
 <div class="hint" id="reportsStatusHint" style="margin-top:10px;">Ready.</div>
-      </div>
       <div class="hint" id="statusMessage">Ready.</div>
     </section>
   </main>
