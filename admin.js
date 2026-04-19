@@ -101,6 +101,9 @@ function setAdminUiLocked(isLocked){
 'deliveryDestinationLabel',
 'deliveryColorTag',
 'deliveryNotes',
+'currentDeliveryBatchId',
+'completeDeliveryBtn',
+'deleteDeliveryBtn',
 'saveDeliveryBatchBtn',
 'deliveryBatchSelect',
 'deliveryItemSku',
@@ -133,6 +136,14 @@ function updateAdminAuthButtons(isSignedIn){
 
   if (staffEmail) staffEmail.disabled = isSignedIn
   if (staffPassword) staffPassword.disabled = isSignedIn
+}
+
+function updateDeliverySaveButtonLabel(){
+  const btn = el('saveDeliveryBatchBtn')
+  const currentId = safeText(el('currentDeliveryBatchId')?.value).trim()
+
+  if (!btn) return
+  btn.textContent = currentId ? 'Update Delivery' : 'Save Delivery'
 }
 
 async function getCurrentSessionUser(){
@@ -674,7 +685,8 @@ async function saveConstituent(){
 async function loadDeliveryBatches(){
   const { data, error } = await supabase
     .from('delivery_batches')
-    .select('id, batch_name, recipient_name, scheduled_date')
+    .select('id, batch_name, recipient_name, scheduled_date, status')
+    .eq('status', 'open')
     .order('scheduled_date', { ascending: true })
 
   if (error) {
@@ -688,13 +700,60 @@ async function loadDeliveryBatches(){
       <option value="">Select delivery</option>
       ${data.map(row => `
         <option value="${row.id}">
-          ${safeText(row.batch_name)}${row.recipient_name ? ` — ${safeText(row.recipient_name)}` : ''}
+          ${safeText(row.batch_name)}${row.recipient_name ? ` — ${safeText(row.recipient_name)}` : ''}${row.scheduled_date ? ` — ${safeText(row.scheduled_date)}` : ''}
         </option>
       `).join('')}
     `
   }
 
   return data
+}
+
+async function loadDeliveryBatchIntoForm(batchId){
+  if (!batchId) {
+    if (el('currentDeliveryBatchId')) el('currentDeliveryBatchId').value = ''
+    if (el('deliveryBatchName')) el('deliveryBatchName').value = ''
+    if (el('deliveryRecipientName')) el('deliveryRecipientName').value = ''
+    if (el('deliveryScheduledDate')) el('deliveryScheduledDate').value = ''
+    if (el('deliveryTeamLeadName')) el('deliveryTeamLeadName').value = ''
+    if (el('deliveryTeamLeadPhone')) el('deliveryTeamLeadPhone').value = ''
+    if (el('deliveryDestinationLabel')) el('deliveryDestinationLabel').value = ''
+    if (el('deliveryColorTag')) el('deliveryColorTag').value = ''
+    if (el('deliveryNotes')) el('deliveryNotes').value = ''
+    await loadDeliveryBatchItems('')
+
+updateDeliverySaveButtonLabel()
+
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('delivery_batches')
+    .select('id, batch_name, recipient_name, scheduled_date, team_lead_name, team_lead_phone, destination_label, color_tag, notes')
+    .eq('id', batchId)
+    .single()
+
+  if (error) {
+    setDeliveryBatchHint(error.message)
+
+    return
+  }
+
+  if (el('currentDeliveryBatchId')) el('currentDeliveryBatchId').value = data.id || ''
+  if (el('deliveryBatchName')) el('deliveryBatchName').value = data.batch_name || ''
+  if (el('deliveryRecipientName')) el('deliveryRecipientName').value = data.recipient_name || ''
+  if (el('deliveryScheduledDate')) el('deliveryScheduledDate').value = data.scheduled_date || ''
+  if (el('deliveryTeamLeadName')) el('deliveryTeamLeadName').value = data.team_lead_name || ''
+  if (el('deliveryTeamLeadPhone')) el('deliveryTeamLeadPhone').value = data.team_lead_phone || ''
+  if (el('deliveryDestinationLabel')) el('deliveryDestinationLabel').value = data.destination_label || ''
+  if (el('deliveryColorTag')) el('deliveryColorTag').value = data.color_tag || ''
+  if (el('deliveryNotes')) el('deliveryNotes').value = data.notes || ''
+
+  await loadDeliveryBatchItems(batchId)
+
+  setDeliveryBatchHint('Delivery loaded')
+
+updateDeliverySaveButtonLabel()
 }
 
 async function saveDeliveryBatch(){
@@ -705,6 +764,7 @@ async function saveDeliveryBatch(){
       return
     }
 
+    const currentBatchId = safeText(el('currentDeliveryBatchId')?.value).trim()
     const batch_name = safeText(el('deliveryBatchName')?.value).trim()
     const recipient_name = safeText(el('deliveryRecipientName')?.value).trim()
     const scheduled_date = safeText(el('deliveryScheduledDate')?.value).trim()
@@ -719,31 +779,146 @@ async function saveDeliveryBatch(){
       return
     }
 
+    const payload = {
+      batch_name,
+      recipient_name: recipient_name || null,
+      scheduled_date: scheduled_date || null,
+      team_lead_name: team_lead_name || null,
+      team_lead_phone: team_lead_phone || null,
+      destination_label: destination_label || null,
+      color_tag: color_tag || null,
+      notes: notes || null
+    }
+
+    let result
+
+    if (currentBatchId) {
+      result = await supabase
+        .from('delivery_batches')
+        .update(payload)
+        .eq('id', currentBatchId)
+        .select('id')
+        .single()
+    } else {
+      result = await supabase
+        .from('delivery_batches')
+        .insert({
+          ...payload,
+          status: 'open'
+        })
+        .select('id')
+        .single()
+    }
+
+    if (result.error) {
+      setDeliveryBatchHint(result.error.message)
+      return
+    }
+
+    if (el('currentDeliveryBatchId')) el('currentDeliveryBatchId').value = result.data.id
+    if (el('deliveryBatchSelect')) el('deliveryBatchSelect').value = result.data.id
+
+    updateDeliverySaveButtonLabel()
+
+    setDeliveryBatchHint(currentBatchId ? 'Delivery updated' : 'Delivery saved')
+
+    await loadDeliveryBatches()
+    await loadDeliveryBatchItems(result.data.id)
+  } catch (err) {
+    setDeliveryBatchHint(err.message || 'Delivery save failed')
+  }
+}
+
+async function completeDeliveryBatch(){
+  try {
+    const current = await getCurrentProfile()
+    if (!current) {
+      setDeliveryBatchHint('You must be signed in')
+      return
+    }
+
+    const batchId = safeText(el('currentDeliveryBatchId')?.value || el('deliveryBatchSelect')?.value).trim()
+
+    if (!batchId) {
+      setDeliveryBatchHint('Select a delivery first')
+      return
+    }
+
     const { error } = await supabase
       .from('delivery_batches')
-      .insert({
-        batch_name,
-        recipient_name: recipient_name || null,
-        scheduled_date: scheduled_date || null,
-        team_lead_name: team_lead_name || null,
-        team_lead_phone: team_lead_phone || null,
-        destination_label: destination_label || null,
-        color_tag: color_tag || null,
-        notes: notes || null
+      .update({
+        status: 'completed',
+        completed_at: new Date().toISOString()
       })
+      .eq('id', batchId)
 
     if (error) {
       setDeliveryBatchHint(error.message)
       return
     }
 
-    setDeliveryBatchHint('Delivery saved')
+    setDeliveryBatchHint('Delivery marked complete')
+
+    if (el('currentDeliveryBatchId')) el('currentDeliveryBatchId').value = ''
+    if (el('deliveryBatchSelect')) el('deliveryBatchSelect').value = ''
+
+    updateDeliverySaveButtonLabel()
+
     await loadDeliveryBatches()
+    await loadDeliveryBatchIntoForm('')
   } catch (err) {
-    setDeliveryBatchHint(err.message || 'Delivery save failed')
+    setDeliveryBatchHint(err.message || 'Failed to complete delivery')
   }
 }
 
+async function deleteDeliveryBatch(){
+  try {
+    const current = await getCurrentProfile()
+    if (!current) {
+      setDeliveryBatchHint('You must be signed in')
+      return
+    }
+
+    const batchId = safeText(
+      el('currentDeliveryBatchId')?.value ||
+      el('deliveryBatchSelect')?.value
+    ).trim()
+
+    if (!batchId) {
+      setDeliveryBatchHint('Select a delivery first')
+      return
+    }
+
+    const confirmDelete = window.confirm(
+      'Delete this delivery and all of its pull items?'
+    )
+
+    if (!confirmDelete) return
+
+    const { error } = await supabase
+      .from('delivery_batches')
+      .delete()
+      .eq('id', batchId)
+
+    if (error) {
+      setDeliveryBatchHint(error.message)
+      return
+    }
+
+    setDeliveryBatchHint('Delivery deleted')
+
+    if (el('currentDeliveryBatchId')) el('currentDeliveryBatchId').value = ''
+    if (el('deliveryBatchSelect')) el('deliveryBatchSelect').value = ''
+
+    updateDeliverySaveButtonLabel()
+
+    await loadDeliveryBatches()
+    await loadDeliveryBatchIntoForm('')
+
+  } catch (err) {
+    setDeliveryBatchHint(err.message || 'Failed to delete delivery')
+  }
+}
 async function addItemToDeliveryBatch(){
   try {
     const current = await getCurrentProfile()
@@ -948,7 +1123,9 @@ if (el('quickAddTableBtn')) el('quickAddTableBtn').onclick = () => quickAddItem(
 if (el('quickAddChairBtn')) el('quickAddChairBtn').onclick = () => quickAddItem('Chair', 'Living Room')
 if (el('saveDeliveryBatchBtn')) el('saveDeliveryBatchBtn').onclick = saveDeliveryBatch
 if (el('addDeliveryItemBtn')) el('addDeliveryItemBtn').onclick = addItemToDeliveryBatch
-if (el('deliveryBatchSelect')) el('deliveryBatchSelect').onchange = (e) => loadDeliveryBatchItems(e.target.value)
+if (el('deliveryBatchSelect')) el('deliveryBatchSelect').onchange = (e) => loadDeliveryBatchIntoForm(e.target.value)
+if (el('completeDeliveryBtn')) el('completeDeliveryBtn').onclick = completeDeliveryBatch
+if (el('deleteDeliveryBtn')) el('deleteDeliveryBtn').onclick = deleteDeliveryBatch
 
 supabase.auth.onAuthStateChange(() => {
   applyAdminAuthState()
