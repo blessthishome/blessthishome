@@ -285,18 +285,29 @@ async function loadTodayDeliveries(){
         </summary>
         <div style="margin-top:10px;">
           ${batchItems.length ? batchItems.map(item => `
-            <label style="display:flex; gap:10px; align-items:flex-start; margin-bottom:10px;">
-              <input
-                type="checkbox"
-                data-delivery-item-id="${item.id}"
-                ${item.is_checked ? 'checked' : ''}
-              />
-              <span>
-                <strong>${item.item_number || ''}</strong>
-                ${item.description ? ` — ${item.description}` : ''}
-                ${item.piece_count ? ` (${item.piece_count} pieces)` : ''}
-              </span>
-            </label>
+            <label style="
+display:grid;
+grid-template-columns:28px 1fr;
+gap:10px;
+margin-bottom:12px;
+width:100%;
+">
+  <input
+    type="checkbox"
+    data-delivery-item-id="${item.id}"
+    ${item.is_checked ? 'checked' : ''}
+  />
+
+  <span style="
+min-width:0;
+overflow-wrap:break-word;
+word-break:break-word;
+">
+    <strong>${item.item_number || ''}</strong>
+    ${item.description ? ` — ${item.description}` : ''}
+    ${item.piece_count ? ` (${item.piece_count} pieces)` : ''}
+  </span>
+</label>
           `).join('') : '<div>No pull items loaded.</div>'}
         </div>
       </details>
