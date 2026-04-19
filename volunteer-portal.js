@@ -273,8 +273,39 @@ async function loadTodayDeliveries(){
     return
   }
 
+  const safeItems = Array.isArray(items) ? items : []
+
+  setMsg(`Loaded ${batches.length} deliveries for today`)
+
   container.innerHTML = batches.map(batch => {
-    const batchItems = items.filter(item => item.delivery_batch_id === batch.id)
+    const batchItems = safeItems.filter(item => item.delivery_batch_id === batch.id)
+
+    const itemsHtml = batchItems.length
+      ? batchItems.map(item => `
+        <label style="
+          display:grid;
+          grid-template-columns:28px 1fr;
+          gap:10px;
+          margin-bottom:12px;
+          width:100%;
+        ">
+          <input
+            type="checkbox"
+            data-delivery-item-id="${item.id}"
+            ${item.is_checked ? 'checked' : ''}
+          />
+          <span style="
+            min-width:0;
+            overflow-wrap:break-word;
+            word-break:break-word;
+          ">
+            <strong>${item.item_number || ''}</strong>
+            ${item.description ? ` — ${item.description}` : ''}
+            ${item.piece_count ? ` (${item.piece_count} pieces)` : ''}
+          </span>
+        </label>
+      `).join('')
+      : '<div>No pull items loaded.</div>'
 
     return `
       <details style="margin-bottom:14px;">
@@ -284,31 +315,7 @@ async function loadTodayDeliveries(){
           ${batch.destination_label ? ` • ${batch.destination_label}` : ''}
         </summary>
         <div style="margin-top:10px;">
-          ${batchItems.length ? batchItems.map(item => `
-            <label style="
-display:grid;
-grid-template-columns:28px 1fr;
-gap:10px;
-margin-bottom:12px;
-width:100%;
-">
-  <input
-    type="checkbox"
-    data-delivery-item-id="${item.id}"
-    ${item.is_checked ? 'checked' : ''}
-  />
-
-  <span style="
-min-width:0;
-overflow-wrap:break-word;
-word-break:break-word;
-">
-    <strong>${item.item_number || ''}</strong>
-    ${item.description ? ` — ${item.description}` : ''}
-    ${item.piece_count ? ` (${item.piece_count} pieces)` : ''}
-  </span>
-</label>
-          `).join('') : '<div>No pull items loaded.</div>'}
+          ${itemsHtml}
         </div>
       </details>
     `
