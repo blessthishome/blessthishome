@@ -164,6 +164,7 @@
     <section>
       <div class="formGrid">
         <input id="deliveryBatchName" placeholder="Delivery name, ex: Chelsea Delivery" />
+<input id="currentDeliveryBatchId" type="hidden" />
         <input id="deliveryRecipientName" placeholder="Recipient name" />
         <input id="deliveryScheduledDate" type="date" />
         <input id="deliveryTeamLeadName" placeholder="Team lead name" />
@@ -174,8 +175,10 @@
       </div>
 
       <div class="actions">
-        <button class="btn btnPrimary" id="saveDeliveryBatchBtn" type="button">Save Delivery</button>
-      </div>
+  <button class="btn btnPrimary" id="saveDeliveryBatchBtn" type="button">Save Delivery</button>
+  <button class="btn" id="completeDeliveryBtn" type="button">Mark Complete</button>
+  <button class="btn" id="deleteDeliveryBtn" type="button">Delete Delivery</button>
+</div>
 
       <div class="hint" id="deliveryBatchStatusHint" style="margin-top:10px;">Ready.</div>
     </section>
