@@ -246,10 +246,11 @@ async function loadTodayDeliveries(){
 const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
   const { data: batches, error: batchError } = await supabase
-    .from('delivery_batches')
-    .select('id, batch_name, recipient_name, scheduled_date, color_tag, destination_label')
-    .eq('scheduled_date', today)
-    .order('recipient_name', { ascending: true })
+  .from('delivery_batches')
+  .select('id, batch_name, recipient_name, scheduled_date, color_tag, destination_label, status')
+  .eq('scheduled_date', today)
+  .eq('status', 'open')
+  .order('recipient_name', { ascending: true })
 
   if (batchError) {
     setMsg(batchError.message)
