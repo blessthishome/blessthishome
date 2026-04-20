@@ -354,10 +354,11 @@ async function findInventoryBySkuOrName(sku, itemName){
 
   if (skuTrim) {
     const bySku = await supabase
-      .from('inventory_items')
-      .select('id')
-      .eq('sku', skuTrim)
-      .maybeSingle()
+  .from('inventory_items')
+  .select('id')
+  .eq('sku', skuTrim)
+  .eq('is_deleted', false)
+  .maybeSingle()
 
     if (bySku.error) throw bySku.error
     if (bySku.data?.id) return bySku.data.id
@@ -365,10 +366,11 @@ async function findInventoryBySkuOrName(sku, itemName){
 
   if (nameTrim) {
     const byName = await supabase
-      .from('inventory_items')
-      .select('id')
-      .eq('item_name', nameTrim)
-      .maybeSingle()
+  .from('inventory_items')
+  .select('id')
+  .eq('item_name', nameTrim)
+  .eq('is_deleted', false)
+  .maybeSingle()
 
     if (byName.error) throw byName.error
     if (byName.data?.id) return byName.data.id
@@ -471,10 +473,11 @@ async function findRecipientByEmailOrName(email, fullName){
 
   if (emailTrim) {
     const byEmail = await supabase
-      .from('constituents')
-      .select('id')
-      .eq('email', emailTrim)
-      .maybeSingle()
+  .from('constituents')
+  .select('id')
+  .eq('email', emailTrim)
+  .eq('is_deleted', false)
+  .maybeSingle()
 
     if (byEmail.error) throw byEmail.error
     if (byEmail.data?.id) return byEmail.data.id
@@ -486,11 +489,12 @@ async function findRecipientByEmailOrName(email, fullName){
     const lastName = parts.slice(1).join(' ') || null
 
     const byName = await supabase
-      .from('constituents')
-      .select('id')
-      .eq('first_name', firstName)
-      .eq('last_name', lastName)
-      .maybeSingle()
+  .from('constituents')
+  .select('id')
+  .eq('first_name', firstName)
+  .eq('last_name', lastName)
+  .eq('is_deleted', false)
+  .maybeSingle()
 
     if (byName.error) throw byName.error
     if (byName.data?.id) return byName.data.id
@@ -527,10 +531,11 @@ async function findInventoryItemByName(itemName){
   if (!trimmed) return null
 
   const { data, error } = await supabase
-    .from('inventory_items')
-    .select('id, item_name')
-    .eq('item_name', trimmed)
-    .maybeSingle()
+  .from('inventory_items')
+  .select('id, item_name')
+  .eq('item_name', trimmed)
+  .eq('is_deleted', false)
+  .maybeSingle()
 
   if (error) throw error
   return data?.id || null
@@ -639,10 +644,11 @@ async function saveConstituent(){
   }
 
   const { data: existing, error: lookupError } = await supabase
-    .from('constituents')
-    .select('id')
-    .eq('email', email)
-    .maybeSingle()
+  .from('constituents')
+  .select('id')
+  .eq('email', email)
+  .eq('is_deleted', false)
+  .maybeSingle()
 
   if (lookupError) {
     setStatus(lookupError.message)
@@ -684,10 +690,11 @@ async function saveConstituent(){
 
 async function loadDeliveryBatches(){
   const { data, error } = await supabase
-    .from('delivery_batches')
-    .select('id, batch_name, recipient_name, scheduled_date, status')
-    .eq('status', 'open')
-    .order('scheduled_date', { ascending: true })
+  .from('delivery_batches')
+  .select('id, batch_name, recipient_name, scheduled_date, status')
+  .eq('is_deleted', false)
+  .eq('status', 'open')
+  .order('scheduled_date', { ascending: true })
 
   if (error) {
     setDeliveryBatchHint(error.message)
@@ -728,10 +735,11 @@ updateDeliverySaveButtonLabel()
   }
 
   const { data, error } = await supabase
-    .from('delivery_batches')
-    .select('id, batch_name, recipient_name, scheduled_date, team_lead_name, team_lead_phone, destination_label, color_tag, notes')
-    .eq('id', batchId)
-    .single()
+  .from('delivery_batches')
+  .select('id, batch_name, recipient_name, scheduled_date, team_lead_name, team_lead_phone, destination_label, color_tag, notes')
+  .eq('id', batchId)
+  .eq('is_deleted', false)
+  .single()
 
   if (error) {
     setDeliveryBatchHint(error.message)
@@ -896,9 +904,13 @@ async function deleteDeliveryBatch(){
     if (!confirmDelete) return
 
     const { error } = await supabase
-      .from('delivery_batches')
-      .delete()
-      .eq('id', batchId)
+  .from('delivery_batches')
+  .update({
+    is_deleted: true,
+    deleted_at: new Date().toISOString(),
+    deleted_by: current.user.id
+  })
+  .eq('id', batchId)
 
     if (error) {
       setDeliveryBatchHint(error.message)
@@ -943,10 +955,11 @@ async function addItemToDeliveryBatch(){
     }
 
     const inventoryLookup = await supabase
-      .from('inventory_items')
-      .select('id, item_name, sku, piece_count')
-      .eq('sku', item_number)
-      .maybeSingle()
+  .from('inventory_items')
+  .select('id, item_name, sku, piece_count')
+  .eq('sku', item_number)
+  .eq('is_deleted', false)
+  .maybeSingle()
 
     if (inventoryLookup.error) {
       setDeliveryItemHint(inventoryLookup.error.message)
