@@ -1009,24 +1009,64 @@ async function loadDeliveryBatchItems(batchId){
   return data
 }
 
-function exportRows(filename, headers, rows){
-  const csv = [
-    headers.join(','),
-    ...rows.map(row =>
-      row.map(value => {
-        const str = safeText(value).replace(/"/g, '""')
-        return `"${str}"`
-      }).join(',')
-    )
-  ].join('\n')
+function toCsvCell(value){
+  const str = safeText(value).replace(/"/g, '""')
+  return `"${str}"`
+}
 
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+function buildCsvSection(title, headers, rows){
+  const sectionLines = []
+
+  sectionLines.push(title)
+  sectionLines.push(headers.map(toCsvCell).join(','))
+
+  rows.forEach(row => {
+    sectionLines.push(row.map(toCsvCell).join(','))
+  })
+
+  sectionLines.push('')
+  sectionLines.push('')
+
+  return sectionLines.join('\n')
+}
+
+function downloadTextFile(filename, content, mimeType = 'text/csv;charset=utf-8;'){
+  const blob = new Blob([content], { type: mimeType })
   const link = document.createElement('a')
   const url = URL.createObjectURL(blob)
+
   link.href = url
   link.download = filename
+  document.body.appendChild(link)
   link.click()
-  URL.revokeObjectURL(url)
+  document.body.removeChild(link)
+
+  setTimeout(() => {
+    URL.revokeObjectURL(url)
+  }, 1000)
+}
+
+async function loadExecutiveSummary(){
+  const { data, error } = await supabase
+    .from('v_executive_summary')
+    .select('*')
+    .single()
+
+  if (error) {
+    setStatus(error.message)
+    return null
+  }
+
+  return data
+}
+
+function exportRows(filename, headers, rows){
+  const csv = [
+    headers.map(toCsvCell).join(','),
+    ...rows.map(row => row.map(toCsvCell).join(','))
+  ].join('\n')
+
+  downloadTextFile(filename, csv)
 }
 
 async function exportInventory(){
@@ -1057,30 +1097,92 @@ async function exportDonors(){
 }
 
 async function exportAll(){
-  const inventoryRows = await loadInventory()
-  const distributionRows = await loadDistribution()
-  const donorRows = await loadDonors()
+  try {
+    const summary = await loadExecutiveSummary()
+    const inventoryRows = await loadInventory()
+    const distributionRows = await loadDistribution()
+    const donorRows = await loadDonors()
 
-  exportRows(
-    'inventory.csv',
-    ['Item', 'Category', 'On Hand', 'Location'],
-    inventoryRows.map(row => [row.item_name, row.category_name, row.quantity_on_hand, row.storage_location])
-  )
+    const sections = []
 
-  exportRows(
-    'distribution-log.csv',
-    ['Date', 'Recipient', 'Item', 'Quantity', 'Destination', 'Notes'],
-    distributionRows.map(row => [row.distributed_at, row.recipient_name, row.item_name, row.quantity, row.destination_label, row.notes])
-  )
+    if (summary) {
+      sections.push(
+        buildCsvSection(
+          'Executive Summary',
+          [
+            'Inventory Records',
+            'Inventory Value',
+            'Total Distributions',
+            'Distribution Value',
+            'Cash Donations',
+            'Active Ready Volunteers',
+            'Open Deliveries',
+            'Completed Deliveries'
+          ],
+          [[
+            summary.inventory_records,
+            summary.inventory_value,
+            summary.total_distributions,
+            summary.distribution_value,
+            summary.cash_donations,
+            summary.active_ready_volunteers,
+            summary.open_deliveries,
+            summary.completed_deliveries
+          ]]
+        )
+      )
+    }
 
-  exportRows(
-    'donor-log.csv',
-    ['Date', 'Donor', 'Type', 'Amount'],
-    donorRows.map(row => [row.donated_at, row.donor_name, row.donation_kind, row.amount])
-  )
+    sections.push(
+      buildCsvSection(
+        'Inventory',
+        ['Item', 'Category', 'On Hand', 'Location'],
+        inventoryRows.map(row => [
+          row.item_name,
+          row.category_name,
+          row.quantity_on_hand,
+          row.storage_location
+        ])
+      )
+    )
 
-  setStatus('Reports exported')
-setReportsHint('Reports exported')
+    sections.push(
+      buildCsvSection(
+        'Distribution Log',
+        ['Date', 'Recipient', 'Item', 'Quantity', 'Destination', 'Notes'],
+        distributionRows.map(row => [
+          row.distributed_at,
+          row.recipient_name,
+          row.item_name,
+          row.quantity,
+          row.destination_label,
+          row.notes
+        ])
+      )
+    )
+
+    sections.push(
+      buildCsvSection(
+        'Donor Log',
+        ['Date', 'Donor', 'Type', 'Amount'],
+        donorRows.map(row => [
+          row.donated_at,
+          row.donor_name,
+          row.donation_kind,
+          row.amount
+        ])
+      )
+    )
+
+    const fullCsv = sections.join('\n')
+    downloadTextFile('full-operations-bundle.csv', fullCsv)
+
+    setStatus('Full operations bundle exported')
+    setReportsHint('Full operations bundle exported')
+  } catch (err) {
+    setStatus(err.message || 'Full operations export failed')
+    setReportsHint(err.message || 'Full operations export failed')
+  }
 }
 
 async function refresh(){
