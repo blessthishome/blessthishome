@@ -61,6 +61,9 @@ async function applyVolunteerAuthState(){
   updateVolunteerAuthButtons(true)
   setVolunteerUiLocked(false)
   setMsg('Signed in.')
+
+await updateVolunteerLastActive(user)
+
   setVolunteerStateLabel(`Signed in as ${user.email}`)
   await loadOpenNeeds()
 await loadTodayDeliveries()
@@ -195,6 +198,22 @@ async function saveAvailability(){
   }
 
   setMsg('Availability saved')
+}
+
+async function updateVolunteerLastActive(user){
+
+const constituentId =
+await findVolunteerConstituentByEmail(user.email)
+
+if (!constituentId) return
+
+await supabase
+.from('volunteer_profiles')
+.update({
+last_active:new Date().toISOString()
+})
+.eq('constituent_id',constituentId)
+
 }
 
 async function loadOpenNeeds(){
