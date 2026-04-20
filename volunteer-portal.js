@@ -109,11 +109,12 @@ async function logout(){
 
 async function findVolunteerConstituentByEmail(email){
   const { data, error } = await supabase
-    .from('constituents')
-    .select('id')
-    .eq('email', email)
-    .eq('constituent_type', 'volunteer')
-    .maybeSingle()
+  .from('constituents')
+  .select('id')
+  .eq('email', email)
+  .eq('constituent_type', 'volunteer')
+  .eq('is_deleted', false)
+  .maybeSingle()
 
   if (error) {
     setMsg(error.message)
@@ -201,10 +202,11 @@ async function loadOpenNeeds(){
   if (!user) return
 
   const { data, error } = await supabase
-    .from('inventory_items')
-    .select('item_name, quantity_on_hand')
-    .lte('quantity_on_hand', 3)
-    .order('item_name')
+  .from('inventory_items')
+  .select('item_name, quantity_on_hand')
+  .eq('is_deleted', false)
+  .lte('quantity_on_hand', 3)
+  .order('item_name')
 
   if (error) {
     setMsg(error.message)
@@ -248,6 +250,7 @@ const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0'
   const { data: batches, error: batchError } = await supabase
   .from('delivery_batches')
   .select('id, batch_name, recipient_name, scheduled_date, color_tag, destination_label, status')
+  .eq('is_deleted', false)
   .eq('scheduled_date', today)
   .eq('status', 'open')
   .order('recipient_name', { ascending: true })
