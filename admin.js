@@ -247,7 +247,7 @@ async function loadConstituentIntoEditor(constituentId){
 
   updateConstituentSaveButtonLabel()
   setConstituentHint('Constituent loaded')
-}g
+}
 
 function safeText(value){
   return value == null ? '' : String(value)
