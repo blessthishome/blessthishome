@@ -49,13 +49,23 @@
       <article class="panel stat full"><div class="label">Financial Donations Total</div><div class="value" id="statDonationTotal">$0.00</div></article>
     </section>
 
-<input id="searchInput" placeholder="Search name, email..." />
-<select id="filterType">
-  <option value="">All</option>
-  <option value="donor">Donors</option>
-  <option value="volunteer">Volunteers</option>
-  <option value="recipient">Recipients</option>
-</select>
+<div class="panel" style="margin-bottom:18px;">
+  <div class="panelHead"><h2>Find Constituent</h2></div>
+
+  <div class="formGrid">
+    <input id="searchInput" placeholder="Search name, email, phone..." autocomplete="off" />
+    <select id="filterType">
+      <option value="">All</option>
+      <option value="donor">Donors</option>
+      <option value="volunteer">Volunteers</option>
+      <option value="recipient">Recipients</option>
+      <option value="partner">Partners</option>
+      <option value="other">Other</option>
+    </select>
+  </div>
+
+  <div id="searchResultsBox" class="hint" style="margin-top:10px; display:none;"></div>
+</div>
 
 
     <section class="gridTwo">
@@ -86,9 +96,12 @@
       <section class="panel">
         <div class="panelHead"><h2>Log Distribution Event</h2></div>
         <div class="formGrid">
-          <input id="recipientName" placeholder="Recipient full name" />
-          <input id="recipientEmail" placeholder="Recipient email" />
-          <input id="distributionItemName" placeholder="Inventory item name, ex: Couch" />
+  <div style="grid-column:1 / -1;">
+    <input id="recipientName" placeholder="Recipient full name" autocomplete="off" />
+    <div id="recipientSearchResultsBox" class="hint" style="margin-top:10px; display:none;"></div>
+  </div>
+  <input id="recipientEmail" placeholder="Recipient email" />
+  <input id="distributionItemName" placeholder="Inventory item name, ex: Couch" />
           <input id="distributionQty" type="number" min="1" placeholder="Quantity" />
           <input id="distributionDestination" placeholder="Destination label, ex: John Doe home" />
           <textarea id="distributionNotes" placeholder="Notes"></textarea>
@@ -135,6 +148,7 @@
 
       <section class="panel">
         <div class="panelHead"><h2>Constituent Quick Add</h2></div>
+<input id="currentConstituentId" type="hidden" />
         <div class="formGrid">
           <select id="constituentType">
             <option value="donor">Donor</option>
