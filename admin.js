@@ -575,7 +575,7 @@ async function distribute(){
       return
     }
 
-    const { data, error } = await supabase.rpc('create_distribution_transaction', {
+    const { error } = await supabase.rpc('create_distribution_transaction', {
       p_recipient_name: recipientName,
       p_recipient_email: recipientEmail || null,
       p_item_name: itemName,
