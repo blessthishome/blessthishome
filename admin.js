@@ -253,6 +253,87 @@ function safeText(value){
   return value == null ? '' : String(value)
 }
 
+let distributionDraftItems = []
+
+function renderDistributionDraftItems(){
+  const box = el('distributionDraftList')
+  if (!box) return
+
+  if (!distributionDraftItems.length){
+    box.innerHTML = 'No items added yet.'
+    return
+  }
+
+  box.innerHTML = distributionDraftItems.map((item,index)=>`
+    <div style="
+      border:1px solid rgba(255,255,255,.15);
+      padding:10px;
+      margin-bottom:10px;
+      border-radius:8px;
+    ">
+      <strong>${safeText(item.item_name)}</strong>
+      <div>Qty: ${item.quantity}</div>
+
+      <button
+        type="button"
+        class="btn"
+        onclick="removeDistributionDraftItem(${index})"
+        style="margin-top:8px;"
+      >
+        Remove
+      </button>
+    </div>
+  `).join('')
+}
+
+window.removeDistributionDraftItem = function(index){
+  distributionDraftItems.splice(index,1)
+  renderDistributionDraftItems()
+}
+
+async function addDistributionDraftItem(){
+
+  const itemName =
+    safeText(el('distributionItemName')?.value).trim()
+
+  const qty =
+    Number(el('distributionQty')?.value || 0)
+
+  if (!itemName){
+    setDistributionHint('Enter inventory item')
+    return
+  }
+
+  if (!qty || qty < 1){
+    setDistributionHint('Quantity must be at least 1')
+    return
+  }
+
+  const itemId =
+    await findInventoryItemByName(itemName)
+
+  if (!itemId){
+    setDistributionHint('Item not found')
+    return
+  }
+
+  distributionDraftItems.push({
+    inventory_item_id: itemId,
+    item_name: itemName,
+    quantity: qty
+  })
+
+  if (el('distributionItemName'))
+    el('distributionItemName').value=''
+
+  if (el('distributionQty'))
+    el('distributionQty').value=''
+
+  renderDistributionDraftItems()
+
+  setDistributionHint('Item added to event')
+}
+
 function money(value){
   return value == null || value === '' ? '' : `$${Number(value).toFixed(2)}`
 }
@@ -742,70 +823,94 @@ async function findInventoryItemByName(itemName){
 }
 
 async function distribute(){
+
   try {
-    const sessionData = await getCurrentProfile()
-    if (!sessionData) {
-      setStatus('You must be signed in')
+
+    const sessionData =
+      await getCurrentProfile()
+
+    if (!sessionData){
       setDistributionHint('You must be signed in')
       return
     }
 
-    const recipientName = safeText(el('recipientName')?.value).trim()
-    const recipientEmail = safeText(el('recipientEmail')?.value).trim()
-    const itemName = safeText(el('distributionItemName')?.value).trim()
-    const qty = Number(el('distributionQty')?.value || 0)
-    const destination = safeText(el('distributionDestination')?.value).trim()
-    const notes = safeText(el('distributionNotes')?.value).trim()
+    const recipientName =
+      safeText(el('recipientName')?.value).trim()
 
-    if (!recipientName) {
-      setStatus('Recipient name is required')
-      setDistributionHint('Recipient name is required')
+    const recipientEmail =
+      safeText(el('recipientEmail')?.value).trim()
+
+    const destination =
+      safeText(el('distributionDestination')?.value).trim()
+
+    const notes =
+      safeText(el('distributionNotes')?.value).trim()
+
+    if (!recipientName){
+      setDistributionHint('Recipient required')
       return
     }
 
-    if (!itemName) {
-      setStatus('Inventory item name is required')
-      setDistributionHint('Inventory item name is required')
+    if (!distributionDraftItems.length){
+      setDistributionHint('Add at least one item')
       return
     }
 
-    if (!qty || qty < 1) {
-      setStatus('Quantity must be at least 1')
-      setDistributionHint('Quantity must be at least 1')
-      return
+    for (const item of distributionDraftItems){
+
+      const { error } =
+        await supabase.rpc(
+          'create_distribution_transaction',
+          {
+            p_recipient_name: recipientName,
+            p_recipient_email: recipientEmail || null,
+            p_item_name: item.item_name,
+            p_quantity: item.quantity,
+            p_destination_label: destination || null,
+            p_notes: notes || null,
+            p_created_by: sessionData.user.id
+          }
+        )
+
+      if (error){
+        setDistributionHint(error.message)
+        return
+      }
+
     }
 
-    const { error } = await supabase.rpc('create_distribution_transaction', {
-      p_recipient_name: recipientName,
-      p_recipient_email: recipientEmail || null,
-      p_item_name: itemName,
-      p_quantity: qty,
-      p_destination_label: destination || null,
-      p_notes: notes || null,
-      p_created_by: sessionData.user.id
-    })
+    distributionDraftItems=[]
 
-    if (error) {
-      setStatus(error.message)
-      setDistributionHint(error.message)
-      return
-    }
+    renderDistributionDraftItems()
 
-    setStatus('Distribution logged')
-    setDistributionHint('Distribution logged')
+    if (el('recipientName'))
+      el('recipientName').value=''
 
-    if (el('recipientName')) el('recipientName').value = ''
-    if (el('recipientEmail')) el('recipientEmail').value = ''
-    if (el('distributionItemName')) el('distributionItemName').value = ''
-    if (el('distributionQty')) el('distributionQty').value = ''
-    if (el('distributionDestination')) el('distributionDestination').value = ''
-    if (el('distributionNotes')) el('distributionNotes').value = ''
+    if (el('recipientEmail'))
+      el('recipientEmail').value=''
+
+    if (el('distributionDestination'))
+      el('distributionDestination').value=''
+
+    if (el('distributionNotes'))
+      el('distributionNotes').value=''
+
+    setDistributionHint(
+      'Multi item distribution saved'
+    )
 
     await refresh()
-  } catch (err) {
-    setStatus(err.message || 'Distribution failed')
-    setDistributionHint(err.message || 'Distribution failed')
+
   }
+
+  catch(err){
+
+    setDistributionHint(
+      err.message || 'Distribution failed'
+    )
+
+  }
+
 }
 
 async function saveConstituent(){
@@ -1440,6 +1545,9 @@ if (el('loginBtn')) el('loginBtn').onclick = sendMagicLink
 if (el('magicCardBtn')) el('magicCardBtn').onclick = sendMagicLink
 if (el('logoutBtn')) el('logoutBtn').onclick = logout
 if (el('saveInventoryBtn')) el('saveInventoryBtn').onclick = saveInventory
+if (el('addDistributionItemBtn'))
+el('addDistributionItemBtn').onclick =
+addDistributionDraftItem
 if (el('logDistributionBtn')) el('logDistributionBtn').onclick = distribute
 if (el('saveConstituentBtn')) el('saveConstituentBtn').onclick = saveConstituent
 if (el('exportInventoryBtn')) el('exportInventoryBtn').onclick = exportInventory
