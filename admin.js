@@ -575,48 +575,32 @@ async function distribute(){
       return
     }
 
-    const recipientId = await ensureRecipient(recipientName, recipientEmail)
-    const inventoryItemId = await findInventoryItemByName(itemName)
+    const { data, error } = await supabase.rpc('create_distribution_transaction', {
+      p_recipient_name: recipientName,
+      p_recipient_email: recipientEmail || null,
+      p_item_name: itemName,
+      p_quantity: qty,
+      p_destination_label: destination || null,
+      p_notes: notes || null,
+      p_created_by: sessionData.user.id
+    })
 
-    if (!inventoryItemId) {
-      setStatus('Item not found')
-      setDistributionHint('Item not found')
-      return
-    }
-
-    const eventInsert = await supabase
-      .from('distribution_events')
-      .insert({
-        recipient_constituent_id: recipientId,
-        destination_label: destination || null,
-        notes: notes || null,
-        created_by: sessionData.user.id
-      })
-      .select('id')
-      .single()
-
-    if (eventInsert.error) {
-      setStatus(eventInsert.error.message)
-      setDistributionHint(eventInsert.error.message)
-      return
-    }
-
-    const itemInsert = await supabase
-      .from('distribution_event_items')
-      .insert({
-        distribution_event_id: eventInsert.data.id,
-        inventory_item_id: inventoryItemId,
-        quantity: qty
-      })
-
-    if (itemInsert.error) {
-      setStatus(itemInsert.error.message)
-      setDistributionHint(itemInsert.error.message)
+    if (error) {
+      setStatus(error.message)
+      setDistributionHint(error.message)
       return
     }
 
     setStatus('Distribution logged')
     setDistributionHint('Distribution logged')
+
+    if (el('recipientName')) el('recipientName').value = ''
+    if (el('recipientEmail')) el('recipientEmail').value = ''
+    if (el('distributionItemName')) el('distributionItemName').value = ''
+    if (el('distributionQty')) el('distributionQty').value = ''
+    if (el('distributionDestination')) el('distributionDestination').value = ''
+    if (el('distributionNotes')) el('distributionNotes').value = ''
+
     await refresh()
   } catch (err) {
     setStatus(err.message || 'Distribution failed')
