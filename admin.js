@@ -12,6 +12,8 @@ const constituentStatusHint = el('constituentStatusHint')
 const reportsStatusHint = el('reportsStatusHint')
 const deliveryBatchStatusHint = el('deliveryBatchStatusHint')
 const deliveryItemStatusHint = el('deliveryItemStatusHint')
+const searchResultsBox = el('searchResultsBox')
+const recipientSearchResultsBox = el('recipientSearchResultsBox')
 
 function setInventoryHint(msg){
   if (inventoryStatusHint) inventoryStatusHint.textContent = msg
@@ -48,6 +50,204 @@ function setDeliveryBatchHint(msg){
 function setDeliveryItemHint(msg){
   if (deliveryItemStatusHint) deliveryItemStatusHint.textContent = msg
 }
+
+function hideSearchResults(){
+  if (!searchResultsBox) return
+  searchResultsBox.style.display = 'none'
+  searchResultsBox.innerHTML = ''
+}
+
+function hideRecipientSearchResults(){
+  if (!recipientSearchResultsBox) return
+  recipientSearchResultsBox.style.display = 'none'
+  recipientSearchResultsBox.innerHTML = ''
+}
+
+function updateConstituentSaveButtonLabel(){
+  const btn = el('saveConstituentBtn')
+  const currentId = safeText(el('currentConstituentId')?.value).trim()
+
+  if (!btn) return
+  btn.textContent = currentId ? 'Update Constituent' : 'Save Constituent'
+}
+
+function clearConstituentEditor(){
+  if (el('currentConstituentId')) el('currentConstituentId').value = ''
+  if (el('constituentType')) el('constituentType').value = 'donor'
+  if (el('constituentOrg')) el('constituentOrg').value = ''
+  if (el('constituentFirstName')) el('constituentFirstName').value = ''
+  if (el('constituentLastName')) el('constituentLastName').value = ''
+  if (el('constituentEmail')) el('constituentEmail').value = ''
+  if (el('constituentPhone')) el('constituentPhone').value = ''
+  if (el('constituentNotes')) el('constituentNotes').value = ''
+  updateConstituentSaveButtonLabel()
+}
+
+function renderConstituentSearchResults(rows){
+  if (!searchResultsBox) return
+
+  if (!rows.length) {
+    searchResultsBox.style.display = 'block'
+    searchResultsBox.innerHTML = 'No matching constituents found.'
+    return
+  }
+
+  searchResultsBox.style.display = 'block'
+  searchResultsBox.innerHTML = rows.map(row => {
+    const fullName = [row.first_name, row.last_name].filter(Boolean).join(' ').trim()
+    const displayName = fullName || row.organization_name || row.email || 'Unnamed Constituent'
+    const meta = [
+      row.constituent_type,
+      row.email,
+      row.primary_phone
+    ].filter(Boolean).join(' • ')
+
+    return `
+      <button
+        type="button"
+        class="btn"
+        data-constituent-id="${row.id}"
+        style="display:block;width:100%;text-align:left;margin-bottom:8px;"
+      >
+        <strong>${safeText(displayName)}</strong>
+        <div class="hint">${safeText(meta)}</div>
+      </button>
+    `
+  }).join('')
+
+  searchResultsBox.querySelectorAll('[data-constituent-id]').forEach(node => {
+    node.addEventListener('click', async () => {
+      const id = node.getAttribute('data-constituent-id')
+      await loadConstituentIntoEditor(id)
+      hideSearchResults()
+    })
+  })
+}
+
+function renderRecipientSearchResults(rows){
+  if (!recipientSearchResultsBox) return
+
+  if (!rows.length) {
+    recipientSearchResultsBox.style.display = 'block'
+    recipientSearchResultsBox.innerHTML = 'No matching recipients found.'
+    return
+  }
+
+  recipientSearchResultsBox.style.display = 'block'
+  recipientSearchResultsBox.innerHTML = rows.map(row => {
+    const fullName = [row.first_name, row.last_name].filter(Boolean).join(' ').trim()
+    const displayName = fullName || row.organization_name || row.email || 'Unnamed Recipient'
+    const meta = [
+      row.email,
+      row.primary_phone
+    ].filter(Boolean).join(' • ')
+
+    return `
+      <button
+        type="button"
+        class="btn"
+        data-recipient-id="${row.id}"
+        data-recipient-name="${safeText(displayName)}"
+        data-recipient-email="${safeText(row.email || '')}"
+        style="display:block;width:100%;text-align:left;margin-bottom:8px;"
+      >
+        <strong>${safeText(displayName)}</strong>
+        <div class="hint">${safeText(meta)}</div>
+      </button>
+    `
+  }).join('')
+
+  recipientSearchResultsBox.querySelectorAll('[data-recipient-id]').forEach(node => {
+    node.addEventListener('click', () => {
+      if (el('recipientName')) el('recipientName').value = node.getAttribute('data-recipient-name') || ''
+      if (el('recipientEmail')) el('recipientEmail').value = node.getAttribute('data-recipient-email') || ''
+      hideRecipientSearchResults()
+    })
+  })
+}
+
+async function searchConstituents(term, typeFilter = ''){
+  const trimmed = safeText(term).trim()
+  if (!trimmed) {
+    hideSearchResults()
+    return
+  }
+
+  let query = supabase
+    .from('constituents')
+    .select('id, constituent_type, organization_name, first_name, last_name, email, primary_phone')
+    .eq('is_deleted', false)
+    .order('last_name', { ascending: true })
+    .limit(12)
+
+  if (typeFilter) {
+    query = query.eq('constituent_type', typeFilter)
+  }
+
+  const { data, error } = await query.or(
+    `first_name.ilike.%${trimmed}%,last_name.ilike.%${trimmed}%,organization_name.ilike.%${trimmed}%,email.ilike.%${trimmed}%,primary_phone.ilike.%${trimmed}%`
+  )
+
+  if (error) {
+    setStatus(error.message)
+    return
+  }
+
+  renderConstituentSearchResults(data || [])
+}
+
+async function searchRecipients(term){
+  const trimmed = safeText(term).trim()
+  if (!trimmed) {
+    hideRecipientSearchResults()
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('constituents')
+    .select('id, organization_name, first_name, last_name, email, primary_phone')
+    .eq('is_deleted', false)
+    .eq('constituent_type', 'recipient')
+    .or(
+      `first_name.ilike.%${trimmed}%,last_name.ilike.%${trimmed}%,organization_name.ilike.%${trimmed}%,email.ilike.%${trimmed}%`
+    )
+    .order('last_name', { ascending: true })
+    .limit(10)
+
+  if (error) {
+    setStatus(error.message)
+    return
+  }
+
+  renderRecipientSearchResults(data || [])
+}
+
+async function loadConstituentIntoEditor(constituentId){
+  const { data, error } = await supabase
+    .from('constituents')
+    .select('id, constituent_type, organization_name, first_name, last_name, email, primary_phone, notes')
+    .eq('id', constituentId)
+    .eq('is_deleted', false)
+    .single()
+
+  if (error) {
+    setStatus(error.message)
+    setConstituentHint(error.message)
+    return
+  }
+
+  if (el('currentConstituentId')) el('currentConstituentId').value = data.id || ''
+  if (el('constituentType')) el('constituentType').value = data.constituent_type || 'other'
+  if (el('constituentOrg')) el('constituentOrg').value = data.organization_name || ''
+  if (el('constituentFirstName')) el('constituentFirstName').value = data.first_name || ''
+  if (el('constituentLastName')) el('constituentLastName').value = data.last_name || ''
+  if (el('constituentEmail')) el('constituentEmail').value = data.email || ''
+  if (el('constituentPhone')) el('constituentPhone').value = data.primary_phone || ''
+  if (el('constituentNotes')) el('constituentNotes').value = data.notes || ''
+
+  updateConstituentSaveButtonLabel()
+  setConstituentHint('Constituent loaded')
+}g
 
 function safeText(value){
   return value == null ? '' : String(value)
@@ -609,11 +809,12 @@ async function distribute(){
 }
 
 async function saveConstituent(){
+  const currentConstituentId = safeText(el('currentConstituentId')?.value).trim()
   const email = safeText(el('constituentEmail')?.value).trim()
 
-  if (!email) {
-    setStatus('Email required')
-    setConstituentHint('Email required')
+  if (!email && !safeText(el('constituentFirstName')?.value).trim() && !safeText(el('constituentOrg')?.value).trim()) {
+    setStatus('Enter at least an email, first name, or organization')
+    setConstituentHint('Enter at least an email, first name, or organization')
     return
   }
 
@@ -622,29 +823,16 @@ async function saveConstituent(){
     organization_name: safeText(el('constituentOrg')?.value).trim() || null,
     first_name: safeText(el('constituentFirstName')?.value).trim() || null,
     last_name: safeText(el('constituentLastName')?.value).trim() || null,
-    email: email,
+    email: email || null,
     primary_phone: safeText(el('constituentPhone')?.value).trim() || null,
     notes: safeText(el('constituentNotes')?.value).trim() || null
   }
 
-  const { data: existing, error: lookupError } = await supabase
-  .from('constituents')
-  .select('id')
-  .eq('email', email)
-  .eq('is_deleted', false)
-  .maybeSingle()
-
-  if (lookupError) {
-    setStatus(lookupError.message)
-    setConstituentHint(lookupError.message)
-    return
-  }
-
-  if (existing?.id) {
+  if (currentConstituentId) {
     const { error } = await supabase
       .from('constituents')
       .update(payload)
-      .eq('id', existing.id)
+      .eq('id', currentConstituentId)
 
     if (error) {
       setStatus(error.message)
@@ -652,22 +840,65 @@ async function saveConstituent(){
       return
     }
 
-    setStatus('Updated existing constituent')
-    setConstituentHint('Updated existing constituent')
-  } else {
-    const { error } = await supabase
-      .from('constituents')
-      .insert(payload)
-
-    if (error) {
-      setStatus(error.message)
-      setConstituentHint(error.message)
-      return
-    }
-
-    setStatus('New constituent added')
-    setConstituentHint('New constituent added')
+    setStatus('Constituent updated')
+    setConstituentHint('Constituent updated')
+    await refresh()
+    return
   }
+
+  if (email) {
+    const { data: existing, error: lookupError } = await supabase
+      .from('constituents')
+      .select('id')
+      .eq('email', email)
+      .eq('is_deleted', false)
+      .maybeSingle()
+
+    if (lookupError) {
+      setStatus(lookupError.message)
+      setConstituentHint(lookupError.message)
+      return
+    }
+
+    if (existing?.id) {
+      const { error } = await supabase
+        .from('constituents')
+        .update(payload)
+        .eq('id', existing.id)
+
+      if (error) {
+        setStatus(error.message)
+        setConstituentHint(error.message)
+        return
+      }
+
+      if (el('currentConstituentId')) el('currentConstituentId').value = existing.id
+      updateConstituentSaveButtonLabel()
+
+      setStatus('Updated existing constituent')
+      setConstituentHint('Updated existing constituent')
+      await refresh()
+      return
+    }
+  }
+
+  const { data: inserted, error } = await supabase
+    .from('constituents')
+    .insert(payload)
+    .select('id')
+    .single()
+
+  if (error) {
+    setStatus(error.message)
+    setConstituentHint(error.message)
+    return
+  }
+
+  if (el('currentConstituentId')) el('currentConstituentId').value = inserted.id
+  updateConstituentSaveButtonLabel()
+
+  setStatus('New constituent added')
+  setConstituentHint('New constituent added')
 
   await refresh()
 }
@@ -1226,10 +1457,46 @@ if (el('deliveryBatchSelect')) el('deliveryBatchSelect').onchange = (e) => loadD
 if (el('completeDeliveryBtn')) el('completeDeliveryBtn').onclick = completeDeliveryBatch
 if (el('deleteDeliveryBtn')) el('deleteDeliveryBtn').onclick = deleteDeliveryBatch
 
+if (el('searchInput')) {
+  el('searchInput').addEventListener('input', async (e) => {
+    const typeFilter = safeText(el('filterType')?.value).trim()
+    await searchConstituents(e.target.value, typeFilter)
+  })
+}
+
+if (el('filterType')) {
+  el('filterType').addEventListener('change', async () => {
+    const term = safeText(el('searchInput')?.value).trim()
+    const typeFilter = safeText(el('filterType')?.value).trim()
+    if (!term) {
+      hideSearchResults()
+      return
+    }
+    await searchConstituents(term, typeFilter)
+  })
+}
+
+if (el('recipientName')) {
+  el('recipientName').addEventListener('input', async (e) => {
+    await searchRecipients(e.target.value)
+  })
+}
+
+document.addEventListener('click', (e) => {
+  if (!searchResultsBox?.contains(e.target) && e.target !== el('searchInput')) {
+    hideSearchResults()
+  }
+
+  if (!recipientSearchResultsBox?.contains(e.target) && e.target !== el('recipientName')) {
+    hideRecipientSearchResults()
+  }
+})
+
 supabase.auth.onAuthStateChange(() => {
   applyAdminAuthState()
 })
 
 setAdminUiLocked(true)
 updateAdminAuthButtons(false)
+updateConstituentSaveButtonLabel()
 applyAdminAuthState()
