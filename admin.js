@@ -14,6 +14,9 @@ const deliveryBatchStatusHint = el('deliveryBatchStatusHint')
 const deliveryItemStatusHint = el('deliveryItemStatusHint')
 const searchResultsBox = el('searchResultsBox')
 const recipientSearchResultsBox = el('recipientSearchResultsBox')
+const crmAudienceHint = el('crmAudienceHint')
+let cachedInventoryRows = []
+
 
 function setInventoryHint(msg){
   if (inventoryStatusHint) inventoryStatusHint.textContent = msg
@@ -69,6 +72,15 @@ function updateConstituentSaveButtonLabel(){
 
   if (!btn) return
   btn.textContent = currentId ? 'Update Constituent' : 'Save Constituent'
+}
+
+function escapeHtml(value){
+  return safeText(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
 }
 
 function clearConstituentEditor(){
@@ -391,7 +403,11 @@ function setAdminUiLocked(isLocked){
 'deliveryItemDescription',
 'deliveryItemPieceCount',
 'addDeliveryItemBtn',
-'inventoryPieceCount'
+'inventoryPieceCount',
+'crmAudienceType',
+'crmAudienceSearch',
+'exportCrmAudienceBtn',
+'inventoryTableSearch'
   ]
 
   protectedIds.forEach((id) => {
@@ -539,21 +555,55 @@ async function loadInventory(){
     return []
   }
 
+  cachedInventoryRows = data || []
+  renderInventoryTable(cachedInventoryRows)
+
+  return cachedInventoryRows
+}
+
+function renderInventoryTable(rows){
   const tbody = document.querySelector('#inventoryTable tbody')
-  if (tbody) {
-    tbody.innerHTML = data.map(row => `
+  if (!tbody) return
+
+  tbody.innerHTML = rows.map(row => {
+    const low = Number(row.quantity_on_hand) <= Number(row.reorder_threshold || 0)
+
+    return `
       <tr>
-        <td>${safeText(row.item_name)}</td>
-        <td>${safeText(row.category_name)}</td>
-        <td class="${Number(row.quantity_on_hand) <= Number(row.reorder_threshold || 0) ? 'lowStock' : ''}">
-          ${safeText(row.quantity_on_hand)}
+        <td>${escapeHtml(row.sku)}</td>
+        <td><strong>${escapeHtml(row.item_name)}</strong></td>
+        <td>${escapeHtml(row.category_name)}</td>
+        <td class="${low ? 'lowStock' : ''}">${escapeHtml(row.quantity_on_hand)}</td>
+        <td>${escapeHtml(row.reorder_threshold)}</td>
+        <td>${escapeHtml(row.storage_location)}</td>
+        <td>
+          <span class="badge ${low ? 'badgeDanger' : ''}">
+            ${low ? 'Low Stock' : 'Ready'}
+          </span>
         </td>
-        <td>${safeText(row.storage_location)}</td>
       </tr>
-    `).join('')
+    `
+  }).join('')
+}
+
+function filterInventoryTable(){
+  const term = safeText(el('inventoryTableSearch')?.value).trim().toLowerCase()
+
+  if (!term) {
+    renderInventoryTable(cachedInventoryRows)
+    return
   }
 
-  return data
+  const filtered = cachedInventoryRows.filter(row => {
+    return [
+      row.sku,
+      row.item_name,
+      row.category_name,
+      row.storage_location
+    ].some(value => safeText(value).toLowerCase().includes(term))
+  })
+
+  renderInventoryTable(filtered)
 }
 
 async function loadDistribution(){
@@ -1432,6 +1482,57 @@ async function exportDonors(){
   )
 }
 
+function setCrmAudienceHint(msg){
+  if (crmAudienceHint) crmAudienceHint.textContent = msg
+}
+
+async function exportCrmAudience(){
+  const type = safeText(el('crmAudienceType')?.value).trim()
+  const search = safeText(el('crmAudienceSearch')?.value).trim()
+
+  let query = supabase
+    .from('constituents')
+    .select('constituent_type, organization_name, first_name, last_name, email, primary_phone, city, state, tags, notes')
+    .eq('is_deleted', false)
+    .order('last_name', { ascending: true })
+
+  if (type) {
+    query = query.eq('constituent_type', type)
+  }
+
+  if (search) {
+    query = query.or(
+      `first_name.ilike.%${search}%,last_name.ilike.%${search}%,organization_name.ilike.%${search}%,email.ilike.%${search}%,primary_phone.ilike.%${search}%`
+    )
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    setCrmAudienceHint(error.message)
+    return
+  }
+
+  exportRows(
+    `crm-audience-${type || 'all'}.csv`,
+    ['Type', 'Organization', 'First Name', 'Last Name', 'Email', 'Phone', 'City', 'State', 'Tags', 'Notes'],
+    (data || []).map(row => [
+      row.constituent_type,
+      row.organization_name,
+      row.first_name,
+      row.last_name,
+      row.email,
+      row.primary_phone,
+      row.city,
+      row.state,
+      Array.isArray(row.tags) ? row.tags.join(', ') : '',
+      row.notes
+    ])
+  )
+
+  setCrmAudienceHint(`Exported ${(data || []).length} audience records`)
+}
+
 async function exportAll(){
   try {
     const summary = await loadExecutiveSummary()
@@ -1583,6 +1684,9 @@ if (el('filterType')) {
     await searchConstituents(term, typeFilter)
   })
 }
+
+if (el('inventoryTableSearch')) el('inventoryTableSearch').addEventListener('input', filterInventoryTable)
+if (el('exportCrmAudienceBtn')) el('exportCrmAudienceBtn').onclick = exportCrmAudience
 
 if (el('recipientName')) {
   el('recipientName').addEventListener('input', async (e) => {
