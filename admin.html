@@ -134,14 +134,30 @@ No items added yet.
 
     <section class="gridTwo">
       <section class="panel">
-        <div class="panelHead"><h2>Inventory Status</h2><button class="btn" id="exportInventoryBtn">Export CSV</button></div>
-        <div class="tableWrap">
-          <table id="inventoryTable">
-            <thead><tr><th>Item</th><th>Category</th><th>On Hand</th><th>Location</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
+  <div class="panelHead">
+    <h2>Inventory Status</h2>
+    <button class="btn" id="exportInventoryBtn">Export CSV</button>
+  </div>
+
+  <input id="inventoryTableSearch" placeholder="Search live inventory..." style="margin-bottom:12px;" />
+
+  <div class="tableWrap tableTall">
+    <table id="inventoryTable">
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Item</th>
+          <th>Category</th>
+          <th>On Hand</th>
+          <th>Threshold</th>
+          <th>Location</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
 
       <section class="panel">
         <div class="panelHead"><h2>Distribution Log</h2><button class="btn" id="exportDistributionBtn">Export CSV</button></div>
@@ -250,6 +266,37 @@ No items added yet.
       <tbody></tbody>
     </table>
   </div>
+</section>
+
+<section class="panel">
+  <div class="panelHead">
+    <div>
+      <h2>CRM Communications Center</h2>
+      <div class="hint">Build segmented audiences for donors, volunteers, recipients, partners, and future email campaigns.</div>
+    </div>
+  </div>
+
+  <div class="formGrid">
+    <select id="crmAudienceType">
+      <option value="">All Constituents</option>
+      <option value="donor">Donors</option>
+      <option value="volunteer">Volunteers</option>
+      <option value="recipient">Recipients</option>
+      <option value="partner">Partners</option>
+      <option value="contractor">Contractors</option>
+      <option value="staff">Staff</option>
+      <option value="board">Board Members</option>
+    </select>
+
+    <input id="crmAudienceSearch" placeholder="Optional search by name, email, phone..." />
+  </div>
+
+  <div class="actions">
+    <button class="btn btnPrimary" id="exportCrmAudienceBtn" type="button">Export Audience CSV</button>
+    <button class="btn" type="button" disabled>Email Sending Coming Next</button>
+  </div>
+
+  <div class="hint" id="crmAudienceHint" style="margin-top:10px;">Ready.</div>
 </section>
 
     <section class="panel">
