@@ -16,7 +16,11 @@ const searchResultsBox = el('searchResultsBox')
 const recipientSearchResultsBox = el('recipientSearchResultsBox')
 const crmAudienceHint = el('crmAudienceHint')
 let cachedInventoryRows = []
-
+let cachedDistributionRows = []
+let cachedDonorRows = []
+let visibleInventoryRows = []
+let visibleDistributionRows = []
+let visibleDonorRows = []
 
 function setInventoryHint(msg){
   if (inventoryStatusHint) inventoryStatusHint.textContent = msg
@@ -407,7 +411,10 @@ function setAdminUiLocked(isLocked){
 'crmAudienceType',
 'crmAudienceSearch',
 'exportCrmAudienceBtn',
-'inventoryTableSearch'
+'inventoryTableSearch',
+'distributionTableSearch',
+'donorTableSearch',
+'quickAddInventorySelect'
   ]
 
   protectedIds.forEach((id) => {
@@ -562,6 +569,7 @@ async function loadInventory(){
 }
 
 function renderInventoryTable(rows){
+visibleInventoryRows = rows
   const tbody = document.querySelector('#inventoryTable tbody')
   if (!tbody) return
 
@@ -616,19 +624,48 @@ async function loadDistribution(){
     return []
   }
 
+  cachedDistributionRows = data || []
+  renderDistributionTable(cachedDistributionRows)
+
+  return cachedDistributionRows
+}
+
+function renderDistributionTable(rows){
+  visibleDistributionRows = rows
+
   const tbody = document.querySelector('#distributionTable tbody')
-  if (tbody) {
-    tbody.innerHTML = data.map(row => `
-      <tr>
-        <td>${row.distributed_at ? new Date(row.distributed_at).toLocaleDateString() : ''}</td>
-        <td>${safeText(row.recipient_name)}</td>
-        <td>${safeText(row.item_name)}</td>
-        <td>${safeText(row.quantity)}</td>
-      </tr>
-    `).join('')
+  if (!tbody) return
+
+  tbody.innerHTML = rows.map(row => `
+    <tr>
+      <td>${row.distributed_at ? new Date(row.distributed_at).toLocaleDateString() : ''}</td>
+      <td>${escapeHtml(row.recipient_name)}</td>
+      <td>${escapeHtml(row.item_name)}</td>
+      <td>${escapeHtml(row.quantity)}</td>
+    </tr>
+  `).join('')
+}
+
+function filterDistributionTable(){
+  const term = safeText(el('distributionTableSearch')?.value).trim().toLowerCase()
+
+  if (!term) {
+    renderDistributionTable(cachedDistributionRows)
+    return
   }
 
-  return data
+  const filtered = cachedDistributionRows.filter(row => {
+    return [
+      row.distributed_at ? new Date(row.distributed_at).toLocaleDateString() : '',
+      row.recipient_name,
+      row.item_name,
+      row.quantity,
+      row.destination_label,
+      row.notes
+    ].some(value => safeText(value).toLowerCase().includes(term))
+  })
+
+  renderDistributionTable(filtered)
 }
 
 async function loadDonors(){
@@ -641,19 +678,48 @@ async function loadDonors(){
     return []
   }
 
+  cachedDonorRows = data || []
+  renderDonorTable(cachedDonorRows)
+
+  return cachedDonorRows
+}
+
+function renderDonorTable(rows){
+  visibleDonorRows = rows
+
   const tbody = document.querySelector('#donorTable tbody')
-  if (tbody) {
-    tbody.innerHTML = data.map(row => `
-      <tr>
-        <td>${row.donated_at ? new Date(row.donated_at).toLocaleDateString() : ''}</td>
-        <td>${row.anonymous ? 'Anonymous' : safeText(row.donor_name)}</td>
-        <td>${safeText(row.donation_kind)}</td>
-        <td>${money(row.amount)}</td>
-      </tr>
-    `).join('')
+  if (!tbody) return
+
+  tbody.innerHTML = rows.map(row => `
+    <tr>
+      <td>${row.donated_at ? new Date(row.donated_at).toLocaleDateString() : ''}</td>
+      <td>${row.anonymous ? 'Anonymous' : escapeHtml(row.donor_name)}</td>
+      <td>${escapeHtml(row.donation_kind)}</td>
+      <td>${money(row.amount)}</td>
+    </tr>
+  `).join('')
+}
+
+function filterDonorTable(){
+  const term = safeText(el('donorTableSearch')?.value).trim().toLowerCase()
+
+  if (!term) {
+    renderDonorTable(cachedDonorRows)
+    return
   }
 
-  return data
+  const filtered = cachedDonorRows.filter(row => {
+    return [
+      row.donated_at ? new Date(row.donated_at).toLocaleDateString() : '',
+      row.donor_name,
+      row.donation_kind,
+      row.amount,
+      row.email,
+      row.primary_phone
+    ].some(value => safeText(value).toLowerCase().includes(term))
+  })
+
+  renderDonorTable(filtered)
 }
 
 async function ensureCategoryId(categoryName){
@@ -1058,6 +1124,19 @@ async function saveConstituent(){
   await refresh()
 }
 
+function applyQuickAddTemplate(){
+  const value = safeText(el('quickAddInventorySelect')?.value).trim()
+  if (!value) return
+
+  const [itemName, categoryName] = value.split('|')
+
+  quickAddItem(itemName, categoryName)
+
+  if (el('quickAddInventorySelect')) {
+    el('quickAddInventorySelect').value = ''
+  }
+}
+
 async function loadDeliveryBatches(){
   const { data, error } = await supabase
   .from('delivery_batches')
@@ -1456,29 +1535,53 @@ function exportRows(filename, headers, rows){
 }
 
 async function exportInventory(){
-  const rows = await loadInventory()
+  const rows = visibleInventoryRows.length ? visibleInventoryRows : await loadInventory()
+
   exportRows(
-    'inventory.csv',
-    ['Item', 'Category', 'On Hand', 'Location'],
-    rows.map(row => [row.item_name, row.category_name, row.quantity_on_hand, row.storage_location])
+    'inventory-visible.csv',
+    ['SKU', 'Item', 'Category', 'On Hand', 'Threshold', 'Location'],
+    rows.map(row => [
+      row.sku,
+      row.item_name,
+      row.category_name,
+      row.quantity_on_hand,
+      row.reorder_threshold,
+      row.storage_location
+    ])
   )
 }
 
 async function exportDistribution(){
-  const rows = await loadDistribution()
+  const rows = visibleDistributionRows.length ? visibleDistributionRows : await loadDistribution()
+
   exportRows(
-    'distribution-log.csv',
+    'distribution-visible.csv',
     ['Date', 'Recipient', 'Item', 'Quantity', 'Destination', 'Notes'],
-    rows.map(row => [row.distributed_at, row.recipient_name, row.item_name, row.quantity, row.destination_label, row.notes])
+    rows.map(row => [
+      row.distributed_at,
+      row.recipient_name,
+      row.item_name,
+      row.quantity,
+      row.destination_label,
+      row.notes
+    ])
   )
 }
 
 async function exportDonors(){
-  const rows = await loadDonors()
+  const rows = visibleDonorRows.length ? visibleDonorRows : await loadDonors()
+
   exportRows(
-    'donor-log.csv',
-    ['Date', 'Donor', 'Type', 'Amount'],
-    rows.map(row => [row.donated_at, row.donor_name, row.donation_kind, row.amount])
+    'donor-visible.csv',
+    ['Date', 'Donor', 'Type', 'Amount', 'Email', 'Phone'],
+    rows.map(row => [
+      row.donated_at,
+      row.donor_name,
+      row.donation_kind,
+      row.amount,
+      row.email,
+      row.primary_phone
+    ])
   )
 }
 
@@ -1665,6 +1768,10 @@ if (el('addDeliveryItemBtn')) el('addDeliveryItemBtn').onclick = addItemToDelive
 if (el('deliveryBatchSelect')) el('deliveryBatchSelect').onchange = (e) => loadDeliveryBatchIntoForm(e.target.value)
 if (el('completeDeliveryBtn')) el('completeDeliveryBtn').onclick = completeDeliveryBatch
 if (el('deleteDeliveryBtn')) el('deleteDeliveryBtn').onclick = deleteDeliveryBatch
+if (el('distributionTableSearch')) el('distributionTableSearch').addEventListener('input', filterDistributionTable)
+if (el('donorTableSearch')) el('donorTableSearch').addEventListener('input', filterDonorTable)
+if (el('quickAddInventorySelect')) el('quickAddInventorySelect').addEventListener('change', applyQuickAddTemplate)
+
 
 if (el('searchInput')) {
   el('searchInput').addEventListener('input', async (e) => {
