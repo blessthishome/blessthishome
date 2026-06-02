@@ -593,7 +593,7 @@ async function loadInventory(){
 }
 
 function renderInventoryTable(rows){
-visibleInventoryRows = rows
+  visibleInventoryRows = rows
   const tbody = document.querySelector('#inventoryTable tbody')
   if (!tbody) return
 
@@ -602,11 +602,12 @@ visibleInventoryRows = rows
 
     return `
       <tr>
-        <td>${escapeHtml(row.sku)}</td>
+        <td>${escapeHtml(row.item_number || row.sku || '')}</td>
         <td><strong>${escapeHtml(row.item_name)}</strong></td>
         <td>${escapeHtml(row.category_name)}</td>
         <td class="${low ? 'lowStock' : ''}">${escapeHtml(row.quantity_on_hand)}</td>
-        <td>${escapeHtml(row.reorder_threshold)}</td>
+        <td>${money(row.estimated_unit_value || 0)}</td>
+        <td><strong>${money(row.total_estimated_value || 0)}</strong></td>
         <td>${escapeHtml(row.storage_location)}</td>
         <td>
           <span class="badge ${low ? 'badgeDanger' : ''}">
@@ -1564,15 +1565,17 @@ async function exportInventory(){
   const rows = visibleInventoryRows.length ? visibleInventoryRows : await loadInventory()
 
   exportRows(
-    'inventory-visible.csv',
-    ['SKU', 'Item', 'Category', 'On Hand', 'Threshold', 'Location'],
+    'inventory-valuation-visible.csv',
+    ['Item Number', 'Item', 'Category', 'On Hand', 'Unit Value', 'Total Value', 'Location', 'Valuation Source'],
     rows.map(row => [
-      row.sku,
+      row.item_number || row.sku || '',
       row.item_name,
       row.category_name,
       row.quantity_on_hand,
-      row.reorder_threshold,
-      row.storage_location
+      row.estimated_unit_value,
+      row.total_estimated_value,
+      row.storage_location,
+      row.valuation_source
     ])
   )
 }
