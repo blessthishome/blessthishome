@@ -377,14 +377,26 @@ No items added yet.
 </section>
 
     <section class="panel">
-      <div class="panelHead"><h2>One Click Reports</h2></div>
-      <div class="actions wrapButtons">
-  <button class="btn btnPrimary" id="exportAllBtn">Export Full Operations Bundle</button>
-  <button class="btn" id="refreshBtn">Refresh Dashboard</button>
-</div>
-<div class="hint" id="reportsStatusHint" style="margin-top:10px;">Ready.</div>
-      <div class="hint" id="statusMessage">Ready.</div>
-    </section>
+  <div class="panelHead">
+    <div>
+      <h2>QuickBooks Export Package</h2>
+      <div class="hint">
+        Bless This Home manages operations. QuickBooks manages accounting. Export clean CSV files for accounting review, board reporting, and reconciliation.
+      </div>
+    </div>
+  </div>
+
+  <div class="actions wrapButtons">
+    <button class="btn btnPrimary" id="exportDonationsQuickBooksBtn" type="button">Export Donations CSV</button>
+    <button class="btn" id="exportInventoryValuationBtn" type="button">Export Inventory Valuation CSV</button>
+    <button class="btn" id="exportDistributionValueBtn" type="button">Export Distribution Value CSV</button>
+    <button class="btn" id="exportAllBtn" type="button">Export Full Operations Bundle</button>
+    <button class="btn" id="refreshBtn" type="button">Refresh Dashboard</button>
+  </div>
+
+  <div class="hint" id="reportsStatusHint" style="margin-top:10px;">Ready.</div>
+  <div class="hint" id="statusMessage">Ready.</div>
+</section>
   </main>
 
   <script type="module" src="admin.js"></script>
