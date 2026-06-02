@@ -373,3 +373,43 @@ button:disabled{
     font-size:26px;
   }
 }
+
+html,
+body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+}
+
+main,
+section,
+.panel,
+.shell{
+  max-width:100%;
+}
+
+@media (max-width:620px){
+  .shell{
+    padding:12px;
+  }
+
+  .topbar{
+    width:100%;
+  }
+
+  .panel{
+    width:100%;
+  }
+
+  .gridTwo{
+    grid-template-columns:1fr;
+  }
+
+  .tableWrap{
+    max-width:100%;
+  }
+
+  table{
+    min-width:680px;
+  }
+}
