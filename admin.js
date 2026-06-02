@@ -537,19 +537,43 @@ async function logout(){
 }
 
 async function loadSummary(){
-  const { data, error } = await supabase.rpc('dashboard_summary')
+  const { data, error } = await supabase
+    .from('v_executive_summary')
+    .select('*')
+    .single()
+
   if (error) {
     setStatus(error.message)
     return
   }
 
-  el('statConstituents').textContent = data.constituents ?? 0
-  el('statDonors').textContent = data.donors ?? 0
-  el('statVolunteers').textContent = data.volunteers ?? 0
-  el('statRecipients').textContent = data.recipients ?? 0
-  el('statInventory').textContent = data.inventory_items ?? 0
-  el('statLowStock').textContent = data.low_stock_items ?? 0
-  el('statDonationTotal').textContent = money(data.financial_donations_total || 0)
+  if (el('statInventoryValue')) {
+    el('statInventoryValue').textContent = money(data.inventory_value || 0)
+  }
+
+  if (el('statDistributionValue')) {
+    el('statDistributionValue').textContent = money(data.distribution_value || 0)
+  }
+
+  if (el('statDonationTotal')) {
+    el('statDonationTotal').textContent = money(data.cash_donations || 0)
+  }
+
+  if (el('statInventory')) {
+    el('statInventory').textContent = data.inventory_records ?? 0
+  }
+
+  if (el('statOpenDeliveries')) {
+    el('statOpenDeliveries').textContent = data.open_deliveries ?? 0
+  }
+
+  if (el('statCompletedDeliveries')) {
+    el('statCompletedDeliveries').textContent = data.completed_deliveries ?? 0
+  }
+
+  if (el('statReadyVolunteers')) {
+    el('statReadyVolunteers').textContent = data.active_ready_volunteers ?? 0
+  }
 }
 
 async function loadInventory(){
