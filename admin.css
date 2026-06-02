@@ -413,3 +413,13 @@ section,
     min-width:680px;
   }
 }
+.shell{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.summaryGrid,
+.gridTwo{
+  margin-bottom:0;
+}
