@@ -378,7 +378,7 @@ html,
 body{
   width:100%;
   max-width:100%;
-  overflow-x:hidden;
+  overflow-x:auto;
 }
 
 main,
@@ -406,13 +406,19 @@ section,
   }
 
   .tableWrap{
+    width:100%;
     max-width:100%;
+    overflow-x:auto;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
   }
 
   table{
+    width:max-content;
     min-width:680px;
   }
 }
+
 .shell{
   display:flex;
   flex-direction:column;
@@ -422,4 +428,15 @@ section,
 .summaryGrid,
 .gridTwo{
   margin-bottom:0;
+}
+
+.tableWrap{
+  overflow-x:auto;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.tableWrap table{
+  width:max-content;
+  min-width:680px;
 }
