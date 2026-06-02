@@ -666,6 +666,8 @@ function renderDistributionTable(rows){
       <td>${escapeHtml(row.recipient_name)}</td>
       <td>${escapeHtml(row.item_name)}</td>
       <td>${escapeHtml(row.quantity)}</td>
+      <td>${money(row.estimated_unit_value || 0)}</td>
+      <td><strong>${money(row.total_estimated_value || 0)}</strong></td>
     </tr>
   `).join('')
 }
@@ -1580,15 +1582,17 @@ async function exportDistribution(){
 
   exportRows(
     'distribution-visible.csv',
-    ['Date', 'Recipient', 'Item', 'Quantity', 'Destination', 'Notes'],
+    ['Date', 'Recipient', 'Item', 'Quantity', 'Unit Value', 'Total Value', 'Destination', 'Notes'],
     rows.map(row => [
-      row.distributed_at,
-      row.recipient_name,
-      row.item_name,
-      row.quantity,
-      row.destination_label,
-      row.notes
-    ])
+  row.distributed_at,
+  row.recipient_name,
+  row.item_name,
+  row.quantity,
+  row.estimated_unit_value,
+  row.total_estimated_value,
+  row.destination_label,
+  row.notes
+])
   )
 }
 
