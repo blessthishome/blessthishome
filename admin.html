@@ -69,29 +69,79 @@
 
 
     <section class="gridTwo">
-      <section class="panel">
-        <div class="panelHead"><h2>Add or Update Inventory</h2></div>
-<div class="actions" style="margin-top:0;margin-bottom:14px;">
-  <button class="btn" type="button" id="quickAddCouchBtn">Quick Add Couch</button>
-  <button class="btn" type="button" id="quickAddBedBtn">Quick Add Bed</button>
-  <button class="btn" type="button" id="quickAddTableBtn">Quick Add Table</button>
-  <button class="btn" type="button" id="quickAddChairBtn">Quick Add Chair</button>
-</div>
-        <div class="formGrid">
-  <input id="inventorySku" placeholder="SKU / Item number" />
-  <input id="inventoryName" placeholder="Item name" />
-  <input id="inventoryCategory" placeholder="Category name, ex: Living Room" />
-  <input id="inventoryPieceCount" type="number" min="1" placeholder="Piece count" />
-  <input id="inventoryQty" type="number" min="0" placeholder="Quantity on hand" />
-  <input id="inventoryThreshold" type="number" min="0" placeholder="Reorder threshold" />
-  <input id="inventoryLocation" placeholder="Storage location" />
-  <textarea id="inventoryDescription" placeholder="Description"></textarea>
-</div>
-        <div class="actions">
-          <button class="btn btnPrimary" id="saveInventoryBtn">Save Inventory Item</button>
-        </div>
-<div class="hint" id="inventoryStatusHint" style="margin-top:10px;">Ready.</div>
-      </section>
+  <section class="panel">
+    <div class="panelHead">
+      <h2>Add or Update Inventory</h2>
+    </div>
+
+    <select id="quickAddInventorySelect" style="margin-bottom:14px;">
+      <option value="">Quick add item template</option>
+
+      <optgroup label="Furniture">
+        <option value="Couch|Living Room">Couch</option>
+        <option value="Chair|Living Room">Chair</option>
+        <option value="Kitchen Table|Kitchen">Kitchen Table</option>
+        <option value="Dresser|Bedroom">Dresser</option>
+        <option value="Bed Frame|Bedroom">Bed Frame</option>
+        <option value="Nightstand|Bedroom">Nightstand</option>
+      </optgroup>
+
+      <optgroup label="Kitchen">
+        <option value="Dishes|Kitchen">Dishes</option>
+        <option value="Silverware|Kitchen">Silverware</option>
+        <option value="Cookware|Kitchen">Cookware</option>
+        <option value="Table Cloths|Kitchen">Table Cloths</option>
+        <option value="Misc Kitchen Items|Kitchen">Misc Kitchen Items</option>
+      </optgroup>
+
+      <optgroup label="Bedroom">
+        <option value="Bedding|Bedroom">Bedding</option>
+        <option value="Pillows|Bedroom">Pillows</option>
+        <option value="Sheets|Bedroom">Sheets</option>
+        <option value="Pillow Cases|Bedroom">Pillow Cases</option>
+        <option value="Misc Bedroom Items|Bedroom">Misc Bedroom Items</option>
+      </optgroup>
+
+      <optgroup label="Living Room">
+        <option value="Curtains|Living Room">Curtains</option>
+        <option value="Curtain Rods|Living Room">Curtain Rods</option>
+        <option value="Lamps|Living Room">Lamps</option>
+        <option value="Mirrors|Living Room">Mirrors</option>
+        <option value="Misc Living Room Items|Living Room">Misc Living Room Items</option>
+      </optgroup>
+
+      <optgroup label="Bathroom">
+        <option value="Towels|Bathroom">Towels</option>
+        <option value="Shower Curtains|Bathroom">Shower Curtains</option>
+        <option value="Toiletries|Bathroom">Toiletries</option>
+        <option value="Misc Bathroom Items|Bathroom">Misc Bathroom Items</option>
+      </optgroup>
+
+      <optgroup label="Misc">
+        <option value="Cleaning Supplies|Misc">Cleaning Supplies</option>
+        <option value="Storage Bins|Misc">Storage Bins</option>
+        <option value="Decor|Misc">Decor</option>
+        <option value="Misc Household Items|Misc">Misc Household Items</option>
+      </optgroup>
+    </select>
+
+    <div class="formGrid">
+      <input id="inventorySku" placeholder="SKU / Item number" />
+      <input id="inventoryName" placeholder="Item name" />
+      <input id="inventoryCategory" placeholder="Category name, ex: Living Room" />
+      <input id="inventoryPieceCount" type="number" min="1" placeholder="Piece count" />
+      <input id="inventoryQty" type="number" min="0" placeholder="Quantity on hand" />
+      <input id="inventoryThreshold" type="number" min="0" placeholder="Reorder threshold" />
+      <input id="inventoryLocation" placeholder="Storage location" />
+      <textarea id="inventoryDescription" placeholder="Description"></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="btn btnPrimary" id="saveInventoryBtn">Save Inventory Item</button>
+    </div>
+
+    <div class="hint" id="inventoryStatusHint" style="margin-top:10px;">Ready.</div>
+  </section>
 
       <section class="panel">
         <div class="panelHead"><h2>Log Distribution Event</h2></div>
@@ -160,26 +210,52 @@ No items added yet.
 </section>
 
       <section class="panel">
-        <div class="panelHead"><h2>Distribution Log</h2><button class="btn" id="exportDistributionBtn">Export CSV</button></div>
-        <div class="tableWrap">
-          <table id="distributionTable">
-            <thead><tr><th>Date</th><th>Recipient</th><th>Item</th><th>Qty</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
+  <div class="panelHead">
+    <h2>Distribution Log</h2>
+    <button class="btn" id="exportDistributionBtn">Export Visible CSV</button>
+  </div>
+
+  <input id="distributionTableSearch" placeholder="Search distributions by date, recipient, item..." style="margin-bottom:12px;" />
+
+  <div class="tableWrap tableTall">
+    <table id="distributionTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Recipient</th>
+          <th>Item</th>
+          <th>Qty</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
     </section>
 
     <section class="gridTwo">
-      <section class="panel">
-        <div class="panelHead"><h2>Donor Log</h2><button class="btn" id="exportDonorBtn">Export CSV</button></div>
-        <div class="tableWrap">
-          <table id="donorTable">
-            <thead><tr><th>Date</th><th>Donor</th><th>Type</th><th>Amount</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
+     <section class="panel">
+  <div class="panelHead">
+    <h2>Donor Log</h2>
+    <button class="btn" id="exportDonorBtn">Export Visible CSV</button>
+  </div>
+
+  <input id="donorTableSearch" placeholder="Search donors by date, name, type, amount..." style="margin-bottom:12px;" />
+
+  <div class="tableWrap tableTall">
+    <table id="donorTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Donor</th>
+          <th>Type</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
 
       <section class="panel">
         <div class="panelHead"><h2>Constituent Quick Add</h2></div>
