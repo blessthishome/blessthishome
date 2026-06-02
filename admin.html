@@ -39,42 +39,15 @@
 <div class="hint" id="authStateLabel" style="margin-top:8px;"></div>
 </section>
 
-  <section class="summaryGrid">
-  <article class="panel stat">
-    <div class="label">Inventory Asset Value</div>
-    <div class="value" id="statInventoryValue">$0.00</div>
-  </article>
-
-  <article class="panel stat">
-    <div class="label">Distributed Value</div>
-    <div class="value" id="statDistributionValue">$0.00</div>
-  </article>
-
-  <article class="panel stat">
-    <div class="label">Cash Donations</div>
-    <div class="value" id="statDonationTotal">$0.00</div>
-  </article>
-
-  <article class="panel stat">
-    <div class="label">Inventory Items</div>
-    <div class="value" id="statInventory">0</div>
-  </article>
-
-  <article class="panel stat">
-    <div class="label">Open Deliveries</div>
-    <div class="value" id="statOpenDeliveries">0</div>
-  </article>
-
-  <article class="panel stat">
-    <div class="label">Completed Deliveries</div>
-    <div class="value" id="statCompletedDeliveries">0</div>
-  </article>
-
-  <article class="panel stat">
-    <div class="label">Ready Volunteers</div>
-    <div class="value" id="statReadyVolunteers">0</div>
-  </article>
-</section>
+    <section class="summaryGrid">
+      <article class="panel stat"><div class="label">Constituents</div><div class="value" id="statConstituents">0</div></article>
+      <article class="panel stat"><div class="label">Donors</div><div class="value" id="statDonors">0</div></article>
+      <article class="panel stat"><div class="label">Volunteers</div><div class="value" id="statVolunteers">0</div></article>
+      <article class="panel stat"><div class="label">Recipients</div><div class="value" id="statRecipients">0</div></article>
+      <article class="panel stat"><div class="label">Inventory Items</div><div class="value" id="statInventory">0</div></article>
+      <article class="panel stat"><div class="label">Low Stock</div><div class="value" id="statLowStock">0</div></article>
+      <article class="panel stat full"><div class="label">Financial Donations Total</div><div class="value" id="statDonationTotal">$0.00</div></article>
+    </section>
 
 <div class="panel" style="margin-bottom:18px;">
   <div class="panelHead"><h2>Find Constituent</h2></div>
@@ -247,15 +220,13 @@ No items added yet.
   <div class="tableWrap tableTall">
     <table id="distributionTable">
       <thead>
-  <tr>
-    <th>Date</th>
-    <th>Recipient</th>
-    <th>Item</th>
-    <th>Qty</th>
-    <th>Unit Value</th>
-    <th>Total Value</th>
-  </tr>
-</thead>
+        <tr>
+          <th>Date</th>
+          <th>Recipient</th>
+          <th>Item</th>
+          <th>Qty</th>
+        </tr>
+      </thead>
       <tbody></tbody>
     </table>
   </div>
