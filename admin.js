@@ -1616,6 +1616,104 @@ async function exportDonors(){
   )
 }
 
+async function exportDonationsQuickBooks(){
+  const rows = visibleDonorRows.length ? visibleDonorRows : await loadDonors()
+
+  exportRows(
+    'quickbooks-donations.csv',
+    [
+      'Date',
+      'Donor',
+      'Donation Type',
+      'Amount',
+      'Status',
+      'Frequency',
+      'Email',
+      'Phone',
+      'External ID',
+      'Receipt Generated'
+    ],
+    rows.map(row => [
+      row.donated_at,
+      row.donor_name,
+      row.donation_kind,
+      row.amount,
+      row.status,
+      row.frequency,
+      row.email,
+      row.primary_phone,
+      row.external_id,
+      row.receipt_generated
+    ])
+  )
+
+  setReportsHint('QuickBooks donations export created')
+}
+
+async function exportInventoryValuation(){
+  const rows = visibleInventoryRows.length ? visibleInventoryRows : await loadInventory()
+
+  exportRows(
+    'quickbooks-inventory-valuation.csv',
+    [
+      'Item Number',
+      'Item',
+      'Category',
+      'Quantity On Hand',
+      'Unit Value',
+      'Total Value',
+      'Location',
+      'Valuation Source',
+      'Valuation Note'
+    ],
+    rows.map(row => [
+      row.item_number || row.sku || '',
+      row.item_name,
+      row.category_name,
+      row.quantity_on_hand,
+      row.estimated_unit_value,
+      row.total_estimated_value,
+      row.storage_location,
+      row.valuation_source,
+      row.valuation_note
+    ])
+  )
+
+  setReportsHint('Inventory valuation export created')
+}
+
+async function exportDistributionValue(){
+  const rows = visibleDistributionRows.length ? visibleDistributionRows : await loadDistribution()
+
+  exportRows(
+    'quickbooks-distribution-value.csv',
+    [
+      'Date',
+      'Recipient',
+      'Item Number',
+      'Item',
+      'Quantity',
+      'Unit Value',
+      'Total Value',
+      'Destination',
+      'Notes'
+    ],
+    rows.map(row => [
+      row.distributed_at,
+      row.recipient_name,
+      row.item_number || row.sku || '',
+      row.item_name,
+      row.quantity,
+      row.estimated_unit_value,
+      row.total_estimated_value,
+      row.destination_label,
+      row.notes
+    ])
+  )
+
+  setReportsHint('Distribution value export created')
+}
+
 function setCrmAudienceHint(msg){
   if (crmAudienceHint) crmAudienceHint.textContent = msg
 }
@@ -1802,7 +1900,9 @@ if (el('deleteDeliveryBtn')) el('deleteDeliveryBtn').onclick = deleteDeliveryBat
 if (el('distributionTableSearch')) el('distributionTableSearch').addEventListener('input', filterDistributionTable)
 if (el('donorTableSearch')) el('donorTableSearch').addEventListener('input', filterDonorTable)
 if (el('quickAddInventorySelect')) el('quickAddInventorySelect').addEventListener('change', applyQuickAddTemplate)
-
+if (el('exportDonationsQuickBooksBtn')) el('exportDonationsQuickBooksBtn').onclick = exportDonationsQuickBooks
+if (el('exportInventoryValuationBtn')) el('exportInventoryValuationBtn').onclick = exportInventoryValuation
+if (el('exportDistributionValueBtn')) el('exportDistributionValueBtn').onclick = exportDistributionValue
 
 if (el('searchInput')) {
   el('searchInput').addEventListener('input', async (e) => {
