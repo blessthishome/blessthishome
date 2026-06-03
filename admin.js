@@ -15,6 +15,8 @@ const deliveryItemStatusHint = el('deliveryItemStatusHint')
 const searchResultsBox = el('searchResultsBox')
 const recipientSearchResultsBox = el('recipientSearchResultsBox')
 const crmAudienceHint = el('crmAudienceHint')
+const auditLogHint = el('auditLogHint')
+let cachedAuditLogRows = []
 let cachedInventoryRows = []
 let cachedDistributionRows = []
 let cachedDonorRows = []
@@ -56,6 +58,10 @@ function setDeliveryBatchHint(msg){
 
 function setDeliveryItemHint(msg){
   if (deliveryItemStatusHint) deliveryItemStatusHint.textContent = msg
+}
+
+function setAuditLogHint(msg){
+  if (auditLogHint) auditLogHint.textContent = msg
 }
 
 function hideSearchResults(){
@@ -414,7 +420,9 @@ function setAdminUiLocked(isLocked){
 'inventoryTableSearch',
 'distributionTableSearch',
 'donorTableSearch',
-'quickAddInventorySelect'
+'quickAddInventorySelect',
+    'auditLogSearch',
+'auditLogActionFilter'
   ]
 
   protectedIds.forEach((id) => {
@@ -1854,6 +1862,61 @@ async function exportAll(){
   }
 }
 
+async function loadAuditLogs(){
+  const { data, error } = await supabase
+    .from('audit_logs')
+    .select('id, table_name, record_id, action_type, changed_by, changed_at')
+    .order('changed_at', { ascending: false })
+    .limit(100)
+
+  if (error) {
+    setAuditLogHint(error.message)
+    return []
+  }
+
+  cachedAuditLogRows = data || []
+  renderAuditLogTable(cachedAuditLogRows)
+  setAuditLogHint(`Loaded ${cachedAuditLogRows.length} recent audit events`)
+  return cachedAuditLogRows
+}
+
+function renderAuditLogTable(rows){
+  const tbody = document.querySelector('#auditLogTable tbody')
+  if (!tbody) return
+
+  tbody.innerHTML = rows.map(row => `
+    <tr>
+      <td>${row.changed_at ? new Date(row.changed_at).toLocaleString() : ''}</td>
+      <td><span class="badge">${escapeHtml(row.action_type)}</span></td>
+      <td>${escapeHtml(row.table_name)}</td>
+      <td>${escapeHtml(row.record_id)}</td>
+      <td>${escapeHtml(row.changed_by)}</td>
+    </tr>
+  `).join('')
+}
+
+function filterAuditLogs(){
+  const term = safeText(el('auditLogSearch')?.value).trim().toLowerCase()
+  const action = safeText(el('auditLogActionFilter')?.value).trim()
+
+  const filtered = cachedAuditLogRows.filter(row => {
+    const matchesAction = !action || row.action_type === action
+
+    const matchesSearch = !term || [
+      row.table_name,
+      row.record_id,
+      row.action_type,
+      row.changed_by,
+      row.changed_at
+    ].some(value => safeText(value).toLowerCase().includes(term))
+
+    return matchesAction && matchesSearch
+  })
+
+  renderAuditLogTable(filtered)
+  setAuditLogHint(`Showing ${filtered.length} audit events`)
+}
+
 async function refresh(){
   const current = await getCurrentProfile()
   if (!current) return
@@ -1863,7 +1926,8 @@ async function refresh(){
   await loadDistribution()
   await loadDonors()
   await loadDeliveryBatches()
-
+  await loadAuditLogs()
+  
   const selectedBatchId = safeText(el('deliveryBatchSelect')?.value).trim()
   if (selectedBatchId) {
     await loadDeliveryBatchItems(selectedBatchId)
@@ -1903,6 +1967,8 @@ if (el('quickAddInventorySelect')) el('quickAddInventorySelect').addEventListene
 if (el('exportDonationsQuickBooksBtn')) el('exportDonationsQuickBooksBtn').onclick = exportDonationsQuickBooks
 if (el('exportInventoryValuationBtn')) el('exportInventoryValuationBtn').onclick = exportInventoryValuation
 if (el('exportDistributionValueBtn')) el('exportDistributionValueBtn').onclick = exportDistributionValue
+if (el('auditLogSearch')) el('auditLogSearch').addEventListener('input', filterAuditLogs)
+if (el('auditLogActionFilter')) el('auditLogActionFilter').addEventListener('change', filterAuditLogs)
 
 if (el('searchInput')) {
   el('searchInput').addEventListener('input', async (e) => {
