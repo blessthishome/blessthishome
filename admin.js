@@ -422,7 +422,10 @@ function setAdminUiLocked(isLocked){
 'donorTableSearch',
 'quickAddInventorySelect',
     'auditLogSearch',
-'auditLogActionFilter'
+'auditLogActionFilter',
+    'exportDonationsQuickBooksBtn',
+'exportInventoryValuationBtn',
+'exportDistributionValueBtn'
   ]
 
   protectedIds.forEach((id) => {
@@ -1970,10 +1973,10 @@ async function refresh(){
   await loadSummary()
   await loadInventory()
   await loadDistribution()
-  await loadDonors()
-  await loadDeliveryBatches()
-  await loadAuditLogs()
-  await loadDistribution()
+await loadDonors()
+await loadDeliveryBatches()
+await loadAuditLogs()
+renderHouseholdImpact()
   
   const selectedBatchId = safeText(el('deliveryBatchSelect')?.value).trim()
   if (selectedBatchId) {
