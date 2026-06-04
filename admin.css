@@ -224,7 +224,9 @@ textarea{
 
 .tableWrap{
   width:100%;
+  max-width:100%;
   overflow:auto;
+  -webkit-overflow-scrolling:touch;
   border:1px solid var(--line);
   border-radius:16px;
   background:#fff;
@@ -235,11 +237,10 @@ textarea{
 }
 
 table{
-  width:100%;
+  width:max-content;
   min-width:720px;
   border-collapse:collapse;
 }
-
 th,
 td{
   text-align:left;
@@ -439,4 +440,57 @@ section,
 .tableWrap table{
   width:max-content;
   min-width:680px;
+}
+
+
+.panel{
+  overflow:hidden;
+}
+
+.panel .tableWrap{
+  overflow-x:auto;
+  overflow-y:auto;
+}
+
+.tableTall{
+  max-height:460px;
+}
+
+.actions{
+  max-width:100%;
+  overflow:hidden;
+}
+
+.actions .btn{
+  max-width:100%;
+  white-space:normal;
+  text-align:center;
+}
+
+@media (max-width:620px){
+  .panelHead{
+    overflow:hidden;
+  }
+
+  .panelHead .btn,
+  .actions .btn{
+    width:100%;
+    max-width:100%;
+  }
+
+  .tableWrap{
+    max-height:430px;
+  }
+
+  table{
+    min-width:760px;
+  }
+
+  .summaryGrid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .summaryGrid .stat.full{
+    grid-column:1 / -1;
+  }
 }
