@@ -1917,6 +1917,52 @@ function filterAuditLogs(){
   setAuditLogHint(`Showing ${filtered.length} audit events`)
 }
 
+function renderHouseholdImpact(){
+  const rows = Array.isArray(cachedDistributionRows) ? cachedDistributionRows : []
+
+  const families = new Set()
+  let itemsDistributed = 0
+  let bedsDistributed = 0
+  let couchesDistributed = 0
+  let tablesDistributed = 0
+  let totalValue = 0
+
+  rows.forEach(row => {
+    const recipient = safeText(row.recipient_name).trim()
+    const itemName = safeText(row.item_name).toLowerCase()
+    const qty = Number(row.quantity || 0)
+    const value = Number(row.total_estimated_value || 0)
+
+    if (recipient) families.add(recipient)
+
+    itemsDistributed += qty
+    totalValue += value
+
+    if (itemName.includes('bed') || itemName.includes('mattress')) {
+      bedsDistributed += qty
+    }
+
+    if (itemName.includes('couch') || itemName.includes('sofa') || itemName.includes('loveseat')) {
+      couchesDistributed += qty
+    }
+
+    if (itemName.includes('table') || itemName.includes('dinette')) {
+      tablesDistributed += qty
+    }
+  })
+
+  if (el('impactFamiliesServed')) el('impactFamiliesServed').textContent = families.size
+  if (el('impactItemsDistributed')) el('impactItemsDistributed').textContent = itemsDistributed
+  if (el('impactBedsDistributed')) el('impactBedsDistributed').textContent = bedsDistributed
+  if (el('impactCouchesDistributed')) el('impactCouchesDistributed').textContent = couchesDistributed
+  if (el('impactTablesDistributed')) el('impactTablesDistributed').textContent = tablesDistributed
+  if (el('impactValueDelivered')) el('impactValueDelivered').textContent = money(totalValue)
+
+  if (el('impactReportHint')) {
+    el('impactReportHint').textContent = `Calculated from ${rows.length} distribution records`
+  }
+}
+
 async function refresh(){
   const current = await getCurrentProfile()
   if (!current) return
@@ -1927,6 +1973,7 @@ async function refresh(){
   await loadDonors()
   await loadDeliveryBatches()
   await loadAuditLogs()
+  await loadDistribution()
   
   const selectedBatchId = safeText(el('deliveryBatchSelect')?.value).trim()
   if (selectedBatchId) {
