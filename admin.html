@@ -275,9 +275,11 @@ No items added yet.
       <thead>
         <tr>
           <th>Date</th>
-          <th>Donor</th>
-          <th>Type</th>
-          <th>Amount</th>
+<th>Recipient</th>
+<th>Item</th>
+<th>Qty</th>
+<th>Unit Value</th>
+<th>Total Value</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -403,6 +405,41 @@ No items added yet.
   <div class="hint" id="crmAudienceHint" style="margin-top:10px;">Ready.</div>
 </section>
 
+<section class="panel">
+  <div class="panelHead">
+    <div>
+      <h2>Audit Log Viewer</h2>
+      <div class="hint">Recent system activity showing what changed, when it changed, and which record was affected.</div>
+    </div>
+  </div>
+
+  <div class="formGrid">
+    <input id="auditLogSearch" placeholder="Search audit logs..." />
+    <select id="auditLogActionFilter">
+      <option value="">All Actions</option>
+      <option value="INSERT">Created</option>
+      <option value="UPDATE">Updated</option>
+    </select>
+  </div>
+
+  <div class="tableWrap tableTall" style="margin-top:12px;">
+    <table id="auditLogTable">
+      <thead>
+        <tr>
+          <th>When</th>
+          <th>Action</th>
+          <th>Table</th>
+          <th>Record</th>
+          <th>User</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="hint" id="auditLogHint" style="margin-top:10px;">Ready.</div>
+</section>
+    
     <section class="panel">
   <div class="panelHead">
     <div>
