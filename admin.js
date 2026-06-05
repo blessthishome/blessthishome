@@ -405,6 +405,7 @@ function setAdminUiLocked(isLocked){
 'deliveryColorTag',
 'deliveryNotes',
 'currentDeliveryBatchId',
+'startDeliveryBtn',
 'completeDeliveryBtn',
 'deleteDeliveryBtn',
 'saveDeliveryBatchBtn',
@@ -577,6 +578,10 @@ async function loadSummary(){
   if (el('statOpenDeliveries')) {
     el('statOpenDeliveries').textContent = data.open_deliveries ?? 0
   }
+
+if (el('statInProgressDeliveries')) {
+  el('statInProgressDeliveries').textContent = data.in_progress_deliveries ?? 0
+}
 
   if (el('statCompletedDeliveries')) {
     el('statCompletedDeliveries').textContent = data.completed_deliveries ?? 0
@@ -1177,11 +1182,11 @@ function applyQuickAddTemplate(){
 
 async function loadDeliveryBatches(){
   const { data, error } = await supabase
-  .from('delivery_batches')
-  .select('id, batch_name, recipient_name, scheduled_date, status')
-  .eq('is_deleted', false)
-  .eq('status', 'open')
-  .order('scheduled_date', { ascending: true })
+    .from('delivery_batches')
+    .select('id, batch_name, recipient_name, scheduled_date, status')
+    .eq('is_deleted', false)
+    .in('status', ['open', 'in_progress'])
+    .order('scheduled_date', { ascending: true })
 
   if (error) {
     setDeliveryBatchHint(error.message)
@@ -1192,15 +1197,18 @@ async function loadDeliveryBatches(){
   if (select) {
     select.innerHTML = `
       <option value="">Select delivery</option>
-      ${data.map(row => `
+      ${(data || []).map(row => `
         <option value="${row.id}">
-          ${safeText(row.batch_name)}${row.recipient_name ? ` — ${safeText(row.recipient_name)}` : ''}${row.scheduled_date ? ` — ${safeText(row.scheduled_date)}` : ''}
+          ${safeText(row.batch_name)}
+          ${row.status ? ` — ${safeText(row.status).replace('_', ' ')}` : ''}
+          ${row.recipient_name ? ` — ${safeText(row.recipient_name)}` : ''}
+          ${row.scheduled_date ? ` — ${safeText(row.scheduled_date)}` : ''}
         </option>
       `).join('')}
     `
   }
 
-  return data
+  return data || []
 }
 
 async function loadDeliveryBatchIntoForm(batchId){
@@ -1324,6 +1332,47 @@ async function saveDeliveryBatch(){
   }
 }
 
+async function startDeliveryBatch(){
+  try {
+    const current = await getCurrentProfile()
+    if (!current) {
+      setDeliveryBatchHint('You must be signed in')
+      return
+    }
+
+    const batchId = safeText(
+      el('currentDeliveryBatchId')?.value ||
+      el('deliveryBatchSelect')?.value
+    ).trim()
+
+    if (!batchId) {
+      setDeliveryBatchHint('Select a delivery first')
+      return
+    }
+
+    const { error } = await supabase
+      .from('delivery_batches')
+      .update({
+        status: 'in_progress',
+        started_at: new Date().toISOString()
+      })
+      .eq('id', batchId)
+
+    if (error) {
+      setDeliveryBatchHint(error.message)
+      return
+    }
+
+    setDeliveryBatchHint('Delivery marked in progress')
+
+    await loadDeliveryBatches()
+    await loadDeliveryBatchIntoForm(batchId)
+    await loadSummary()
+  } catch (err) {
+    setDeliveryBatchHint(err.message || 'Failed to start delivery')
+  }
+}
+
 async function completeDeliveryBatch(){
   try {
     const current = await getCurrentProfile()
@@ -1361,6 +1410,7 @@ async function completeDeliveryBatch(){
 
     await loadDeliveryBatches()
     await loadDeliveryBatchIntoForm('')
+await loadSummary()
   } catch (err) {
     setDeliveryBatchHint(err.message || 'Failed to complete delivery')
   }
@@ -1413,6 +1463,7 @@ async function deleteDeliveryBatch(){
 
     await loadDeliveryBatches()
     await loadDeliveryBatchIntoForm('')
+await loadSummary()
 
   } catch (err) {
     setDeliveryBatchHint(err.message || 'Failed to delete delivery')
@@ -2009,6 +2060,7 @@ if (el('quickAddChairBtn')) el('quickAddChairBtn').onclick = () => quickAddItem(
 if (el('saveDeliveryBatchBtn')) el('saveDeliveryBatchBtn').onclick = saveDeliveryBatch
 if (el('addDeliveryItemBtn')) el('addDeliveryItemBtn').onclick = addItemToDeliveryBatch
 if (el('deliveryBatchSelect')) el('deliveryBatchSelect').onchange = (e) => loadDeliveryBatchIntoForm(e.target.value)
+if (el('startDeliveryBtn')) el('startDeliveryBtn').onclick = startDeliveryBatch
 if (el('completeDeliveryBtn')) el('completeDeliveryBtn').onclick = completeDeliveryBatch
 if (el('deleteDeliveryBtn')) el('deleteDeliveryBtn').onclick = deleteDeliveryBatch
 if (el('distributionTableSearch')) el('distributionTableSearch').addEventListener('input', filterDistributionTable)
