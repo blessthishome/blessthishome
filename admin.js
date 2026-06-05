@@ -1388,14 +1388,12 @@ async function completeDeliveryBatch(){
       return
     }
 
-    const { error } = await supabase
-      .from('delivery_batches')
-      .update({
-        status: 'completed',
-        completed_at: new Date().toISOString()
-      })
-      .eq('id', batchId)
-
+    const { error } = await supabase.rpc(
+  'complete_delivery_batch_transaction',
+  {
+    p_delivery_batch_id: batchId
+  }
+)
     if (error) {
       setDeliveryBatchHint(error.message)
       return
