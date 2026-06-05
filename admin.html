@@ -61,14 +61,19 @@
   </article>
 
   <article class="panel stat">
-    <div class="label">Open Deliveries</div>
-    <div class="value" id="statOpenDeliveries">0</div>
-  </article>
+  <div class="label">Open Deliveries</div>
+  <div class="value" id="statOpenDeliveries">0</div>
+</article>
 
-  <article class="panel stat">
-    <div class="label">Completed Deliveries</div>
-    <div class="value" id="statCompletedDeliveries">0</div>
-  </article>
+<article class="panel stat">
+  <div class="label">In Progress</div>
+  <div class="value" id="statInProgressDeliveries">0</div>
+</article>
+
+<article class="panel stat">
+  <div class="label">Completed Deliveries</div>
+  <div class="value" id="statCompletedDeliveries">0</div>
+</article>
 
   <article class="panel stat">
     <div class="label">Ready Volunteers</div>
@@ -331,8 +336,9 @@ No items added yet.
 
       <div class="actions">
   <button class="btn btnPrimary" id="saveDeliveryBatchBtn" type="button">Save Delivery</button>
-  <button class="btn" id="completeDeliveryBtn" type="button">Mark Complete</button>
-  <button class="btn" id="deleteDeliveryBtn" type="button">Delete Delivery</button>
+<button class="btn" id="startDeliveryBtn" type="button">Start Delivery</button>
+<button class="btn" id="completeDeliveryBtn" type="button">Mark Complete</button>
+<button class="btn" id="deleteDeliveryBtn" type="button">Delete Delivery</button>
 </div>
 
       <div class="hint" id="deliveryBatchStatusHint" style="margin-top:10px;">Ready.</div>
