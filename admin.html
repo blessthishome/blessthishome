@@ -349,9 +349,12 @@ No items added yet.
         <select id="deliveryBatchSelect">
           <option value="">Select delivery</option>
         </select>
-        <input id="deliveryItemSku" placeholder="Item SKU / number" />
-        <input id="deliveryItemDescription" placeholder="Item description" />
-        <input id="deliveryItemPieceCount" type="number" min="1" placeholder="Piece count" />
+        <input id="deliveryInventorySearch" placeholder="Search inventory item..." autocomplete="off" />
+<input id="deliveryInventoryItemId" type="hidden" />
+<input id="deliveryItemSku" placeholder="Item number / SKU" />
+<input id="deliveryItemDescription" placeholder="Item description" />
+<input id="deliveryItemPieceCount" type="number" min="1" placeholder="Quantity / pieces" />
+<div id="deliveryInventorySearchResultsBox" class="hint" style="margin-top:10px; display:none;"></div>
       </div>
 
       <div class="actions">
