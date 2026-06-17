@@ -16,6 +16,7 @@ const searchResultsBox = el('searchResultsBox')
 const recipientSearchResultsBox = el('recipientSearchResultsBox')
 const crmAudienceHint = el('crmAudienceHint')
 const auditLogHint = el('auditLogHint')
+const deliveryInventorySearchResultsBox = el('deliveryInventorySearchResultsBox')
 let cachedAuditLogRows = []
 let cachedInventoryRows = []
 let cachedDistributionRows = []
@@ -424,6 +425,9 @@ function setAdminUiLocked(isLocked){
 'quickAddInventorySelect',
     'auditLogSearch',
 'auditLogActionFilter',
+'deliveryInventorySearch',
+'deliveryInventoryItemId',
+'deliveryInventorySearchResultsBox',
     'exportDonationsQuickBooksBtn',
 'exportInventoryValuationBtn',
 'exportDistributionValueBtn'
@@ -1467,6 +1471,77 @@ await loadSummary()
     setDeliveryBatchHint(err.message || 'Failed to delete delivery')
   }
 }
+
+function hideDeliveryInventorySearchResults(){
+  if (!deliveryInventorySearchResultsBox) return
+  deliveryInventorySearchResultsBox.style.display = 'none'
+  deliveryInventorySearchResultsBox.innerHTML = ''
+}
+
+function renderDeliveryInventorySearchResults(rows){
+  if (!deliveryInventorySearchResultsBox) return
+
+  if (!rows.length) {
+    deliveryInventorySearchResultsBox.style.display = 'block'
+    deliveryInventorySearchResultsBox.innerHTML = 'No matching inventory items found.'
+    return
+  }
+
+  deliveryInventorySearchResultsBox.style.display = 'block'
+  deliveryInventorySearchResultsBox.innerHTML = rows.map(row => `
+    <button
+      type="button"
+      class="btn"
+      data-inventory-id="${row.id}"
+      data-item-number="${safeText(row.item_number || row.sku || '')}"
+      data-item-name="${safeText(row.item_name || '')}"
+      data-piece-count="${safeText(row.piece_count || 1)}"
+      style="display:block;width:100%;text-align:left;margin-bottom:8px;"
+    >
+      <strong>${escapeHtml(row.item_name)}</strong>
+      <div class="hint">
+        Item No: ${escapeHtml(row.item_number || row.sku || 'N/A')} • On hand: ${escapeHtml(row.quantity_on_hand)}
+      </div>
+    </button>
+  `).join('')
+
+  deliveryInventorySearchResultsBox.querySelectorAll('[data-inventory-id]').forEach(node => {
+    node.addEventListener('click', () => {
+      if (el('deliveryInventoryItemId')) el('deliveryInventoryItemId').value = node.getAttribute('data-inventory-id') || ''
+      if (el('deliveryItemSku')) el('deliveryItemSku').value = node.getAttribute('data-item-number') || ''
+      if (el('deliveryItemDescription')) el('deliveryItemDescription').value = node.getAttribute('data-item-name') || ''
+      if (el('deliveryItemPieceCount')) el('deliveryItemPieceCount').value = '1'
+      if (el('deliveryInventorySearch')) el('deliveryInventorySearch').value = node.getAttribute('data-item-name') || ''
+      hideDeliveryInventorySearchResults()
+    })
+  })
+}
+
+async function searchDeliveryInventory(term){
+  const trimmed = safeText(term).trim()
+
+  if (!trimmed) {
+    hideDeliveryInventorySearchResults()
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('inventory_items')
+    .select('id, item_number, sku, item_name, quantity_on_hand, piece_count')
+    .eq('is_deleted', false)
+    .gt('quantity_on_hand', 0)
+    .or(`item_name.ilike.%${trimmed}%,item_number.ilike.%${trimmed}%,sku.ilike.%${trimmed}%`)
+    .order('item_name', { ascending: true })
+    .limit(12)
+
+  if (error) {
+    setDeliveryItemHint(error.message)
+    return
+  }
+
+  renderDeliveryInventorySearchResults(data || [])
+}
+
 async function addItemToDeliveryBatch(){
   try {
     const current = await getCurrentProfile()
@@ -1476,6 +1551,7 @@ async function addItemToDeliveryBatch(){
     }
 
     const delivery_batch_id = safeText(el('deliveryBatchSelect')?.value).trim()
+    const selectedInventoryId = safeText(el('deliveryInventoryItemId')?.value).trim()
     const item_number = safeText(el('deliveryItemSku')?.value).trim()
     const description = safeText(el('deliveryItemDescription')?.value).trim()
     const piece_count = Number(el('deliveryItemPieceCount')?.value || 1)
@@ -1485,35 +1561,48 @@ async function addItemToDeliveryBatch(){
       return
     }
 
-    if (!item_number) {
-      setDeliveryItemHint('Item SKU / number is required')
+    if (!selectedInventoryId && !item_number) {
+      setDeliveryItemHint('Search and select an inventory item first')
       return
     }
 
-    const inventoryLookup = await supabase
-  .from('inventory_items')
-  .select('id, item_name, sku, piece_count')
-  .eq('sku', item_number)
-  .eq('is_deleted', false)
-  .maybeSingle()
+    let inventoryQuery = supabase
+      .from('inventory_items')
+      .select('id, item_name, sku, item_number, piece_count, quantity_on_hand')
+      .eq('is_deleted', false)
+      .limit(1)
 
-    if (inventoryLookup.error) {
-      setDeliveryItemHint(inventoryLookup.error.message)
+    if (selectedInventoryId) {
+      inventoryQuery = inventoryQuery.eq('id', selectedInventoryId)
+    } else {
+      inventoryQuery = inventoryQuery.or(`item_number.eq.${item_number},sku.eq.${item_number},item_name.eq.${item_number}`)
+    }
+
+    const { data, error: lookupError } = await inventoryQuery.maybeSingle()
+
+    if (lookupError) {
+      setDeliveryItemHint(lookupError.message)
       return
     }
 
-    const inventory_item_id = inventoryLookup.data?.id || null
-    const finalDescription = description || inventoryLookup.data?.item_name || null
-    const finalPieceCount = piece_count || inventoryLookup.data?.piece_count || 1
+    if (!data?.id) {
+      setDeliveryItemHint('Inventory item not found. Use the search result dropdown.')
+      return
+    }
+
+    if (Number(data.quantity_on_hand || 0) < piece_count) {
+      setDeliveryItemHint(`Only ${data.quantity_on_hand} available for ${data.item_name}`)
+      return
+    }
 
     const { error } = await supabase
       .from('delivery_batch_items')
       .insert({
         delivery_batch_id,
-        inventory_item_id,
-        item_number,
-        piece_count: finalPieceCount,
-        description: finalDescription,
+        inventory_item_id: data.id,
+        item_number: data.item_number || data.sku || item_number,
+        piece_count,
+        description: description || data.item_name,
         is_checked: false
       })
 
@@ -1521,6 +1610,12 @@ async function addItemToDeliveryBatch(){
       setDeliveryItemHint(error.message)
       return
     }
+
+    if (el('deliveryInventorySearch')) el('deliveryInventorySearch').value = ''
+    if (el('deliveryInventoryItemId')) el('deliveryInventoryItemId').value = ''
+    if (el('deliveryItemSku')) el('deliveryItemSku').value = ''
+    if (el('deliveryItemDescription')) el('deliveryItemDescription').value = ''
+    if (el('deliveryItemPieceCount')) el('deliveryItemPieceCount').value = ''
 
     setDeliveryItemHint('Item added to delivery')
     await loadDeliveryBatchItems(delivery_batch_id)
@@ -2010,6 +2105,7 @@ function renderHouseholdImpact(){
   if (el('impactTablesDistributed')) el('impactTablesDistributed').textContent = tablesDistributed
   if (el('impactValueDelivered')) el('impactValueDelivered').textContent = money(totalValue)
 
+
   if (el('impactReportHint')) {
     el('impactReportHint').textContent = `Calculated from ${rows.length} distribution records`
   }
@@ -2076,6 +2172,11 @@ if (el('searchInput')) {
     await searchConstituents(e.target.value, typeFilter)
   })
 }
+if (el('deliveryInventorySearch')) {
+  el('deliveryInventorySearch').addEventListener('input', async (e) => {
+    await searchDeliveryInventory(e.target.value)
+  })
+}
 
 if (el('filterType')) {
   el('filterType').addEventListener('change', async () => {
@@ -2105,6 +2206,10 @@ document.addEventListener('click', (e) => {
 
   if (!recipientSearchResultsBox?.contains(e.target) && e.target !== el('recipientName')) {
     hideRecipientSearchResults()
+  }
+
+  if (!deliveryInventorySearchResultsBox?.contains(e.target) && e.target !== el('deliveryInventorySearch')) {
+    hideDeliveryInventorySearchResults()
   }
 })
 
