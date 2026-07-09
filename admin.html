@@ -422,16 +422,44 @@ No items added yet.
     </div>
   </div>
 
-  <section class="summaryGrid">
-    <article class="panel stat"><div class="label">Families Served</div><div class="value" id="impactFamiliesServed">0</div></article>
-    <article class="panel stat"><div class="label">Items Distributed</div><div class="value" id="impactItemsDistributed">0</div></article>
-    <article class="panel stat"><div class="label">Beds Distributed</div><div class="value" id="impactBedsDistributed">0</div></article>
-    <article class="panel stat"><div class="label">Couches Distributed</div><div class="value" id="impactCouchesDistributed">0</div></article>
-    <article class="panel stat"><div class="label">Tables Distributed</div><div class="value" id="impactTablesDistributed">0</div></article>
-    <article class="panel stat full"><div class="label">Total Household Value Delivered</div><div class="value" id="impactValueDelivered">$0.00</div></article>
-  </section>
+  <div class="tableWrap">
+    <table id="impactReportTable">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Families Served</td>
+          <td id="impactFamiliesServed">0</td>
+        </tr>
+        <tr>
+          <td>Items Distributed</td>
+          <td id="impactItemsDistributed">0</td>
+        </tr>
+        <tr>
+          <td>Beds Distributed</td>
+          <td id="impactBedsDistributed">0</td>
+        </tr>
+        <tr>
+          <td>Couches Distributed</td>
+          <td id="impactCouchesDistributed">0</td>
+        </tr>
+        <tr>
+          <td>Tables Distributed</td>
+          <td id="impactTablesDistributed">0</td>
+        </tr>
+        <tr>
+          <td><strong>Total Household Value Delivered</strong></td>
+          <td><strong id="impactValueDelivered">$0.00</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-  <div class="hint" id="impactReportHint">Impact report will update when the dashboard refreshes.</div>
+  <div class="hint" id="impactReportHint" style="margin-top:10px;">Impact report will update when the dashboard refreshes.</div>
 </section>
     
 <section class="panel">
