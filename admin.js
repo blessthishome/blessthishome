@@ -2066,45 +2066,74 @@ function filterAuditLogs(){
 
 function renderHouseholdImpact(){
   const rows = Array.isArray(cachedDistributionRows) ? cachedDistributionRows : []
+  const inventoryRows = Array.isArray(cachedInventoryRows) ? cachedInventoryRows : []
 
   const families = new Set()
+
   let itemsDistributed = 0
-  let bedsDistributed = 0
-  let couchesDistributed = 0
-  let tablesDistributed = 0
+  let bedroomItems = 0
+  let livingRoomItems = 0
+  let kitchenItems = 0
+  let bathroomItems = 0
+  let miscItems = 0
   let totalValue = 0
+
+  function findInventoryMatch(row){
+    const rowItemName = safeText(row.item_name).trim().toLowerCase()
+    const rowItemNumber = safeText(row.item_number || row.sku).trim().toLowerCase()
+
+    return inventoryRows.find(item => {
+      const invName = safeText(item.item_name).trim().toLowerCase()
+      const invNumber = safeText(item.item_number || item.sku).trim().toLowerCase()
+
+      return (
+        rowItemName && invName && rowItemName === invName
+      ) || (
+        rowItemNumber && invNumber && rowItemNumber === invNumber
+      )
+    })
+  }
+
+  function getImpactCategory(row){
+    const directCategory = safeText(row.category_name).trim()
+    if (directCategory) return directCategory.toLowerCase()
+
+    const match = findInventoryMatch(row)
+    return safeText(match?.category_name).trim().toLowerCase()
+  }
 
   rows.forEach(row => {
     const recipient = safeText(row.recipient_name).trim()
-    const itemName = safeText(row.item_name).toLowerCase()
     const qty = Number(row.quantity || 0)
     const value = Number(row.total_estimated_value || 0)
+    const category = getImpactCategory(row)
 
     if (recipient) families.add(recipient)
 
     itemsDistributed += qty
     totalValue += value
 
-    if (itemName.includes('bed') || itemName.includes('mattress')) {
-      bedsDistributed += qty
-    }
-
-    if (itemName.includes('couch') || itemName.includes('sofa') || itemName.includes('loveseat')) {
-      couchesDistributed += qty
-    }
-
-    if (itemName.includes('table') || itemName.includes('dinette')) {
-      tablesDistributed += qty
+    if (category.includes('bedroom')) {
+      bedroomItems += qty
+    } else if (category.includes('living')) {
+      livingRoomItems += qty
+    } else if (category.includes('kitchen')) {
+      kitchenItems += qty
+    } else if (category.includes('bathroom')) {
+      bathroomItems += qty
+    } else {
+      miscItems += qty
     }
   })
 
   if (el('impactFamiliesServed')) el('impactFamiliesServed').textContent = families.size
   if (el('impactItemsDistributed')) el('impactItemsDistributed').textContent = itemsDistributed
-  if (el('impactBedsDistributed')) el('impactBedsDistributed').textContent = bedsDistributed
-  if (el('impactCouchesDistributed')) el('impactCouchesDistributed').textContent = couchesDistributed
-  if (el('impactTablesDistributed')) el('impactTablesDistributed').textContent = tablesDistributed
+  if (el('impactBedroomItems')) el('impactBedroomItems').textContent = bedroomItems
+  if (el('impactLivingRoomItems')) el('impactLivingRoomItems').textContent = livingRoomItems
+  if (el('impactKitchenItems')) el('impactKitchenItems').textContent = kitchenItems
+  if (el('impactBathroomItems')) el('impactBathroomItems').textContent = bathroomItems
+  if (el('impactMiscItems')) el('impactMiscItems').textContent = miscItems
   if (el('impactValueDelivered')) el('impactValueDelivered').textContent = money(totalValue)
-
 
   if (el('impactReportHint')) {
     el('impactReportHint').textContent = `Calculated from ${rows.length} distribution records`
