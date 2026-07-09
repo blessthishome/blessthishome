@@ -39,26 +39,132 @@
 <div class="hint" id="volunteerStateLabel" style="margin-top:8px;"></div>
 </section>
 
-    <section class="gridTwo" style="margin-top:18px;">
+    <section class="summaryGrid">
+  <article class="panel stat">
+    <div class="label">My Role</div>
+    <div class="value" id="volunteerRoleLabel">Volunteer</div>
+  </article>
+  <article class="panel stat">
+    <div class="label">Open Needs</div>
+    <div class="value" id="openNeedsCount">0</div>
+  </article>
+  <article class="panel stat">
+    <div class="label">My Signups</div>
+    <div class="value" id="mySignupsCount">0</div>
+  </article>
+  <article class="panel stat">
+    <div class="label">Pending Hours</div>
+    <div class="value" id="pendingHoursTotal">0</div>
+  </article>
+</section>
+
+<section class="gridTwo">
   <section class="panel">
-    <div class="panelHead"><h2>My Availability</h2></div>
-    <textarea id="availabilityText" placeholder="Example: Saturdays 10am to 2pm, Wednesdays evenings, can lift furniture"></textarea>
+    <div class="panelHead">
+      <div>
+        <h2>My Volunteer Profile</h2>
+        <div class="hint">Availability, skills and service preferences.</div>
+      </div>
+    </div>
+
+    <div class="formGrid">
+      <select id="volunteerRole">
+        <option value="volunteer">Volunteer</option>
+        <option value="hauler">Hauler</option>
+        <option value="team_lead">Team Lead</option>
+      </select>
+
+      <input id="preferredTasks" placeholder="Preferred tasks, ex: packing, warehouse, delivery" />
+
+      <label class="hint">
+        <input id="canDrive" type="checkbox" />
+        Can drive
+      </label>
+
+      <label class="hint">
+        <input id="canLiftFurniture" type="checkbox" />
+        Can lift furniture
+      </label>
+
+      <label class="hint">
+        <input id="hasTruck" type="checkbox" />
+        Has truck
+      </label>
+
+      <textarea id="availabilityText" placeholder="Example: Saturdays 10am to 2pm, Wednesday evenings, can lift furniture"></textarea>
+    </div>
+
     <div class="actions">
-      <button class="btn btnPrimary" id="saveAvailabilityBtn">Save Availability</button>
+      <button class="btn btnPrimary" id="saveAvailabilityBtn" type="button">Save Profile</button>
     </div>
   </section>
 
   <section class="panel">
-    <div class="panelHead"><h2>Open Volunteer Needs</h2></div>
-    <ul id="openNeedsList" class="hint"></ul>
+    <div class="panelHead">
+      <div>
+        <h2>Open Volunteer Needs</h2>
+        <div class="hint">Sign up for available warehouse, packing, delivery and special tasks.</div>
+      </div>
+    </div>
+
+    <div id="openNeedsList" class="hint">No needs loaded.</div>
   </section>
 </section>
 
-<section class="panel" style="margin-top:18px;">
-  <div class="panelHead"><h2>Today’s Deliveries</h2></div>
-  <div id="todayDeliveriesList" class="hint">No deliveries loaded.</div>
+<section class="gridTwo">
+  <section class="panel">
+    <div class="panelHead">
+      <div>
+        <h2>My Signups</h2>
+        <div class="hint">Tasks you have signed up for.</div>
+      </div>
+    </div>
+
+    <div id="mySignupsList" class="hint">No signups loaded.</div>
+  </section>
+
+  <section class="panel">
+    <div class="panelHead">
+      <div>
+        <h2>Log Volunteer Hours</h2>
+        <div class="hint">Submit actual hours worked for staff approval.</div>
+      </div>
+    </div>
+
+    <div class="formGrid">
+      <input id="hoursServiceDate" type="date" />
+      <input id="hoursAmount" type="number" min="0" step="0.25" placeholder="Hours worked" />
+
+      <select id="hoursActivityType">
+        <option value="general">General</option>
+        <option value="warehouse">Warehouse</option>
+        <option value="packing">Packing small items</option>
+        <option value="hauling">Hauling or delivery</option>
+        <option value="admin">Admin or communication</option>
+        <option value="special_task">Special task</option>
+      </select>
+
+      <textarea id="hoursDescription" placeholder="Describe what you worked on"></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="btn btnPrimary" id="submitHoursBtn" type="button">Submit Hours</button>
+    </div>
+
+    <div class="hint" id="hoursStatusHint" style="margin-top:10px;">Ready.</div>
+  </section>
 </section>
 
+<section class="panel">
+  <div class="panelHead">
+    <div>
+      <h2>Today’s Deliveries</h2>
+      <div class="hint">Pull list staging for approved delivery work.</div>
+    </div>
+  </div>
+
+  <div id="todayDeliveriesList" class="hint">No deliveries loaded.</div>
+</section>
   </main>
 
   <script type="module" src="volunteer-portal.js"></script>
