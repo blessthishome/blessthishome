@@ -465,7 +465,8 @@
     );
 
     const newProfile = {
-      auth_user_id: user.id,
+  id: user.id,
+  auth_user_id: user.id,
       first_name: firstName,
       last_name: lastName,
       display_name: makeDisplayName(
