@@ -33,7 +33,7 @@
     /**
      * Local testing
      */
-    demoMode: true,
+    demoMode: false,
 
     demoRole: allowedDemoRoles.includes(configuredDemoRole)
       ? configuredDemoRole
