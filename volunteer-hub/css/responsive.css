@@ -1,0 +1,1139 @@
+/* =========================================================
+   BLESS THIS HOME VOLUNTEER HUB
+   RESPONSIVE LAYOUT
+   ========================================================= */
+
+/* =========================================================
+   LARGE TABLETS AND SMALL DESKTOPS
+   ========================================================= */
+
+@media (max-width: 1180px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .week-needs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .availability-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .availability-layout .form-panel {
+    max-width: none;
+  }
+
+  .management-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   TABLETS AND MOBILE NAVIGATION
+   ========================================================= */
+
+@media (max-width: 860px) {
+  body.menu-open {
+    overflow: hidden;
+  }
+
+  .auth-shell {
+    grid-template-columns: 1fr;
+    width: min(680px, calc(100% - 2rem));
+    padding: 1rem 0 2rem;
+    gap: 1.5rem;
+  }
+
+  .auth-brand {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .auth-logo {
+    width: min(270px, 70%);
+  }
+
+  .auth-scripture {
+    width: min(500px, 95%);
+  }
+
+  .auth-brand-copy {
+    max-width: 560px;
+  }
+
+  .sidebar {
+    width: min(310px, 86vw);
+    transform: translateX(-105%);
+    transition: transform 0.2s ease;
+    box-shadow: 16px 0 48px rgba(40, 36, 28, 0.2);
+  }
+
+  body.menu-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: rgba(35, 33, 28, 0.42);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.2s ease,
+      visibility 0.2s ease;
+  }
+
+  body.menu-open .menu-backdrop {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .mobile-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 66px;
+    padding:
+      calc(0.65rem + env(safe-area-inset-top))
+      1rem
+      0.65rem;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 252, 246, 0.96);
+    backdrop-filter: blur(15px);
+  }
+
+  .mobile-title {
+    min-width: 0;
+    text-align: center;
+  }
+
+  .mobile-title strong,
+  .mobile-title span {
+    display: block;
+  }
+
+  .mobile-title strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-title span {
+    color: var(--muted);
+    font-size: 0.76rem;
+    text-transform: capitalize;
+  }
+
+  .mobile-logo {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+  }
+
+  .app-content {
+    width: 100%;
+    margin-left: 0;
+    padding:
+      1rem
+      1rem
+      calc(1.5rem + env(safe-area-inset-bottom));
+  }
+
+  .view-heading {
+    margin-bottom: 1.15rem;
+  }
+
+  .schedule-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .today-button {
+    justify-self: start;
+  }
+
+  .schedule-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .calendar-cell {
+    min-height: 108px;
+  }
+
+  .dialog {
+    width: min(640px, calc(100% - 1rem));
+    max-height: calc(100dvh - 1rem);
+  }
+
+  .dialog-card {
+    max-height: calc(100dvh - 1rem);
+  }
+}
+
+@media (max-width: 430px) {
+  .pending-hours-summary {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .pending-hours-total {
+    white-space: normal;
+  }
+}
+
+/* =========================================================
+   PHONES AND SMALL TABLETS
+   ========================================================= */
+
+@media (max-width: 680px) {
+  h1 {
+    font-size: clamp(1.95rem, 9vw, 2.55rem);
+  }
+
+  h2 {
+    font-size: 1.45rem;
+  }
+
+  .auth-shell {
+    width: min(100% - 1rem, 620px);
+  }
+
+  .auth-card {
+    padding: 1rem;
+    border-radius: 20px;
+  }
+
+  .auth-tabs {
+    border-radius: 16px;
+  }
+
+  .auth-tab {
+    border-radius: 13px;
+  }
+
+  .view-heading {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .view-heading > .button {
+    width: 100%;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-card {
+    min-height: 0;
+  }
+
+  .week-needs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .need-day {
+    min-height: 96px;
+  }
+
+  .panel {
+    padding: 1rem;
+    border-radius: 20px;
+  }
+
+  .panel-heading {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .panel-heading .text-button {
+    justify-self: start;
+  }
+
+  .card-list {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid.two-columns,
+  .form-grid.three-columns,
+  .two-columns,
+  .three-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-controls {
+    padding: 1rem;
+  }
+
+  .month-navigation {
+    grid-template-columns: 46px minmax(0, 1fr) 46px;
+    gap: 0.55rem;
+  }
+
+  .month-button {
+    width: 46px;
+    min-width: 46px;
+    height: 50px;
+  }
+
+  .month-display {
+    min-width: 0;
+  }
+
+  .month-display strong {
+    font-size: 0.95rem;
+  }
+
+  .schedule-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .staffing-legend {
+    gap: 0.65rem 1rem;
+  }
+
+  .calendar {
+    grid-template-columns: repeat(7, minmax(54px, 1fr));
+    gap: 0.35rem;
+    width: 100%;
+    padding-bottom: 0.65rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .calendar-weekday {
+    min-width: 54px;
+    padding: 0.3rem 0.15rem;
+    font-size: 0.66rem;
+  }
+
+  .calendar-cell {
+    min-width: 54px;
+    min-height: 78px;
+    padding: 0.35rem;
+    border-radius: 10px;
+  }
+
+  .calendar-cell.is-empty {
+    display: block;
+  }
+
+  .calendar-date {
+    font-size: 0.82rem;
+  }
+
+  .calendar-cell.is-today .calendar-date {
+    min-width: 25px;
+    min-height: 25px;
+  }
+
+  .calendar-shift {
+    min-height: 8px;
+    margin-top: 0.28rem;
+    padding: 0;
+    border-left-width: 0;
+    border-radius: 999px;
+    font-size: 0;
+  }
+
+  .calendar-shift strong,
+  .calendar-shift span {
+    display: none;
+  }
+
+  .selected-day-panel {
+    margin-top: 0.2rem;
+  }
+
+  .availability-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .weekday-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .weekday-name {
+    margin-bottom: -0.15rem;
+  }
+
+  .weekday-custom-times {
+    grid-column: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .specific-date-row {
+    grid-template-columns: 1fr;
+  }
+
+  .specific-date-row .button {
+    width: 100%;
+  }
+
+  .management-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .button-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .button-row .button {
+    width: 100%;
+  }
+
+  .dialog {
+    width: calc(100% - 0.75rem);
+    max-height: calc(100dvh - 0.75rem);
+    border-radius: 18px;
+  }
+
+  .dialog-card {
+    max-height: calc(100dvh - 0.75rem);
+    padding: 1rem;
+    border-radius: 18px;
+  }
+
+  .dialog-header {
+    top: -1rem;
+    margin: -1rem -1rem 0;
+    padding:
+      1rem
+      1rem
+      0.8rem;
+  }
+
+  .dialog-close {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+  }
+
+  .dialog-actions,
+  .dialog-actions-three {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-actions .button {
+    width: 100%;
+  }
+
+  .optional-section summary {
+    padding: 0.85rem;
+  }
+
+  .optional-section-content {
+    padding: 0.85rem;
+  }
+
+  input,
+  select {
+    min-height: 50px;
+    font-size: 16px;
+  }
+
+  input[type="date"],
+  input[type="time"] {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 50px;
+    font-size: 16px;
+    appearance: auto;
+    -webkit-appearance: auto;
+  }
+
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* =========================================================
+   COMMON IPHONE WIDTHS
+   ========================================================= */
+
+@media (max-width: 430px) {
+  .mobile-header {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .app-content {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .auth-logo {
+    width: min(235px, 72%);
+  }
+
+  .auth-scripture {
+    width: min(360px, 96%);
+  }
+
+  .auth-brand-copy h1 {
+    font-size: 2rem;
+  }
+
+  .auth-brand-copy p {
+    font-size: 0.98rem;
+  }
+
+  .summary-card,
+  .shift-card,
+  .message-card,
+  .hour-card,
+  .request-card {
+    padding: 0.95rem;
+  }
+
+  .week-needs {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .need-day {
+    min-height: 90px;
+    padding: 0.62rem;
+  }
+
+  .month-navigation {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 0.45rem;
+  }
+
+  .month-button {
+    width: 44px;
+    min-width: 44px;
+    height: 48px;
+    font-size: 1.8rem;
+  }
+
+  .month-display {
+    min-height: 48px;
+    padding: 0.38rem 0.55rem;
+  }
+
+  .month-display span {
+    font-size: 0.66rem;
+  }
+
+  .month-display strong {
+    font-size: 0.88rem;
+  }
+
+  .calendar {
+    grid-template-columns: repeat(7, minmax(50px, 1fr));
+  }
+
+  .calendar-weekday,
+  .calendar-cell {
+    min-width: 50px;
+  }
+
+  .calendar-cell {
+    min-height: 73px;
+  }
+
+  .weekday-row {
+    padding: 0.75rem;
+  }
+
+  .dialog-header h2 {
+    font-size: 1.3rem;
+  }
+}
+
+/* =========================================================
+   NARROW IPHONES AND SMALL KODER PREVIEWS
+   ========================================================= */
+
+@media (max-width: 375px) {
+  .mobile-header {
+    grid-template-columns: auto minmax(0, 1fr) 38px;
+    gap: 0.45rem;
+  }
+
+  .mobile-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .menu-button {
+    padding-left: 0.7rem;
+    padding-right: 0.7rem;
+  }
+
+  .panel,
+  .auth-card {
+    padding: 0.85rem;
+  }
+
+  .week-needs {
+    grid-template-columns: 1fr;
+  }
+
+  .month-navigation {
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+  }
+
+  .month-button {
+    width: 42px;
+    min-width: 42px;
+  }
+
+  .calendar {
+    grid-template-columns: repeat(7, minmax(47px, 1fr));
+  }
+
+  .calendar-weekday,
+  .calendar-cell {
+    min-width: 47px;
+  }
+
+  .calendar-cell {
+    min-height: 70px;
+  }
+
+  .staffing-legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dialog {
+    width: calc(100% - 0.4rem);
+    max-height: calc(100dvh - 0.4rem);
+  }
+
+  .dialog-card {
+    max-height: calc(100dvh - 0.4rem);
+    padding: 0.9rem;
+  }
+
+  .dialog-header {
+    top: -0.9rem;
+    margin: -0.9rem -0.9rem 0;
+    padding:
+      0.9rem
+      0.9rem
+      0.75rem;
+  }
+}
+
+/* =========================================================
+   MINIMUM SUPPORTED WIDTH
+   ========================================================= */
+
+@media (max-width: 330px) {
+  .mobile-title strong {
+    font-size: 0.9rem;
+  }
+
+  .mobile-title span {
+    font-size: 0.68rem;
+  }
+
+  .calendar {
+    grid-template-columns: repeat(7, minmax(44px, 1fr));
+  }
+
+  .calendar-weekday,
+  .calendar-cell {
+    min-width: 44px;
+  }
+
+  .calendar-cell {
+    min-height: 68px;
+  }
+
+  .month-display strong {
+    font-size: 0.8rem;
+  }
+
+  .staffing-legend {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   SHORT PHONE SCREENS
+   ========================================================= */
+
+@media (max-height: 700px) and (max-width: 680px) {
+  .dialog,
+  .dialog-card {
+    max-height: calc(100dvh - 0.25rem);
+  }
+
+  .dialog {
+    width: calc(100% - 0.4rem);
+  }
+
+  .dialog-card {
+    border-radius: 14px;
+  }
+
+  .dialog-header {
+    padding-bottom: 0.7rem;
+  }
+}
+
+/* =========================================================
+   LANDSCAPE PHONES
+   ========================================================= */
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .mobile-header {
+    min-height: 56px;
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+  }
+
+  .app-content {
+    padding-top: 0.75rem;
+  }
+
+  .dialog,
+  .dialog-card {
+    max-height: calc(100dvh - 0.25rem);
+  }
+
+  .dialog {
+    width: min(760px, calc(100% - 0.5rem));
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================================
+   MOBILE MANAGEMENT LISTS
+   ========================================================= */
+
+@media (max-width: 680px) {
+  .management-list {
+    max-height: 390px;
+  }
+
+  .management-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.55rem 0.75rem;
+    padding: 0.8rem;
+  }
+
+  .management-row-main {
+    grid-column: 1;
+  }
+
+  .management-row-detail {
+    grid-column: 1;
+  }
+
+  .management-row-actions {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    display: grid;
+    justify-items: stretch;
+  }
+
+  .management-row-actions .button {
+    width: 100%;
+    min-width: 92px;
+  }
+
+  .management-row-note {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 430px) {
+  .management-list {
+    max-height: 360px;
+  }
+
+  .management-row {
+    grid-template-columns: 1fr;
+  }
+
+  .management-row-main,
+  .management-row-detail,
+  .management-row-actions,
+  .management-row-note {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .management-row-main strong {
+    white-space: normal;
+  }
+
+  .management-row-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .management-row-actions:has(.button:only-child) {
+    grid-template-columns: 1fr;
+  }
+
+  .management-row-actions .button {
+    min-width: 0;
+  }
+}
+
+/* =========================================================
+   COMPACT MOBILE SCHEDULE RESULTS
+   ========================================================= */
+
+@media (max-width: 860px) {
+  .schedule-shift-summary {
+    grid-template-columns:
+      minmax(120px, 0.75fr)
+      minmax(170px, 1.25fr)
+      minmax(125px, 0.8fr)
+      auto;
+  }
+}
+
+@media (max-width: 680px) {
+  .compact-section-heading {
+    display: grid;
+    align-items: start;
+  }
+
+  .result-count {
+    justify-self: start;
+  }
+
+  .schedule-accordion-list {
+    gap: 0.55rem;
+  }
+
+  .schedule-shift-item {
+    border-radius: 15px;
+  }
+
+  .schedule-shift-summary {
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+    gap: 0.45rem 0.7rem;
+    padding: 0.8rem;
+  }
+
+  .schedule-shift-summary::after {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    align-self: center;
+  }
+
+  .schedule-summary-date {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .schedule-summary-title {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .schedule-summary-time {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .schedule-summary-staffing {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .schedule-summary-title strong {
+    white-space: normal;
+  }
+
+  .schedule-expanded-top {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-shift-expanded {
+    padding:
+      0
+      0.8rem
+      0.85rem;
+  }
+
+  .schedule-expanded-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-expanded-actions .button {
+    width: 100%;
+  }
+
+  .selected-day-panel
+    .schedule-shift-summary {
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+  }
+
+  .selected-day-panel
+    .schedule-summary-title {
+    grid-row: 1;
+  }
+
+  .selected-day-panel
+    .schedule-summary-time {
+    grid-row: 2;
+  }
+
+  .selected-day-panel
+    .schedule-summary-staffing {
+    grid-row: 3;
+  }
+
+  .selected-day-panel
+    .schedule-shift-summary::after {
+    grid-row: 1 / span 2;
+  }
+}
+
+@media (max-width: 430px) {
+  .schedule-summary-date strong {
+    font-size: 0.82rem;
+  }
+
+  .schedule-summary-title strong {
+    font-size: 0.94rem;
+  }
+
+  .schedule-summary-time {
+    font-size: 0.82rem;
+  }
+
+  .schedule-mini-chip {
+    font-size: 0.68rem;
+  }
+}
+
+/* =========================================================
+   COMPACT AVAILABILITY DATE AND TIME FIELDS
+   ========================================================= */
+
+@media (max-width: 680px) {
+  /*
+   * Prevent the iPhone/Koder date and time controls from
+   * inheriting the large text-box height used elsewhere.
+   */
+
+  #weeklyAvailabilityForm input[type="time"],
+  #specificAvailabilityForm input[type="date"],
+  #specificAvailabilityForm input[type="time"] {
+    display: block !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
+
+    margin: 0 !important;
+    padding: 0 0.85rem !important;
+
+    border-radius: 14px !important;
+    box-sizing: border-box !important;
+
+    font-size: 16px !important;
+    line-height: 54px !important;
+
+    background: rgba(255, 255, 255, 0.82) !important;
+    color: var(--ink) !important;
+
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /*
+   * Reduce the space around custom weekly time fields.
+   */
+
+  .weekday-custom-times {
+    gap: 0.75rem !important;
+    margin-top: 0.75rem !important;
+  }
+
+  .weekday-custom-times .field {
+    gap: 0.3rem !important;
+  }
+
+  /*
+   * Keep each weekday card compact when custom time is active.
+   */
+
+  .weekday-row {
+    padding: 1rem !important;
+  }
+
+  /*
+   * Specific-date form should use the same compact control size.
+   */
+
+  #specificAvailabilityForm {
+    gap: 1rem !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .manage-shift-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .management-shift-summary {
+    grid-template-columns: 1fr auto;
+    gap: 0.65rem;
+  }
+
+  .management-shift-summary
+    .management-row-detail {
+    grid-column: 1;
+  }
+
+  .management-shift-summary::after {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+}
+
+/* =========================================================
+   REPORTS — MOBILE DATE FIELD FIX
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .reports-form {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    gap: 1rem;
+    padding: 1rem;
+    overflow: hidden;
+  }
+
+  .reports-form .form-grid.two-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    gap: 1rem;
+  }
+
+  .reports-form .field {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    gap: 0.42rem;
+    overflow: hidden;
+  }
+
+  .reports-form input[type="date"] {
+    display: block !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
+
+    margin: 0 !important;
+    padding: 0 0.85rem !important;
+
+    border-radius: 14px !important;
+    box-sizing: border-box !important;
+
+    background: rgba(255, 255, 255, 0.84) !important;
+    color: var(--ink) !important;
+
+    font-size: 16px !important;
+    line-height: 54px !important;
+
+    -webkit-appearance: none !important;
+    appearance: none !important;
+
+    overflow: hidden !important;
+  }
+
+  .reports-form input[type="date"]::-webkit-date-and-time-value {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+  }
+
+  .reports-form input[type="date"]::-webkit-datetime-edit {
+    display: flex;
+    align-items: center;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .reports-form .button-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    min-width: 0;
+    gap: 0.75rem;
+  }
+
+  .reports-form .button-row .button {
+    width: 100%;
+    min-width: 0;
+  }
+}
