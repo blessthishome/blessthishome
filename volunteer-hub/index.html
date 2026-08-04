@@ -1,0 +1,2776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#f7f2e8">
+
+  <meta
+    name="description"
+    content="Bless This Home Volunteer Hub"
+  >
+
+  <title>Bless This Home Volunteer Hub</title>
+
+  <link
+    rel="icon"
+    type="image/png"
+    href="./assets/branding/favicon.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./css/app.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./css/responsive.css"
+  >
+
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script
+    defer
+    src="./js/config.js"
+  ></script>
+
+  <script
+    defer
+    src="./js/auth.js"
+  ></script>
+
+  <script
+    defer
+    src="./js/data.js"
+  ></script>
+
+  <script
+    defer
+    src="./js/app.js"
+  ></script>
+</head>
+
+<body>
+  <div
+    class="page-background"
+    aria-hidden="true"
+  ></div>
+
+  <!-- =====================================================
+       ACCOUNT ACCESS
+       ===================================================== -->
+
+  <main
+    id="authShell"
+    class="auth-shell"
+  >
+    <section class="auth-brand">
+      <img
+        class="auth-logo"
+        src="./assets/branding/logo.png"
+        alt="Bless This Home"
+      >
+
+      <img
+        class="auth-scripture"
+        src="./assets/branding/scripture2.png"
+        alt=""
+      >
+
+      <div class="auth-brand-copy">
+        <h1>Volunteer Hub</h1>
+
+        <p>
+          View volunteer needs, request shifts, share availability,
+          record hours and stay informed.
+        </p>
+      </div>
+    </section>
+
+    <section
+      class="auth-card"
+      aria-labelledby="authHeading"
+    >
+      <div
+        class="auth-tabs"
+        role="tablist"
+        aria-label="Account access"
+      >
+        <button
+          id="createAccountTab"
+          class="auth-tab is-active"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          aria-controls="createAccountForm"
+        >
+          Create account
+        </button>
+
+        <button
+          id="signInTab"
+          class="auth-tab"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="signInForm"
+        >
+          Sign in
+        </button>
+      </div>
+
+      <form
+        id="createAccountForm"
+        class="auth-form"
+        novalidate
+      >
+        <header class="form-heading">
+          <p class="eyebrow">First visit</p>
+
+          <h2 id="authHeading">
+            Create your account
+          </h2>
+
+          <p class="muted">
+            Your public name will appear as your first name and
+            last initial.
+          </p>
+        </header>
+
+        <div class="form-grid two-columns">
+          <label class="field">
+            <span>First name</span>
+
+            <input
+              id="createFirstName"
+              name="firstName"
+              type="text"
+              autocomplete="given-name"
+              required
+            >
+          </label>
+
+          <label class="field">
+            <span>Last name</span>
+
+            <input
+              id="createLastName"
+              name="lastName"
+              type="text"
+              autocomplete="family-name"
+              required
+            >
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Email address</span>
+
+          <input
+            id="createEmail"
+            name="email"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            required
+          >
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+
+          <input
+            id="createPassword"
+            name="password"
+            type="password"
+            autocomplete="new-password"
+            minlength="8"
+            required
+          >
+        </label>
+
+        <label class="field">
+          <span>Confirm password</span>
+
+          <input
+            id="createPasswordConfirm"
+            name="passwordConfirm"
+            type="password"
+            autocomplete="new-password"
+            minlength="8"
+            required
+          >
+        </label>
+
+        <button
+          class="button button-primary button-full"
+          type="submit"
+        >
+          Create account
+        </button>
+
+        <p
+          id="createAccountFeedback"
+          class="form-feedback"
+          role="status"
+          aria-live="polite"
+        ></p>
+      </form>
+
+      <form
+        id="signInForm"
+        class="auth-form is-hidden"
+        novalidate
+      >
+        <header class="form-heading">
+          <p class="eyebrow">Welcome back</p>
+
+          <h2>Sign in</h2>
+        </header>
+
+        <label class="field">
+          <span>Email address</span>
+
+          <input
+            id="signInEmail"
+            name="email"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            required
+          >
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+
+          <input
+            id="signInPassword"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          >
+        </label>
+
+        <button
+          class="button button-primary button-full"
+          type="submit"
+        >
+          Sign in
+        </button>
+
+        <button
+          id="forgotPasswordButton"
+          class="text-button"
+          type="button"
+        >
+          Forgot password?
+        </button>
+
+        <p
+          id="signInFeedback"
+          class="form-feedback"
+          role="status"
+          aria-live="polite"
+        ></p>
+      </form>
+    </section>
+  </main>
+
+  <!-- =====================================================
+       APPLICATION
+       ===================================================== -->
+
+  <div
+    id="appShell"
+    class="app-shell is-hidden"
+  >
+    <button
+      id="menuBackdrop"
+      class="menu-backdrop"
+      type="button"
+      aria-label="Close menu"
+      tabindex="-1"
+    ></button>
+
+    <aside
+      id="sidebar"
+      class="sidebar"
+      aria-label="Main navigation"
+    >
+      <header class="sidebar-brand">
+        <img
+          src="./assets/branding/logo.png"
+          alt="Bless This Home"
+        >
+
+        <div>
+          <strong>Volunteer Hub</strong>
+
+          <span id="sidebarDisplayName">
+            Volunteer
+          </span>
+
+          <span
+            id="sidebarRole"
+            class="role-badge"
+          >
+            Volunteer
+          </span>
+        </div>
+      </header>
+
+      <nav class="primary-nav">
+        <button
+          class="nav-button is-active"
+          type="button"
+          data-view="dashboard"
+        >
+          Home
+        </button>
+
+        <button
+          class="nav-button"
+          type="button"
+          data-view="schedule"
+        >
+          Schedule
+        </button>
+
+        <button
+          class="nav-button"
+          type="button"
+          data-view="my-shifts"
+        >
+          My Shifts
+        </button>
+
+        <button
+          class="nav-button"
+          type="button"
+          data-view="availability"
+        >
+          Availability
+        </button>
+
+        <button
+          class="nav-button"
+          type="button"
+          data-view="hours"
+        >
+          Hours
+        </button>
+
+        <button
+          class="nav-button"
+          type="button"
+          data-view="messages"
+        >
+          Messages
+        </button>
+
+        <button
+          class="nav-button"
+          type="button"
+          data-view="profile"
+        >
+          Profile
+        </button>
+
+        <button
+          class="nav-button admin-only is-hidden"
+          type="button"
+          data-view="manage"
+        >
+          Manage
+        </button>
+
+        <button
+          class="nav-button admin-only is-hidden"
+          type="button"
+          data-view="reports"
+        >
+          Reports
+        </button>
+      </nav>
+
+      <button
+        id="signOutButton"
+        class="button button-secondary sidebar-signout"
+        type="button"
+      >
+        Sign out
+      </button>
+    </aside>
+
+    <header class="mobile-header">
+      <button
+        id="mobileMenuButton"
+        class="menu-button"
+        type="button"
+        aria-label="Open menu"
+        aria-controls="sidebar"
+        aria-expanded="false"
+      >
+        Menu
+      </button>
+
+      <div class="mobile-title">
+        <strong>Volunteer Hub</strong>
+
+        <span id="mobileRole">
+          Volunteer
+        </span>
+      </div>
+
+      <img
+        class="mobile-logo"
+        src="./assets/branding/floating-logo.png"
+        alt=""
+      >
+    </header>
+
+    <main class="app-content">
+      <div
+        id="appFeedback"
+        class="app-feedback is-hidden"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <!-- =================================================
+           HOME
+           ================================================= -->
+
+      <section
+        class="view is-active"
+        data-view-panel="dashboard"
+      >
+        <header class="view-heading">
+          <div>
+            <p class="eyebrow">Home</p>
+
+            <h1 id="welcomeHeading">
+              Welcome
+            </h1>
+
+            <p class="muted">
+              See upcoming needs and manage your volunteer activity.
+            </p>
+          </div>
+
+          <button
+            class="button button-primary"
+            type="button"
+            data-open-view="schedule"
+          >
+            Find a shift
+          </button>
+        </header>
+
+        <div class="summary-grid">
+          <button
+            class="summary-card"
+            type="button"
+            data-open-view="my-shifts"
+          >
+            <span class="summary-label">
+              Next shift
+            </span>
+
+            <strong id="nextShiftSummary">
+              No upcoming shift
+            </strong>
+
+            <small id="nextShiftDetail">
+              Browse the schedule to request a shift.
+            </small>
+
+            <span class="summary-link">
+              View my shifts
+            </span>
+          </button>
+
+          <button
+            class="summary-card"
+            type="button"
+            data-open-view="hours"
+          >
+            <span class="summary-label">
+              Hours this month
+            </span>
+
+            <strong id="monthlyHoursSummary">
+              0.0
+            </strong>
+
+            <small>
+              Approved and pending hours
+            </small>
+
+            <span class="summary-link">
+              View hours
+            </span>
+          </button>
+
+          <button
+            class="summary-card"
+            type="button"
+            data-open-view="schedule"
+          >
+            <span class="summary-label">
+              Open shift needs
+            </span>
+
+            <strong id="openNeedsSummary">
+              0
+            </strong>
+
+            <small>
+              Upcoming shifts that still need help
+            </small>
+
+            <span class="summary-link">
+              View schedule
+            </span>
+          </button>
+
+          <button
+            class="summary-card"
+            type="button"
+            data-open-view="messages"
+          >
+            <span class="summary-label">
+              Messages
+            </span>
+
+            <strong id="messageCountSummary">
+              0
+            </strong>
+
+            <small>
+              Announcements and updates
+            </small>
+
+            <span class="summary-link">
+              Open messages
+            </span>
+          </button>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="panel">
+            <header class="panel-heading">
+              <div>
+                <h2>This week’s needs</h2>
+
+                <p class="muted">
+                  Select a day to view its available shifts.
+                </p>
+              </div>
+
+              <button
+                class="text-button"
+                type="button"
+                data-open-view="schedule"
+              >
+                Full schedule
+              </button>
+            </header>
+
+            <div
+              id="weekNeeds"
+              class="week-needs"
+            ></div>
+          </article>
+
+          <article class="panel">
+            <header class="panel-heading">
+              <div>
+                <h2>Recent updates</h2>
+              </div>
+
+              <button
+                class="text-button"
+                type="button"
+                data-open-view="messages"
+              >
+                All messages
+              </button>
+            </header>
+
+            <div
+              id="recentMessages"
+              class="stack-list empty-state"
+            >
+              No recent messages.
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- =================================================
+           SCHEDULE
+           ================================================= -->
+
+      <section
+        class="view"
+        data-view-panel="schedule"
+      >
+        <header class="view-heading">
+          <div>
+            <p class="eyebrow">Open opportunities</p>
+
+            <h1>Schedule</h1>
+
+            <p class="muted">
+              Select a day, review the shift and submit a request.
+            </p>
+          </div>
+
+          <button
+            id="nextOpenShiftButton"
+            class="button button-secondary"
+            type="button"
+          >
+            Next open shift
+          </button>
+        </header>
+
+        <article class="panel schedule-controls">
+          <div class="month-navigation">
+            <button
+              id="previousMonthButton"
+              class="month-button"
+              type="button"
+              aria-label="Previous month"
+            >
+              ‹
+            </button>
+
+            <div class="month-display">
+              <span>Month</span>
+
+              <strong id="scheduleMonthLabel">
+                Current month
+              </strong>
+            </div>
+
+            <button
+              id="nextMonthButton"
+              class="month-button"
+              type="button"
+              aria-label="Next month"
+            >
+              ›
+            </button>
+          </div>
+
+          <button
+            id="todayButton"
+            class="text-button today-button"
+            type="button"
+          >
+            Today
+          </button>
+
+          <div class="schedule-filters">
+            <label class="field">
+              <span>Shift type</span>
+
+              <select id="scheduleTypeFilter">
+                <option value="">
+                  All shift types
+                </option>
+
+                <option value="Thrift Store">
+                  Thrift Store
+                </option>
+
+                <option value="Hauler">
+                  Hauler
+                </option>
+
+                <option value="Warehouse">
+                  Warehouse
+                </option>
+
+                <option value="Delivery">
+                  Delivery
+                </option>
+
+                <option value="Donation Pickup">
+                  Donation Pickup
+                </option>
+
+                <option value="Cleaning">
+                  Cleaning
+                </option>
+
+                <option value="Administrative">
+                  Administrative
+                </option>
+
+                <option value="Special Event">
+                  Special Event
+                </option>
+
+                <option value="Other">
+                  Other
+                </option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Staffing</span>
+
+              <select id="scheduleStaffingFilter">
+                <option value="">
+                  All shifts
+                </option>
+
+                <option value="needs">
+                  Needs help
+                </option>
+
+                <option value="almost">
+                  Almost full
+                </option>
+
+                <option value="full">
+                  Fully staffed
+                </option>
+
+                <option value="mine">
+                  My requests and shifts
+                </option>
+              </select>
+            </label>
+          </div>
+
+          <div
+            class="staffing-legend"
+            aria-label="Staffing status"
+          >
+            <span>
+              <i class="legend-dot critical"></i>
+              Critical
+            </span>
+
+            <span>
+              <i class="legend-dot needs"></i>
+              Needs help
+            </span>
+
+            <span>
+              <i class="legend-dot almost"></i>
+              Almost full
+            </span>
+
+            <span>
+              <i class="legend-dot full"></i>
+              Fully staffed
+            </span>
+          </div>
+        </article>
+
+        <div
+  id="scheduleCalendar"
+  class="calendar"
+  aria-label="Shift calendar"
+></div>
+
+<!-- =====================================================
+     MATCHING SHIFTS
+     ===================================================== -->
+
+<section
+  id="matchingShiftsSection"
+  class="schedule-results-section"
+  aria-labelledby="matchingShiftsHeading"
+>
+  <div class="section-heading compact-section-heading">
+    <div>
+      <p class="eyebrow">
+        Filtered results
+      </p>
+
+      <h2 id="matchingShiftsHeading">
+        Matching shifts
+      </h2>
+
+      <p class="muted">
+        Shifts matching the selected month, type and staffing filters.
+      </p>
+    </div>
+
+    <span
+      id="matchingShiftCount"
+      class="result-count"
+    >
+      0 shifts
+    </span>
+  </div>
+
+  <div
+    id="scheduleList"
+    class="schedule-accordion-list empty-state"
+  >
+    No shifts match the selected filters.
+  </div>
+</section>
+
+<!-- =====================================================
+     SELECTED DAY
+     ===================================================== -->
+
+<article
+  id="selectedDayPanel"
+  class="panel selected-day-panel"
+>
+  <header class="panel-heading">
+    <div>
+      <p class="eyebrow">
+        Selected day
+      </p>
+
+      <h2 id="selectedDayHeading">
+        Select a day
+      </h2>
+
+      <p
+        id="selectedDaySummary"
+        class="muted"
+      >
+        Choose a calendar date to review that day’s shifts.
+      </p>
+    </div>
+  </header>
+
+  <div
+    id="selectedDayShifts"
+    class="schedule-accordion-list empty-state"
+  >
+    No date selected.
+  </div>
+</article>
+</section>
+
+<!-- =================================================
+     MY SHIFTS
+     ================================================= -->
+
+<section
+  class="view"
+  data-view-panel="my-shifts"
+>
+  <header class="view-heading">
+    <div>
+      <p class="eyebrow">Your commitments</p>
+
+      <h1>My Shifts</h1>
+
+      <p class="muted">
+        Review pending requests and approved shifts.
+      </p>
+    </div>
+  </header>
+
+  <div
+  id="myShiftsList"
+  class="schedule-accordion-list empty-state"
+>
+    You have no shift requests.
+  </div>
+</section>
+
+
+      <!-- =================================================
+           AVAILABILITY
+           ================================================= -->
+
+      <section
+        class="view"
+        data-view-panel="availability"
+      >
+        <header class="view-heading">
+          <div>
+            <p class="eyebrow">Scheduling preferences</p>
+
+            <h1>Availability</h1>
+
+            <p class="muted">
+              Set your usual weekly availability and any specific dates.
+            </p>
+          </div>
+        </header>
+
+        <div class="availability-layout">
+          <form
+            id="weeklyAvailabilityForm"
+            class="panel form-panel"
+            novalidate
+          >
+            <header class="form-heading">
+              <h2>Usual weekly availability</h2>
+
+              <p class="muted">
+                Choose one option for each day.
+              </p>
+            </header>
+
+            <div class="weekly-availability">
+              <article
+                class="weekday-row"
+                data-weekday="0"
+              >
+                <div class="weekday-name">
+                  Sunday
+                </div>
+
+                <label class="field">
+                  <span class="visually-hidden">
+                    Sunday availability
+                  </span>
+
+                  <select
+                    id="weeklySundayStatus"
+                    data-weekly-status="0"
+                  >
+                    <option value="unavailable">
+                      Unavailable
+                    </option>
+
+                    <option value="open">
+                      Open availability
+                    </option>
+
+                    <option value="morning">
+                      Morning
+                    </option>
+
+                    <option value="afternoon">
+                      Afternoon
+                    </option>
+
+                    <option value="evening">
+                      Evening
+                    </option>
+
+                    <option value="custom">
+                      Custom time
+                    </option>
+                  </select>
+                </label>
+
+                <div
+                  class="weekday-custom-times is-hidden"
+                  data-weekly-custom="0"
+                >
+                  <label class="field">
+                    <span>From</span>
+
+                    <input
+                      id="weeklySundayStart"
+                      type="time"
+                    >
+                  </label>
+
+                  <label class="field">
+                    <span>Until</span>
+
+                    <input
+                      id="weeklySundayEnd"
+                      type="time"
+                    >
+                  </label>
+                </div>
+              </article>
+
+              <article
+                class="weekday-row"
+                data-weekday="1"
+              >
+                <div class="weekday-name">
+                  Monday
+                </div>
+
+                <label class="field">
+                  <span class="visually-hidden">
+                    Monday availability
+                  </span>
+
+                  <select
+                    id="weeklyMondayStatus"
+                    data-weekly-status="1"
+                  >
+                    <option value="unavailable">
+                      Unavailable
+                    </option>
+
+                    <option value="open">
+                      Open availability
+                    </option>
+
+                    <option value="morning">
+                      Morning
+                    </option>
+
+                    <option value="afternoon">
+                      Afternoon
+                    </option>
+
+                    <option value="evening">
+                      Evening
+                    </option>
+
+                    <option value="custom">
+                      Custom time
+                    </option>
+                  </select>
+                </label>
+
+                <div
+                  class="weekday-custom-times is-hidden"
+                  data-weekly-custom="1"
+                >
+                  <label class="field">
+                    <span>From</span>
+
+                    <input
+                      id="weeklyMondayStart"
+                      type="time"
+                    >
+                  </label>
+
+                  <label class="field">
+                    <span>Until</span>
+
+                    <input
+                      id="weeklyMondayEnd"
+                      type="time"
+                    >
+                  </label>
+                </div>
+              </article>
+
+              <article
+                class="weekday-row"
+                data-weekday="2"
+              >
+                <div class="weekday-name">
+                  Tuesday
+                </div>
+
+                <label class="field">
+                  <span class="visually-hidden">
+                    Tuesday availability
+                  </span>
+
+                  <select
+                    id="weeklyTuesdayStatus"
+                    data-weekly-status="2"
+                  >
+                    <option value="unavailable">
+                      Unavailable
+                    </option>
+
+                    <option value="open">
+                      Open availability
+                    </option>
+
+                    <option value="morning">
+                      Morning
+                    </option>
+
+                    <option value="afternoon">
+                      Afternoon
+                    </option>
+
+                    <option value="evening">
+                      Evening
+                    </option>
+
+                    <option value="custom">
+                      Custom time
+                    </option>
+                  </select>
+                </label>
+
+                <div
+                  class="weekday-custom-times is-hidden"
+                  data-weekly-custom="2"
+                >
+                  <label class="field">
+                    <span>From</span>
+
+                    <input
+                      id="weeklyTuesdayStart"
+                      type="time"
+                    >
+                  </label>
+
+                  <label class="field">
+                    <span>Until</span>
+
+                    <input
+                      id="weeklyTuesdayEnd"
+                      type="time"
+                    >
+                  </label>
+                </div>
+              </article>
+
+              <article
+                class="weekday-row"
+                data-weekday="3"
+              >
+                <div class="weekday-name">
+                  Wednesday
+                </div>
+
+                <label class="field">
+                  <span class="visually-hidden">
+                    Wednesday availability
+                  </span>
+
+                  <select
+                    id="weeklyWednesdayStatus"
+                    data-weekly-status="3"
+                  >
+                    <option value="unavailable">
+                      Unavailable
+                    </option>
+
+                    <option value="open">
+                      Open availability
+                    </option>
+
+                    <option value="morning">
+                      Morning
+                    </option>
+
+                    <option value="afternoon">
+                      Afternoon
+                    </option>
+
+                    <option value="evening">
+                      Evening
+                    </option>
+
+                    <option value="custom">
+                      Custom time
+                    </option>
+                  </select>
+                </label>
+
+                <div
+                  class="weekday-custom-times is-hidden"
+                  data-weekly-custom="3"
+                >
+                  <label class="field">
+                    <span>From</span>
+
+                    <input
+                      id="weeklyWednesdayStart"
+                      type="time"
+                    >
+                  </label>
+
+                  <label class="field">
+                    <span>Until</span>
+
+                    <input
+                      id="weeklyWednesdayEnd"
+                      type="time"
+                    >
+                  </label>
+                </div>
+              </article>
+
+              <article
+                class="weekday-row"
+                data-weekday="4"
+              >
+                <div class="weekday-name">
+                  Thursday
+                </div>
+
+                <label class="field">
+                  <span class="visually-hidden">
+                    Thursday availability
+                  </span>
+
+                  <select
+                    id="weeklyThursdayStatus"
+                    data-weekly-status="4"
+                  >
+                    <option value="unavailable">
+                      Unavailable
+                    </option>
+
+                    <option value="open">
+                      Open availability
+                    </option>
+
+                    <option value="morning">
+                      Morning
+                    </option>
+
+                    <option value="afternoon">
+                      Afternoon
+                    </option>
+
+                    <option value="evening">
+                      Evening
+                    </option>
+
+                    <option value="custom">
+                      Custom time
+                    </option>
+                  </select>
+                </label>
+
+                <div
+                  class="weekday-custom-times is-hidden"
+                  data-weekly-custom="4"
+                >
+                  <label class="field">
+                    <span>From</span>
+
+                    <input
+                      id="weeklyThursdayStart"
+                      type="time"
+                    >
+                  </label>
+
+                  <label class="field">
+                    <span>Until</span>
+
+                    <input
+                      id="weeklyThursdayEnd"
+                      type="time"
+                    >
+                  </label>
+                </div>
+              </article>
+
+              <article
+                class="weekday-row"
+                data-weekday="5"
+              >
+                <div class="weekday-name">
+                  Friday
+                </div>
+
+                <label class="field">
+                  <span class="visually-hidden">
+                    Friday availability
+                  </span>
+
+                  <select
+                    id="weeklyFridayStatus"
+                    data-weekly-status="5"
+                  >
+                    <option value="unavailable">
+                      Unavailable
+                    </option>
+
+                    <option value="open">
+                      Open availability
+                    </option>
+
+                    <option value="morning">
+                      Morning
+                    </option>
+
+                    <option value="afternoon">
+                      Afternoon
+                    </option>
+
+                    <option value="evening">
+                      Evening
+                    </option>
+
+                    <option value="custom">
+                      Custom time
+                    </option>
+                  </select>
+                </label>
+
+                <div
+                  class="weekday-custom-times is-hidden"
+                  data-weekly-custom="5"
+                >
+                  <label class="field">
+                    <span>From</span>
+
+                    <input
+                      id="weeklyFridayStart"
+                      type="time"
+                    >
+                  </label>
+
+                  <label class="field">
+                    <span>Until</span>
+
+                    <input
+                      id="weeklyFridayEnd"
+                      type="time"
+                    >
+                  </label>
+                </div>
+              </article>
+
+              <article
+                class="weekday-row"
+                data-weekday="6"
+              >
+                <div class="weekday-name">
+                  Saturday
+                </div>
+
+                <label class="field">
+                  <span class="visually-hidden">
+                    Saturday availability
+                  </span>
+
+                  <select
+                    id="weeklySaturdayStatus"
+                    data-weekly-status="6"
+                  >
+                    <option value="unavailable">
+                      Unavailable
+                    </option>
+
+                    <option value="open">
+                      Open availability
+                    </option>
+
+                    <option value="morning">
+                      Morning
+                    </option>
+
+                    <option value="afternoon">
+                      Afternoon
+                    </option>
+
+                    <option value="evening">
+                      Evening
+                    </option>
+
+                    <option value="custom">
+                      Custom time
+                    </option>
+                  </select>
+                </label>
+
+                <div
+                  class="weekday-custom-times is-hidden"
+                  data-weekly-custom="6"
+                >
+                  <label class="field">
+                    <span>From</span>
+
+                    <input
+                      id="weeklySaturdayStart"
+                      type="time"
+                    >
+                  </label>
+
+                  <label class="field">
+                    <span>Until</span>
+
+                    <input
+                      id="weeklySaturdayEnd"
+                      type="time"
+                    >
+                  </label>
+                </div>
+              </article>
+            </div>
+
+            <label class="field">
+              <span>General scheduling note</span>
+
+              <textarea
+                id="weeklyAvailabilityNote"
+                rows="3"
+                placeholder="Transportation, notice needed, or other helpful information"
+              ></textarea>
+            </label>
+
+            <button
+              class="button button-primary button-full"
+              type="submit"
+            >
+              Save weekly availability
+            </button>
+
+            <p
+              id="weeklyAvailabilityFeedback"
+              class="form-feedback"
+              role="status"
+              aria-live="polite"
+            ></p>
+          </form>
+
+          <section class="panel form-panel">
+            <header class="form-heading">
+              <h2>Specific date</h2>
+
+              <p class="muted">
+                Add an exception for one calendar date.
+              </p>
+            </header>
+
+            <form
+              id="specificAvailabilityForm"
+              class="nested-form"
+              novalidate
+            >
+              <label class="field">
+                <span>Date</span>
+
+                <input
+                  id="specificAvailabilityDate"
+                  type="date"
+                  required
+                >
+              </label>
+
+              <label class="field">
+                <span>Status</span>
+
+                <select id="specificAvailabilityStatus">
+                  <option value="available">
+                    Available
+                  </option>
+
+                  <option value="unavailable">
+                    Unavailable
+                  </option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Time</span>
+
+                <select id="specificAvailabilityTime">
+                  <option value="open">
+                    Open availability
+                  </option>
+
+                  <option value="morning">
+                    Morning
+                  </option>
+
+                  <option value="afternoon">
+                    Afternoon
+                  </option>
+
+                  <option value="evening">
+                    Evening
+                  </option>
+
+                  <option value="custom">
+                    Custom time
+                  </option>
+                </select>
+              </label>
+
+              <div
+                id="specificAvailabilityCustomTimes"
+                class="form-grid two-columns is-hidden"
+              >
+                <label class="field">
+                  <span>From</span>
+
+                  <input
+                    id="specificAvailabilityStart"
+                    type="time"
+                  >
+                </label>
+
+                <label class="field">
+                  <span>Until</span>
+
+                  <input
+                    id="specificAvailabilityEnd"
+                    type="time"
+                  >
+                </label>
+              </div>
+
+              <label class="field">
+                <span>Note</span>
+
+                <textarea
+                  id="specificAvailabilityNote"
+                  rows="3"
+                  placeholder="Optional details"
+                ></textarea>
+              </label>
+
+              <button
+                class="button button-primary button-full"
+                type="submit"
+              >
+                Save date
+              </button>
+
+              <p
+                id="specificAvailabilityFeedback"
+                class="form-feedback"
+                role="status"
+                aria-live="polite"
+              ></p>
+            </form>
+
+            <div class="subsection">
+              <h3>Saved dates</h3>
+
+              <div
+                id="specificAvailabilityList"
+                class="stack-list empty-state"
+              >
+                No specific dates saved.
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- =================================================
+           HOURS
+           ================================================= -->
+
+      <section
+        class="view"
+        data-view-panel="hours"
+      >
+        <header class="view-heading">
+          <div>
+            <p class="eyebrow">Volunteer time</p>
+
+            <h1>Hours</h1>
+
+            <p class="muted">
+              Submit completed service time and review its status.
+            </p>
+          </div>
+
+          <button
+            id="openHoursDialogButton"
+            class="button button-primary"
+            type="button"
+          >
+            Submit hours
+          </button>
+        </header>
+
+        <div
+          id="hoursList"
+          class="card-list empty-state"
+        >
+          No hours submitted.
+        </div>
+      </section>
+
+      <!-- =================================================
+           MESSAGES
+           ================================================= -->
+
+      <section
+        class="view"
+        data-view-panel="messages"
+      >
+        <header class="view-heading">
+          <div>
+            <p class="eyebrow">Stay informed</p>
+
+            <h1>Messages</h1>
+
+            <p class="muted">
+              Read announcements and schedule updates.
+            </p>
+          </div>
+
+          <button
+            id="openMessageDialogButton"
+            class="button button-primary admin-only is-hidden"
+            type="button"
+          >
+            New message
+          </button>
+        </header>
+
+        <div
+          id="messagesList"
+          class="message-list empty-state"
+        >
+          No messages posted.
+        </div>
+      </section>
+
+      <!-- =================================================
+           PROFILE
+           ================================================= -->
+
+      <section
+        class="view"
+        data-view-panel="profile"
+      >
+        <header class="view-heading">
+          <div>
+            <p class="eyebrow">Your account</p>
+
+            <h1>Profile</h1>
+          </div>
+        </header>
+
+        <form
+          id="profileForm"
+          class="panel form-panel profile-form"
+          novalidate
+        >
+          <div class="form-grid two-columns">
+            <label class="field">
+              <span>First name</span>
+
+              <input
+                id="profileFirstName"
+                type="text"
+                required
+              >
+            </label>
+
+            <label class="field">
+              <span>Last name</span>
+
+              <input
+                id="profileLastName"
+                type="text"
+                required
+              >
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Display name</span>
+
+            <input
+              id="profileDisplayName"
+              type="text"
+              readonly
+            >
+          </label>
+
+          <label class="field">
+            <span>Email address</span>
+
+            <input
+              id="profileEmail"
+              type="email"
+              readonly
+            >
+          </label>
+
+          <label class="field">
+            <span>Phone number</span>
+
+            <input
+              id="profilePhone"
+              type="tel"
+              autocomplete="tel"
+            >
+          </label>
+
+          <label class="field">
+            <span>Preferred contact method</span>
+
+            <select id="profileContactMethod">
+              <option value="email">
+                Email
+              </option>
+
+              <option value="phone">
+                Phone call
+              </option>
+
+              <option value="text">
+                Text message
+              </option>
+            </select>
+          </label>
+
+          <button
+            class="button button-primary"
+            type="submit"
+          >
+            Save profile
+          </button>
+
+          <p
+            id="profileFeedback"
+            class="form-feedback"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </form>
+      </section>
+
+      <!-- =================================================
+     MANAGE
+     ================================================= -->
+
+<section
+  class="view"
+  data-view-panel="manage"
+>
+  <header class="view-heading">
+    <div>
+      <p class="eyebrow">
+        Coordinator tools
+      </p>
+
+      <h1>
+        Manage
+      </h1>
+
+      <p class="muted">
+        Create shifts, review requests, approve hours and view team availability.
+      </p>
+    </div>
+
+    <button
+      id="openCreateShiftDialogButton"
+      class="button button-primary"
+      type="button"
+    >
+      Create shift
+    </button>
+  </header>
+
+  <div class="management-grid">
+
+    <!-- ===============================================
+         PENDING SHIFT REQUESTS
+         =============================================== -->
+
+    <article class="panel management-panel">
+      <header class="panel-heading management-panel-heading">
+  <div class="management-title-row">
+    <h2>
+      Pending shift requests
+    </h2>
+
+    <span
+      id="pendingShiftRequestBadge"
+      class="management-notification-badge is-hidden"
+      aria-label="Pending shift requests"
+    >
+      0 requests
+    </span>
+  </div>
+
+  <p class="muted">
+    Select a person to review their pending shift requests.
+  </p>
+</header>
+
+      <label class="field management-filter">
+        <span>
+          Person with pending requests
+        </span>
+
+        <select id="pendingShiftRequestPersonSelect">
+          <option value="">
+            Select a person
+          </option>
+        </select>
+      </label>
+
+      <div
+        id="pendingShiftRequestsList"
+        class="management-list empty-state"
+      >
+        Select a person to review pending requests.
+      </div>
+    </article>
+
+    <!-- ===============================================
+         UPCOMING SHIFTS
+         =============================================== -->
+
+    <article class="panel">
+  <header class="panel-heading">
+    <div>
+      <h2>Upcoming shifts</h2>
+
+      <p class="muted">
+        Search and filter upcoming shift records.
+      </p>
+    </div>
+
+    <span
+      id="manageShiftCount"
+      class="result-count"
+    >
+      0 shifts
+    </span>
+  </header>
+
+  <div class="manage-shift-tools">
+    <label class="field manage-shift-search">
+      <span>Search shifts</span>
+
+      <input
+        id="manageShiftSearch"
+        type="search"
+        placeholder="Search title, location, type, description, or duties"
+        autocomplete="off"
+      >
+    </label>
+
+    <div class="form-grid two-columns manage-shift-filters">
+      <label class="field">
+        <span>Shift type</span>
+
+        <select id="manageShiftTypeFilter">
+          <option value="">
+            All shift types
+          </option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Location</span>
+
+        <select id="manageShiftLocationFilter">
+          <option value="">
+            All locations
+          </option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <div
+    id="manageShiftsList"
+    class="management-list empty-state"
+  >
+    No upcoming shifts.
+  </div>
+</article>
+
+    <!-- ===============================================
+         PENDING HOURS
+         =============================================== -->
+
+    <article class="panel management-panel">
+      <header class="panel-heading management-panel-heading">
+  <div class="management-title-row">
+    <h2>
+      Pending hours
+    </h2>
+
+    <span
+      id="pendingHoursBadge"
+      class="management-notification-badge is-hidden"
+      aria-label="Pending hours"
+    >
+      0 entries
+    </span>
+  </div>
+
+  <p class="muted">
+    Select a person to review their pending time entries.
+  </p>
+</header>
+
+      <label class="field management-filter">
+        <span>
+          Person with pending hours
+        </span>
+
+        <select id="pendingHoursPersonSelect">
+          <option value="">
+            Select a person
+          </option>
+        </select>
+      </label>
+
+      <div
+        id="pendingHoursList"
+        class="management-list empty-state"
+      >
+        Select a person to review pending hours.
+      </div>
+    </article>
+
+    <!-- ===============================================
+         TEAM AVAILABILITY
+         =============================================== -->
+
+    <article class="panel management-panel">
+      <header class="panel-heading management-panel-heading">
+        <div>
+          <div class="management-title-row">
+            <h2>
+              Team availability
+            </h2>
+
+            <span
+              id="availabilityUpdateBadge"
+              class="management-notification-badge notification-label is-hidden"
+              aria-label="Availability updates"
+            >
+              Updated
+            </span>
+          </div>
+
+          <p class="muted">
+            Review availability for volunteers, coordinators and administrators.
+          </p>
+        </div>
+      </header>
+
+      <label class="field management-filter">
+        <span>
+          Team member
+        </span>
+
+        <select id="availabilityVolunteerSelect">
+          <option value="">
+            Select a team member
+          </option>
+        </select>
+      </label>
+
+      <div
+        id="adminAvailabilitySummary"
+        class="stack-list empty-state"
+      >
+        Select a team member to view availability.
+      </div>
+    </article>
+
+  </div>
+</section>
+
+      <!-- =================================================
+           REPORTS
+           ================================================= -->
+
+      <section
+        class="view"
+        data-view-panel="reports"
+      >
+        <header class="view-heading">
+          <div>
+            <p class="eyebrow">Printable records</p>
+
+            <h1>Reports</h1>
+
+            <p class="muted">
+              Choose a date range for volunteer-hour records.
+            </p>
+          </div>
+        </header>
+
+        <form
+          id="reportsForm"
+          class="panel form-panel reports-form"
+        >
+          <div class="form-grid two-columns">
+            <label class="field">
+              <span>Start date</span>
+
+              <input
+                id="reportStartDate"
+                type="date"
+              >
+            </label>
+
+            <label class="field">
+              <span>End date</span>
+
+              <input
+                id="reportEndDate"
+                type="date"
+              >
+            </label>
+          </div>
+
+          <div class="button-row">
+            <button
+              id="printHoursReportButton"
+              class="button button-primary"
+              type="button"
+            >
+              Print hours report
+            </button>
+
+            <button
+              id="downloadHoursCsvButton"
+              class="button button-secondary"
+              type="button"
+            >
+              Download CSV
+            </button>
+          </div>
+
+          <p
+            id="reportsFeedback"
+            class="form-feedback"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- =====================================================
+       SHIFT REQUEST DIALOG
+       ===================================================== -->
+
+  <dialog
+    id="shiftRequestDialog"
+    class="dialog"
+  >
+    <form
+      id="shiftRequestForm"
+      class="dialog-card"
+      novalidate
+    >
+      <header class="dialog-header">
+        <div>
+          <p class="eyebrow">Shift request</p>
+
+          <h2 id="shiftRequestTitle">
+            Request shift
+          </h2>
+        </div>
+
+        <button
+          class="dialog-close"
+          type="button"
+          data-close-dialog
+          aria-label="Close shift request"
+        >
+          ×
+        </button>
+      </header>
+
+      <div id="shiftRequestDetails"></div>
+
+      <fieldset class="choice-group">
+        <legend>Requested time</legend>
+
+        <label class="radio-option">
+          <input
+            type="radio"
+            name="shiftRequestType"
+            value="full"
+            checked
+          >
+
+          <span>Full shift</span>
+        </label>
+
+        <label class="radio-option">
+          <input
+            type="radio"
+            name="shiftRequestType"
+            value="partial"
+          >
+
+          <span>Partial shift</span>
+        </label>
+      </fieldset>
+
+      <div
+        id="partialShiftFields"
+        class="form-grid two-columns is-hidden"
+      >
+        <label class="field">
+          <span>From</span>
+
+          <input
+            id="partialShiftStart"
+            type="time"
+          >
+        </label>
+
+        <label class="field">
+          <span>Until</span>
+
+          <input
+            id="partialShiftEnd"
+            type="time"
+          >
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Note for the coordinator</span>
+
+        <textarea
+          id="shiftRequestNote"
+          rows="3"
+          placeholder="Optional information"
+        ></textarea>
+      </label>
+
+      <div class="dialog-actions">
+        <button
+          class="button button-secondary"
+          type="button"
+          data-close-dialog
+        >
+          Cancel
+        </button>
+
+        <button
+          class="button button-primary"
+          type="submit"
+        >
+          Submit request
+        </button>
+      </div>
+
+      <p
+        id="shiftRequestFeedback"
+        class="form-feedback"
+        role="status"
+        aria-live="polite"
+      ></p>
+    </form>
+  </dialog>
+
+  <!-- =====================================================
+       HOURS DIALOG
+       ===================================================== -->
+
+  <dialog
+    id="hoursDialog"
+    class="dialog"
+  >
+    <form
+      id="hoursForm"
+      class="dialog-card"
+      novalidate
+    >
+      <header class="dialog-header">
+        <div>
+          <p class="eyebrow">Time entry</p>
+
+          <h2>Submit volunteer hours</h2>
+        </div>
+
+        <button
+          class="dialog-close"
+          type="button"
+          data-close-dialog
+          aria-label="Close hours form"
+        >
+          ×
+        </button>
+      </header>
+
+      <label class="field">
+        <span>Date</span>
+
+        <input
+          id="hoursDate"
+          type="date"
+          required
+        >
+      </label>
+
+      <div class="form-grid two-columns">
+        <label class="field">
+          <span>Start time</span>
+
+          <input
+            id="hoursStartTime"
+            type="time"
+            required
+          >
+        </label>
+
+        <label class="field">
+          <span>End time</span>
+
+          <input
+            id="hoursEndTime"
+            type="time"
+            required
+          >
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Related shift</span>
+
+        <select id="hoursShiftSelect">
+          <option value="">
+            No specific shift
+          </option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Note</span>
+
+        <textarea
+          id="hoursNote"
+          rows="3"
+          placeholder="Optional details"
+        ></textarea>
+      </label>
+
+      <div class="dialog-actions">
+        <button
+          class="button button-secondary"
+          type="button"
+          data-close-dialog
+        >
+          Cancel
+        </button>
+
+        <button
+          class="button button-primary"
+          type="submit"
+        >
+          Submit hours
+        </button>
+      </div>
+
+      <p
+        id="hoursFeedback"
+        class="form-feedback"
+        role="status"
+        aria-live="polite"
+      ></p>
+    </form>
+  </dialog>
+
+  <!-- =====================================================
+       CREATE SHIFT DIALOG
+       ===================================================== -->
+
+  <dialog
+    id="createShiftDialog"
+    class="dialog"
+  >
+    <form
+      id="createShiftForm"
+      class="dialog-card"
+      novalidate
+    >
+      <header class="dialog-header">
+        <div>
+          <p class="eyebrow">Coordinator tools</p>
+
+          <h2 id="createShiftDialogTitle">
+  Create shift
+</h2>
+        </div>
+
+        <button
+          class="dialog-close"
+          type="button"
+          data-close-dialog
+          aria-label="Close create shift form"
+        >
+          ×
+        </button>
+      </header>
+
+      <label class="field">
+        <span>Shift title</span>
+
+        <input
+          id="createShiftTitle"
+          type="text"
+          placeholder="Saturday Store Support"
+          required
+        >
+      </label>
+
+      <div class="form-grid two-columns">
+        <label class="field">
+          <span>Date</span>
+
+          <input
+            id="createShiftDate"
+            type="date"
+            required
+          >
+        </label>
+
+        <label class="field">
+          <span>Shift type</span>
+
+          <select
+            id="createShiftType"
+            required
+          >
+            <option value="Thrift Store">
+              Thrift Store
+            </option>
+
+            <option value="Hauler">
+              Hauler
+            </option>
+
+            <option value="Warehouse">
+              Warehouse
+            </option>
+
+            <option value="Delivery">
+              Delivery
+            </option>
+
+            <option value="Donation Pickup">
+              Donation Pickup
+            </option>
+
+            <option value="Cleaning">
+              Cleaning
+            </option>
+
+            <option value="Administrative">
+              Administrative
+            </option>
+
+            <option value="Special Event">
+              Special Event
+            </option>
+
+            <option value="Other">
+              Other
+            </option>
+          </select>
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Shift time</span>
+
+        <select id="createShiftTimePreset">
+          <option value="">
+            Select a time
+          </option>
+
+          <option value="08:00|12:00">
+            8:00 AM to 12:00 PM
+          </option>
+
+          <option value="09:00|13:00">
+            9:00 AM to 1:00 PM
+          </option>
+
+          <option value="09:00|15:00">
+            9:00 AM to 3:00 PM
+          </option>
+
+          <option value="10:00|14:00">
+            10:00 AM to 2:00 PM
+          </option>
+
+          <option value="12:00|16:00">
+            12:00 PM to 4:00 PM
+          </option>
+
+          <option value="custom">
+            Custom time
+          </option>
+        </select>
+      </label>
+
+      <div
+        id="createShiftCustomTimes"
+        class="form-grid two-columns is-hidden"
+      >
+        <label class="field">
+          <span>Start time</span>
+
+          <input
+            id="createShiftStartTime"
+            type="time"
+          >
+        </label>
+
+        <label class="field">
+          <span>End time</span>
+
+          <input
+            id="createShiftEndTime"
+            type="time"
+          >
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Staffing</span>
+
+        <select id="createShiftStaffingPreset">
+          <option value="1|2|3">
+            Small team: 1 minimum, 2 preferred, 3 maximum
+          </option>
+
+          <option
+            value="2|4|6"
+            selected
+          >
+            Standard team: 2 minimum, 4 preferred, 6 maximum
+          </option>
+
+          <option value="3|5|8">
+            Large team: 3 minimum, 5 preferred, 8 maximum
+          </option>
+
+          <option value="custom">
+            Custom staffing
+          </option>
+        </select>
+      </label>
+
+      <div
+        id="createShiftCustomStaffing"
+        class="form-grid three-columns is-hidden"
+      >
+        <label class="field">
+          <span>Minimum</span>
+
+          <input
+            id="createShiftMinimum"
+            type="number"
+            min="0"
+            value="2"
+          >
+        </label>
+
+        <label class="field">
+          <span>Preferred</span>
+
+          <input
+            id="createShiftPreferred"
+            type="number"
+            min="1"
+            value="4"
+          >
+        </label>
+
+        <label class="field">
+          <span>Maximum</span>
+
+          <input
+            id="createShiftMaximum"
+            type="number"
+            min="1"
+            value="6"
+          >
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Location</span>
+
+        <select id="createShiftLocationPreset">
+          <option value="">
+            Select a location
+          </option>
+
+          <option value="Bless This Home Thrift Store">
+            Thrift Store
+          </option>
+
+          <option value="Main Warehouse">
+            Main Warehouse
+          </option>
+
+          <option value="Hauler Station">
+            Hauler Station
+          </option>
+
+          <option value="Delivery Route">
+            Delivery Route
+          </option>
+
+          <option value="custom">
+            Other location
+          </option>
+        </select>
+      </label>
+
+      <label
+        id="createShiftCustomLocationField"
+        class="field is-hidden"
+      >
+        <span>Other location</span>
+
+        <input
+          id="createShiftCustomLocation"
+          type="text"
+        >
+      </label>
+
+      <details class="optional-section">
+        <summary>
+          Description and day notes
+        </summary>
+
+        <div class="optional-section-content">
+          <label class="field">
+            <span>Description</span>
+
+            <textarea
+              id="createShiftDescription"
+              rows="3"
+              placeholder="Brief description of the shift"
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Duties and notes</span>
+
+            <textarea
+              id="createShiftDuties"
+              rows="4"
+              placeholder="One duty or instruction per line"
+            ></textarea>
+          </label>
+        </div>
+      </details>
+
+      <div class="dialog-actions">
+        <button
+          class="button button-secondary"
+          type="button"
+          data-close-dialog
+        >
+          Cancel
+        </button>
+
+        <button
+  id="createShiftSubmitButton"
+  class="button button-primary"
+  type="submit"
+>
+  Create shift
+</button>
+      </div>
+
+      <p
+        id="createShiftFeedback"
+        class="form-feedback"
+        role="status"
+        aria-live="polite"
+      ></p>
+    </form>
+  </dialog>
+
+  <!-- =====================================================
+       MESSAGE DIALOG
+       ===================================================== -->
+
+  <dialog
+    id="messageDialog"
+    class="dialog"
+  >
+    <form
+      id="messageForm"
+      class="dialog-card"
+      novalidate
+    >
+      <header class="dialog-header">
+        <div>
+          <p class="eyebrow">Messages</p>
+
+          <h2>Post a message</h2>
+        </div>
+
+        <button
+          class="dialog-close"
+          type="button"
+          data-close-dialog
+          aria-label="Close message form"
+        >
+          ×
+        </button>
+      </header>
+
+      <label class="field">
+        <span>Title</span>
+
+        <input
+          id="messageTitle"
+          type="text"
+          required
+        >
+      </label>
+
+      <label class="field">
+        <span>Category</span>
+
+        <select id="messageCategory">
+          <option value="Announcements">
+            Announcements
+          </option>
+
+          <option value="Schedule Changes">
+            Schedule Changes
+          </option>
+
+          <option value="Volunteer Updates">
+            Volunteer Updates
+          </option>
+
+          <option value="Hauler Updates">
+            Hauler Updates
+          </option>
+
+          <option value="General">
+            General
+          </option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Message</span>
+
+        <textarea
+          id="messageBody"
+          rows="5"
+          required
+        ></textarea>
+      </label>
+
+      <label class="check-option">
+        <input
+          id="messagePinned"
+          type="checkbox"
+        >
+
+        <span>Pin this message</span>
+      </label>
+
+      <div class="dialog-actions">
+        <button
+          class="button button-secondary"
+          type="button"
+          data-close-dialog
+        >
+          Cancel
+        </button>
+
+        <button
+          class="button button-primary"
+          type="submit"
+        >
+          Post message
+        </button>
+      </div>
+
+      <p
+        id="messageFeedback"
+        class="form-feedback"
+        role="status"
+        aria-live="polite"
+      ></p>
+    </form>
+  </dialog>
+
+  <!-- =====================================================
+       REQUEST REVIEW DIALOG
+       ===================================================== -->
+
+  <dialog
+    id="requestReviewDialog"
+    class="dialog"
+  >
+    <form
+      id="requestReviewForm"
+      class="dialog-card"
+      novalidate
+    >
+      <header class="dialog-header">
+        <div>
+          <p class="eyebrow">Shift request</p>
+
+          <h2>Review request</h2>
+        </div>
+
+        <button
+          class="dialog-close"
+          type="button"
+          data-close-dialog
+          aria-label="Close request review"
+        >
+          ×
+        </button>
+      </header>
+
+      <div id="requestReviewDetails"></div>
+
+      <label class="field">
+        <span>Response note</span>
+
+        <textarea
+          id="requestReviewNote"
+          rows="3"
+          placeholder="Optional note for the volunteer"
+        ></textarea>
+      </label>
+
+      <div class="dialog-actions dialog-actions-three">
+        <button
+          class="button button-secondary"
+          type="button"
+          data-close-dialog
+        >
+          Cancel
+        </button>
+
+        <button
+          id="declineShiftRequestButton"
+          class="button button-danger"
+          type="button"
+        >
+          Decline
+        </button>
+
+        <button
+          id="approveShiftRequestButton"
+          class="button button-primary"
+          type="button"
+        >
+          Approve
+        </button>
+      </div>
+
+      <p
+        id="requestReviewFeedback"
+        class="form-feedback"
+        role="status"
+        aria-live="polite"
+      ></p>
+    </form>
+  </dialog>
+</body>
+</html>
