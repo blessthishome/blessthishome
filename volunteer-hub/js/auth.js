@@ -681,8 +681,7 @@
     }
 
     const redirectTo =
-      `${window.location.origin}` +
-      `${window.location.pathname}`;
+  "https://blessthishome.github.io/blessthishome/set-password.html";
 
     const { error } =
       await state.supabase.auth
