@@ -90,17 +90,43 @@
   }
 
   function normalizeTime(value) {
-    const text = String(value || "").trim();
+  const text = String(
+    value || ""
+  ).trim();
 
-    if (!text) {
-      return null;
-    }
-
-    return /^\d{2}:\d{2}$/.test(text)
-      ? text
-      : null;
+  if (!text) {
+    return null;
   }
 
+  /*
+   * Accepts both browser time values:
+   *   10:00
+   *
+   * And Supabase/Postgres time values:
+   *   10:00:00
+   */
+  const match = text.match(
+    /^(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+
+  if (
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    return null;
+  }
+
+  return `${match[1]}:${match[2]}`;
+}
   function normalizeDate(value) {
     const text = String(value || "").trim();
 
