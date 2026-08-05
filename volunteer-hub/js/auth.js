@@ -615,6 +615,8 @@
         email: normalizeEmail(email),
         password,
         options: {
+          emailRedirectTo:
+  "https://blessthishome.github.io/blessthishome/volunteer-hub/",
           data: {
             first_name: cleanName(firstName),
             last_name: cleanName(lastName),
