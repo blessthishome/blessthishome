@@ -434,67 +434,153 @@
      ======================================================= */
 
   async function loadSupabaseProfile(user) {
-    if (!user?.id) {
-      return null;
-    }
+  if (!user?.id) {
+    return null;
+  }
 
-    const { data, error } = await state.supabase
-      .from("volunteer_hub_profiles")
-      .select("*")
-      .eq("auth_user_id", user.id)
-      .maybeSingle();
+  /*
+   * First check by auth_user_id.
+   * This is the normal production relationship.
+   */
+  const {
+    data: profileByAuthId,
+    error: authIdError
+  } = await state.supabase
+    .from("volunteer_hub_profiles")
+    .select("*")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
 
-    if (error) {
-      throw error;
-    }
+  if (authIdError) {
+    throw authIdError;
+  }
 
-    if (data) {
-      return data;
-    }
+  if (profileByAuthId) {
+    return profileByAuthId;
+  }
 
+  /*
+   * Older rows may use the Auth user ID as the profile ID
+   * but have a missing auth_user_id.
+   */
+  const {
+    data: profileById,
+    error: profileIdError
+  } = await state.supabase
+    .from("volunteer_hub_profiles")
+    .select("*")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profileIdError) {
+    throw profileIdError;
+  }
+
+  if (profileById) {
     /*
-     * This fallback supports a fresh account if the database
-     * trigger has not created its profile yet.
+     * Repair the missing Auth relationship.
      */
-    const metadata = user.user_metadata || {};
-    const firstName = cleanName(
-      metadata.first_name
-    );
-    const lastName = cleanName(
-      metadata.last_name
-    );
+    if (!profileById.auth_user_id) {
+      const {
+        data: repairedProfile,
+        error: repairError
+      } = await state.supabase
+        .from("volunteer_hub_profiles")
+        .update({
+          auth_user_id: user.id,
+          updated_at:
+            new Date().toISOString()
+        })
+        .eq("id", user.id)
+        .select("*")
+        .single();
 
-    const newProfile = {
-  id: user.id,
-  auth_user_id: user.id,
-      first_name: firstName,
-      last_name: lastName,
-      display_name: makeDisplayName(
+      if (repairError) {
+        throw repairError;
+      }
+
+      return repairedProfile;
+    }
+
+    return profileById;
+  }
+
+  /*
+   * No profile exists, so create one.
+   * Every self-created account starts as a volunteer.
+   */
+  const metadata =
+    user.user_metadata || {};
+
+  const firstName =
+    cleanName(
+      metadata.first_name
+    ) || "Volunteer";
+
+  const lastName =
+    cleanName(
+      metadata.last_name
+    ) || "Member";
+
+  const newProfile = {
+    id: user.id,
+    auth_user_id: user.id,
+    first_name: firstName,
+    last_name: lastName,
+    display_name:
+      makeDisplayName(
         firstName,
         lastName
       ),
-      email: normalizeEmail(user.email),
-      phone: "",
-      role: "volunteer",
-      account_status: "active",
-      preferred_contact_method: "email"
-    };
+    email:
+      normalizeEmail(user.email),
+    phone: "",
+    role: "volunteer",
+    account_status: "active",
+    preferred_contact_method:
+      "email"
+  };
 
+  const {
+    data: insertedProfile,
+    error: insertError
+  } = await state.supabase
+    .from("volunteer_hub_profiles")
+    .insert(newProfile)
+    .select("*")
+    .single();
+
+  /*
+   * Another process may have created the profile between
+   * our lookup and insert. Re-read it instead of failing
+   * with a duplicate primary-key error.
+   */
+  if (
+    insertError &&
+    insertError.code === "23505"
+  ) {
     const {
-      data: insertedProfile,
-      error: insertError
+      data: existingProfile,
+      error: existingError
     } = await state.supabase
       .from("volunteer_hub_profiles")
-      .insert(newProfile)
       .select("*")
+      .eq("id", user.id)
       .single();
 
-    if (insertError) {
-      throw insertError;
+    if (existingError) {
+      throw existingError;
     }
 
-    return insertedProfile;
+    return existingProfile;
   }
+
+  if (insertError) {
+    throw insertError;
+  }
+
+  return insertedProfile;
+}
 
   async function loadProfile(user = state.user) {
     if (state.demoMode) {
@@ -611,22 +697,22 @@
     }
 
     const { data, error } =
-      await state.supabase.auth.signUp({
-        email: normalizeEmail(email),
-        password,
-        options: {
-          emailRedirectTo:
-  "https://blessthishome.github.io/blessthishome/volunteer-hub/",
-          data: {
-            first_name: cleanName(firstName),
-            last_name: cleanName(lastName),
-            display_name: makeDisplayName(
-              firstName,
-              lastName
-            )
-          }
-        }
-      });
+  await state.supabase.auth.signUp({
+    email: normalizeEmail(email),
+    password,
+    options: {
+      emailRedirectTo:
+        "https://blessthishome.github.io/blessthishome/volunteer-hub/",
+      data: {
+        first_name: cleanName(firstName),
+        last_name: cleanName(lastName),
+        display_name: makeDisplayName(
+          firstName,
+          lastName
+        )
+      }
+    }
+  });
 
     if (error) {
       throw error;
