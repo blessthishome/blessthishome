@@ -5967,7 +5967,11 @@ async function refreshAvailabilityUpdateBadge() {
     "availabilityUpdateBadge"
   );
 
-  if (!badge) {
+  const select = byId(
+    "availabilityVolunteerSelect"
+  );
+
+  if (!badge || !select) {
     return;
   }
 
@@ -6012,30 +6016,93 @@ async function refreshAvailabilityUpdateBadge() {
               ) || 0
             );
 
-          return (
-            latestTimestamp >
-            viewedTimestamp
-          );
+          return {
+            profileId: profile.id,
+            displayName:
+              profile.display_name ||
+              "Team member",
+            hasUpdate:
+              latestTimestamp >
+              viewedTimestamp
+          };
         }
       )
     );
 
-  const updateCount =
-    results.filter(
-      (result) =>
-        result.status ===
+  const updatedProfiles =
+    results
+      .filter(
+        (result) =>
+          result.status ===
           "fulfilled" &&
-        result.value === true
-    ).length;
+          result.value.hasUpdate
+      )
+      .map(
+        (result) =>
+          result.value
+      );
+
+  const updatedProfileIds =
+    new Set(
+      updatedProfiles.map(
+        (profile) =>
+          profile.profileId
+      )
+    );
+
+  [...select.options].forEach(
+    (option) => {
+      if (!option.value) {
+        return;
+      }
+
+      const profile =
+        appState.profiles.find(
+          (item) =>
+            item.id ===
+            option.value
+        );
+
+      if (!profile) {
+        return;
+      }
+
+      option.textContent =
+        updatedProfileIds.has(
+          profile.id
+        )
+          ? `${profile.display_name} · Updated`
+          : profile.display_name;
+    }
+  );
+
+  if (!updatedProfiles.length) {
+    badge.classList.add(
+      "is-hidden"
+    );
+
+    badge.removeAttribute(
+      "title"
+    );
+
+    return;
+  }
 
   badge.textContent =
-    updateCount > 0
-      ? String(updateCount)
-      : "Updated";
+    String(
+      updatedProfiles.length
+    );
 
-  badge.classList.toggle(
-    "is-hidden",
-    updateCount === 0
+  badge.title =
+    updatedProfiles
+      .map(
+        (profile) =>
+          `${profile.displayName} updated availability`
+      )
+      .join("\n");
+
+  badge.classList.remove(
+    "is-hidden"
   );
 }
 
