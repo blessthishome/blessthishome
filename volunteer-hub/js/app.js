@@ -3895,15 +3895,6 @@ function wireMyShiftActions(
   renderManageShifts();
   renderPendingHours();
   updateManagementBadges();
-
-  refreshAvailabilityUpdateBadge().catch(
-    (error) => {
-      console.warn(
-        "Availability notifications could not be refreshed:",
-        error
-      );
-    }
-  );
 }
 
   function populatePendingShiftRequestPersonSelect() {
@@ -5872,239 +5863,7 @@ function openEditShiftDialog(
      ADMIN AVAILABILITY
      ======================================================= */
 
-function availabilityViewedStorageKey(
-  profileId
-) {
-  return [
-    "bth_availability_viewed",
-    state.profile.id,
-    profileId
-  ].join("_");
-}
 
-function latestAvailabilityTimestamp(
-  summary
-) {
-  const timestamps = [];
-
-  if (
-    summary?.weekly?.updated_at
-  ) {
-    timestamps.push(
-      summary.weekly.updated_at
-    );
-  }
-
-  if (
-    summary?.weekly?.created_at
-  ) {
-    timestamps.push(
-      summary.weekly.created_at
-    );
-  }
-
-  const specificRows =
-    Array.isArray(summary?.specific)
-      ? summary.specific
-      : [];
-
-  specificRows.forEach((row) => {
-    if (row.updated_at) {
-      timestamps.push(
-        row.updated_at
-      );
-    }
-
-    if (row.created_at) {
-      timestamps.push(
-        row.created_at
-      );
-    }
-  });
-
-  const validTimes =
-    timestamps
-      .map((value) =>
-        new Date(value).getTime()
-      )
-      .filter(
-        (value) =>
-          Number.isFinite(value)
-      );
-
-  return validTimes.length
-    ? Math.max(...validTimes)
-    : 0;
-}
-
-function markAvailabilityViewed(
-  profileId,
-  summary
-) {
-  if (!profileId) {
-    return;
-  }
-
-  const latestTimestamp =
-    latestAvailabilityTimestamp(
-      summary
-    );
-
-  if (!latestTimestamp) {
-    return;
-  }
-
-  localStorage.setItem(
-    availabilityViewedStorageKey(
-      profileId
-    ),
-    String(latestTimestamp)
-  );
-}
-
-async function refreshAvailabilityUpdateBadge() {
-  const badge = byId(
-    "availabilityUpdateBadge"
-  );
-
-  const select = byId(
-    "availabilityVolunteerSelect"
-  );
-
-  if (!badge || !select) {
-    return;
-  }
-
-  const teamMembers =
-    appState.profiles.filter(
-      (profile) =>
-        profile.account_status ===
-          "active" &&
-        profile.id !==
-          state.profile.id
-    );
-
-  if (!teamMembers.length) {
-    badge.classList.add(
-      "is-hidden"
-    );
-
-    return;
-  }
-
-  const results =
-    await Promise.allSettled(
-      teamMembers.map(
-        async (profile) => {
-          const summary =
-            await dataApi
-              .getAvailabilitySummary(
-                profile.id
-              );
-
-          const latestTimestamp =
-            latestAvailabilityTimestamp(
-              summary
-            );
-
-          const viewedTimestamp =
-            Number(
-              localStorage.getItem(
-                availabilityViewedStorageKey(
-                  profile.id
-                )
-              ) || 0
-            );
-
-          return {
-            profileId: profile.id,
-            displayName:
-              profile.display_name ||
-              "Team member",
-            hasUpdate:
-              latestTimestamp >
-              viewedTimestamp
-          };
-        }
-      )
-    );
-
-  const updatedProfiles =
-    results
-      .filter(
-        (result) =>
-          result.status ===
-          "fulfilled" &&
-          result.value.hasUpdate
-      )
-      .map(
-        (result) =>
-          result.value
-      );
-
-  const updatedProfileIds =
-    new Set(
-      updatedProfiles.map(
-        (profile) =>
-          profile.profileId
-      )
-    );
-
-  [...select.options].forEach(
-    (option) => {
-      if (!option.value) {
-        return;
-      }
-
-      const profile =
-        appState.profiles.find(
-          (item) =>
-            item.id ===
-            option.value
-        );
-
-      if (!profile) {
-        return;
-      }
-
-      option.textContent =
-        updatedProfileIds.has(
-          profile.id
-        )
-          ? `${profile.display_name} · Updated`
-          : profile.display_name;
-    }
-  );
-
-  if (!updatedProfiles.length) {
-    badge.classList.add(
-      "is-hidden"
-    );
-
-    badge.removeAttribute(
-      "title"
-    );
-
-    return;
-  }
-
-  badge.textContent =
-    String(
-      updatedProfiles.length
-    );
-
-  badge.title =
-    updatedProfiles
-      .map(
-        (profile) =>
-          `${profile.displayName} updated availability`
-      )
-      .join("\n");
-
-  badge.classList.remove(
-    "is-hidden"
-  );
-}
 
   function populateAvailabilityVolunteerSelect() {
   const select = byId(
@@ -6209,56 +5968,49 @@ async function refreshAvailabilityUpdateBadge() {
 }
 
   async function handleAvailabilityVolunteerChange() {
-    const profileId =
-      byId(
-        "availabilityVolunteerSelect"
-      ).value;
+  const profileId =
+    byId(
+      "availabilityVolunteerSelect"
+    ).value;
 
-    const container =
-      byId(
-        "adminAvailabilitySummary"
-      );
+  const container =
+    byId(
+      "adminAvailabilitySummary"
+    );
 
-    if (!profileId) {
-      container.classList.add(
-        "empty-state"
-      );
-
-      container.textContent =
-        "Select a volunteer to view availability.";
-
-      return;
-    }
-
+  if (!profileId) {
     container.classList.add(
       "empty-state"
     );
 
     container.textContent =
-      "Loading availability…";
+      "Select a volunteer to view availability.";
 
-    try {
-      const summary =
-  await dataApi.getAvailabilitySummary(
-    profileId
+    return;
+  }
+
+  container.classList.add(
+    "empty-state"
   );
 
-renderAdminAvailabilitySummary(
-  summary
-);
+  container.textContent =
+    "Loading availability…";
 
-markAvailabilityViewed(
-  profileId,
-  summary
-);
+  try {
+    const summary =
+      await dataApi.getAvailabilitySummary(
+        profileId
+      );
 
-await refreshAvailabilityUpdateBadge();
-    } catch (error) {
-      container.textContent =
-        error.message ||
-        "Unable to load availability.";
-    }
+    renderAdminAvailabilitySummary(
+      summary
+    );
+  } catch (error) {
+    container.textContent =
+      error.message ||
+      "Unable to load availability.";
   }
+}
 
   function renderAdminAvailabilitySummary(
     summary
