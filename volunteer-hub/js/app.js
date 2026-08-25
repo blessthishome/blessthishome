@@ -7111,26 +7111,32 @@ byId(
       applyProfileToInterface();
 
       appState.calendarMonth =
-        startOfMonth(new Date());
+  startOfMonth(new Date());
 
-      if (!appState.selectedDate) {
-        appState.selectedDate =
-          todayString();
-      }
+/*
+ * Every authenticated session starts from Home.
+ *
+ * Never carry an administrative view from a previous
+ * account/session into another user's application state.
+ */
+appState.activeView =
+  "dashboard";
 
-      await refreshAll();
+appState.selectedDate =
+  todayString();
+
+await refreshAll();
 
 if (hasAdministrativeAccess()) {
   setReportDefaultDates();
 }
 
       switchView(
-        appState.activeView ||
-          "dashboard",
-        {
-          scroll: false
-        }
-      );
+  "dashboard",
+  {
+    scroll: false
+  }
+);
     } catch (error) {
       console.error(
         "Application entry failed:",
