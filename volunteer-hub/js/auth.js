@@ -439,147 +439,27 @@
   }
 
   /*
-   * First check by auth_user_id.
-   * This is the normal production relationship.
+   * Production Volunteer Hub profiles use the Supabase
+   * Auth user UUID as the profile UUID.
+   *
+   * Account creation is handled by the database trigger.
+   * The browser must never create, activate, promote,
+   * or repair authorization records.
    */
   const {
-    data: profileByAuthId,
-    error: authIdError
-  } = await state.supabase
-    .from("volunteer_hub_profiles")
-    .select("*")
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
-
-  if (authIdError) {
-    throw authIdError;
-  }
-
-  if (profileByAuthId) {
-    return profileByAuthId;
-  }
-
-  /*
-   * Older rows may use the Auth user ID as the profile ID
-   * but have a missing auth_user_id.
-   */
-  const {
-    data: profileById,
-    error: profileIdError
+    data,
+    error
   } = await state.supabase
     .from("volunteer_hub_profiles")
     .select("*")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (profileIdError) {
-    throw profileIdError;
+  if (error) {
+    throw error;
   }
 
-  if (profileById) {
-    /*
-     * Repair the missing Auth relationship.
-     */
-    if (!profileById.auth_user_id) {
-      const {
-        data: repairedProfile,
-        error: repairError
-      } = await state.supabase
-        .from("volunteer_hub_profiles")
-        .update({
-          auth_user_id: user.id,
-          updated_at:
-            new Date().toISOString()
-        })
-        .eq("id", user.id)
-        .select("*")
-        .single();
-
-      if (repairError) {
-        throw repairError;
-      }
-
-      return repairedProfile;
-    }
-
-    return profileById;
-  }
-
-  /*
-   * No profile exists, so create one.
-   * Every self-created account starts as a volunteer.
-   */
-  const metadata =
-    user.user_metadata || {};
-
-  const firstName =
-    cleanName(
-      metadata.first_name
-    ) || "Volunteer";
-
-  const lastName =
-    cleanName(
-      metadata.last_name
-    ) || "Member";
-
-  const newProfile = {
-    id: user.id,
-    auth_user_id: user.id,
-    first_name: firstName,
-    last_name: lastName,
-    display_name:
-      makeDisplayName(
-        firstName,
-        lastName
-      ),
-    email:
-      normalizeEmail(user.email),
-    phone: "",
-    role: "volunteer",
-    account_status: "active",
-    preferred_contact_method:
-      "email"
-  };
-
-  const {
-    data: insertedProfile,
-    error: insertError
-  } = await state.supabase
-    .from("volunteer_hub_profiles")
-    .insert(newProfile)
-    .select("*")
-    .single();
-
-  /*
-   * Another process may have created the profile between
-   * our lookup and insert. Re-read it instead of failing
-   * with a duplicate primary-key error.
-   */
-  if (
-    insertError &&
-    insertError.code === "23505"
-  ) {
-    const {
-      data: existingProfile,
-      error: existingError
-    } = await state.supabase
-      .from("volunteer_hub_profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    if (existingError) {
-      throw existingError;
-    }
-
-    return existingProfile;
-  }
-
-  if (insertError) {
-    throw insertError;
-  }
-
-  return insertedProfile;
+  return data || null;
 }
 
   async function loadProfile(user = state.user) {
@@ -657,24 +537,35 @@
       return state.profile;
     }
 
-    const { data, error } = await state.supabase
-      .from("volunteer_hub_profiles")
-      .update({
-        ...allowedChanges,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", state.profile.id)
-      .select("*")
-      .single();
+    const {
+  data,
+  error
+} = await state.supabase.rpc(
+  "update_my_volunteer_hub_profile",
+  {
+    p_first_name:
+      allowedChanges.first_name,
 
-    if (error) {
-      throw error;
-    }
+    p_last_name:
+      allowedChanges.last_name,
 
-    state.profile = data;
-    applyAuthenticatedState(data);
+    p_phone:
+      allowedChanges.phone,
 
-    return data;
+    p_preferred_contact_method:
+      allowedChanges
+        .preferred_contact_method
+  }
+);
+
+if (error) {
+  throw error;
+}
+
+state.profile = data;
+applyAuthenticatedState(data);
+
+return data;
   }
 
   /* =======================================================
@@ -850,21 +741,39 @@
       return false;
     }
 
-    state.user = state.session.user;
-    state.profile = await loadProfile(
-      state.user
-    );
+    state.user =
+  state.session.user;
 
-    if (!state.profile) {
-      resetState();
-      return false;
-    }
+state.profile =
+  await loadProfile(
+    state.user
+  );
 
-    state.role = configHelpers.normalizeRole(
-      state.profile.role
-    );
+if (!state.profile) {
+  await state.supabase.auth.signOut();
 
-    return true;
+  resetState();
+
+  return false;
+}
+
+if (
+  state.profile.account_status !==
+  "active"
+) {
+  await state.supabase.auth.signOut();
+
+  resetState();
+
+  return false;
+}
+
+state.role =
+  configHelpers.normalizeRole(
+    state.profile.role
+  );
+
+return true;
   }
 
   async function signOut() {
@@ -990,154 +899,166 @@
   }
 
   async function handleCreateAccount(event) {
-    event.preventDefault();
+  event.preventDefault();
 
-    const feedback =
+  const feedback =
+    requireElement(
+      "createAccountFeedback"
+    );
+
+  const firstName =
+    requireElement(
+      "createFirstName"
+    ).value;
+
+  const lastName =
+    requireElement(
+      "createLastName"
+    ).value;
+
+  const email =
+    normalizeEmail(
       requireElement(
-        "createAccountFeedback"
-      );
+        "createEmail"
+      ).value
+    );
 
-    const firstName =
-      requireElement(
-        "createFirstName"
-      ).value;
+  const password =
+    requireElement(
+      "createPassword"
+    ).value;
 
-    const lastName =
-      requireElement(
-        "createLastName"
-      ).value;
+  const confirmation =
+    requireElement(
+      "createPasswordConfirm"
+    ).value;
 
-    const email =
-      normalizeEmail(
-        requireElement(
-          "createEmail"
-        ).value
-      );
+  clearFeedback(feedback);
 
-    const password =
-      requireElement(
-        "createPassword"
-      ).value;
+  if (!validateName(firstName)) {
+    setFeedback(
+      feedback,
+      "Enter your first name.",
+      "error"
+    );
 
-    const confirmation =
-      requireElement(
-        "createPasswordConfirm"
-      ).value;
+    return;
+  }
 
-    clearFeedback(feedback);
+  if (!validateName(lastName)) {
+    setFeedback(
+      feedback,
+      "Enter your last name.",
+      "error"
+    );
 
-    if (!validateName(firstName)) {
-      setFeedback(
-        feedback,
-        "Enter your first name.",
-        "error"
-      );
-      return;
-    }
+    return;
+  }
 
-    if (!validateName(lastName)) {
-      setFeedback(
-        feedback,
-        "Enter your last name.",
-        "error"
-      );
-      return;
-    }
+  if (!validateEmail(email)) {
+    setFeedback(
+      feedback,
+      "Enter a valid email address.",
+      "error"
+    );
 
-    if (!validateEmail(email)) {
-      setFeedback(
-        feedback,
-        "Enter a valid email address.",
-        "error"
-      );
-      return;
-    }
+    return;
+  }
 
-    if (!validatePassword(password)) {
-      setFeedback(
-        feedback,
-        "Password must contain at least 8 characters.",
-        "error"
-      );
-      return;
-    }
+  if (!validatePassword(password)) {
+    setFeedback(
+      feedback,
+      "Password must contain at least 8 characters.",
+      "error"
+    );
 
-    if (password !== confirmation) {
-      setFeedback(
-        feedback,
-        "Passwords do not match.",
-        "error"
-      );
-      return;
-    }
+    return;
+  }
 
-    try {
-      setFeedback(
-        feedback,
-        "Creating your account…"
-      );
+  if (password !== confirmation) {
+    setFeedback(
+      feedback,
+      "Passwords do not match.",
+      "error"
+    );
 
-      const result = await createAccount({
+    return;
+  }
+
+  try {
+    setFeedback(
+      feedback,
+      "Creating your account…"
+    );
+
+    const result =
+      await createAccount({
         firstName,
         lastName,
         email,
         password
       });
 
-      if (state.demoMode) {
-        applyAuthenticatedState(result);
-
-        setFeedback(
-          feedback,
-          "Account created.",
-          "success"
-        );
-
-        await enterAuthenticatedApp();
-        return;
-      }
-
-      if (result.session?.user) {
-        state.session = result.session;
-        state.user = result.user;
-        state.profile = await loadProfile(
-          result.user
-        );
-
-        state.role =
-          configHelpers.normalizeRole(
-            state.profile?.role
-          );
-
-        await enterAuthenticatedApp();
-        return;
-      }
+    if (state.demoMode) {
+      applyAuthenticatedState(
+        result
+      );
 
       setFeedback(
         feedback,
-        "Account created. Check your email to confirm your account, then sign in.",
+        "Account created.",
         "success"
       );
 
-      showSignInForm();
+      await enterAuthenticatedApp();
 
-      requireElement(
-        "signInEmail"
-      ).value = email;
-    } catch (error) {
-      console.error(
-        "Account creation failed:",
-        error
-      );
-
-      setFeedback(
-        feedback,
-        error.message ||
-          "Unable to create the account.",
-        "error"
-      );
+      return;
     }
+
+    /*
+     * Supabase may create a temporary session immediately
+     * after signup depending on the project's email
+     * confirmation settings.
+     *
+     * New accounts are still pending, so never allow that
+     * temporary session into the Volunteer Hub.
+     */
+    if (result.session) {
+      await state.supabase.auth.signOut();
+    }
+
+    resetState();
+
+    showSignInForm();
+
+    requireElement(
+      "signInEmail"
+    ).value =
+      email;
+
+    setFeedback(
+      requireElement(
+        "signInFeedback"
+      ),
+      result.session
+        ? "Account created successfully. Your volunteer account is awaiting approval from Bless This Home."
+        : "Account created successfully. Check your email if confirmation is required. Your volunteer account must also be approved by Bless This Home before you can access the Volunteer Hub.",
+      "success"
+    );
+  } catch (error) {
+    console.error(
+      "Account creation failed:",
+      error
+    );
+
+    setFeedback(
+      feedback,
+      error.message ||
+        "Unable to create the account.",
+      "error"
+    );
   }
+}
 
   async function handleSignIn(event) {
     event.preventDefault();
@@ -1186,21 +1107,39 @@
       );
 
       state.user = user;
-      state.profile = await loadProfile(user);
+state.profile = await loadProfile(user);
 
-      if (!state.profile) {
-        throw new Error(
-          "The account profile could not be loaded."
-        );
-      }
+if (!state.profile) {
+  await state.supabase.auth.signOut();
 
-      state.role =
-        configHelpers.normalizeRole(
-          state.profile.role
-        );
+  resetState();
 
-      clearFeedback(feedback);
-      await enterAuthenticatedApp();
+  throw new Error(
+    "The account profile could not be loaded."
+  );
+}
+
+if (
+  state.profile.account_status !==
+  "active"
+) {
+  await state.supabase.auth.signOut();
+
+  resetState();
+
+  throw new Error(
+    "Your volunteer account is awaiting approval. Bless This Home will activate it once your application has been reviewed."
+  );
+}
+
+state.role =
+  configHelpers.normalizeRole(
+    state.profile.role
+  );
+
+clearFeedback(feedback);
+
+await enterAuthenticatedApp();
     } catch (error) {
       console.error(
         "Sign-in failed:",
