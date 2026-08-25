@@ -2295,6 +2295,53 @@
     return data;
   }
 
+
+  async function approveVolunteerHubAccount(
+  profileId,
+  role = "volunteer"
+) {
+  requireAdministrativeAccess();
+
+  if (state.demoMode) {
+    throw new Error(
+      "Account approval is unavailable in demo mode."
+    );
+  }
+
+  const normalizedRole =
+    String(role || "volunteer")
+      .trim()
+      .toLowerCase();
+
+  if (
+    ![
+      "volunteer",
+      "admin"
+    ].includes(normalizedRole)
+  ) {
+    throw new Error(
+      "Choose Volunteer or Administrator."
+    );
+  }
+
+  const {
+    data,
+    error
+  } = await state.supabase.rpc(
+    "approve_volunteer_hub_account",
+    {
+      p_profile_id: profileId,
+      p_role: normalizedRole
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+  
   /* =======================================================
      WEEKLY AVAILABILITY
      ======================================================= */
@@ -2945,6 +2992,8 @@
     listHours,
     submitHours,
     reviewHours,
+
+    approveVolunteerHubAccount,
 
     getWeeklyAvailability,
     saveWeeklyAvailability,
