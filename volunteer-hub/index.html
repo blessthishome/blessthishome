@@ -1765,6 +1765,44 @@
   <div class="management-grid">
 
     <!-- ===============================================
+     PENDING ACCOUNT APPROVALS
+     =============================================== -->
+
+<article
+  id="pendingAccountApprovalsPanel"
+  class="panel management-panel is-hidden"
+>
+  <header class="panel-heading management-panel-heading">
+    <div>
+      <div class="management-title-row">
+        <h2>
+          Pending accounts
+        </h2>
+
+        <span
+          id="pendingAccountBadge"
+          class="management-notification-badge is-hidden"
+          aria-label="Pending account approvals"
+        >
+          0 accounts
+        </span>
+      </div>
+
+      <p class="muted">
+        Approve new Volunteer Hub accounts and assign their access level.
+      </p>
+    </div>
+  </header>
+
+  <div
+    id="pendingAccountApprovalsList"
+    class="management-list empty-state"
+  >
+    No accounts are awaiting approval.
+  </div>
+</article>
+
+    <!-- ===============================================
          PENDING SHIFT REQUESTS
          =============================================== -->
 
