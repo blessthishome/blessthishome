@@ -2033,9 +2033,9 @@ function wireShiftCardButtons(
               window.setTimeout(
                 () => {
                   document
-                    .querySelector(
-                      `[data-request-card="${request.id}"]`
-                    )
+  .querySelector(
+    `[data-request-item="${request.id}"]`
+  )
                     ?.scrollIntoView({
                       behavior: "smooth",
                       block: "center"
