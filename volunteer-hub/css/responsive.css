@@ -1137,3 +1137,55 @@
     min-width: 0;
   }
 }
+
+/* =========================================================
+   MOBILE DIALOG DATE AND TIME CONTROLS
+   ========================================================= */
+
+@media (max-width: 680px) {
+  .dialog input[type="date"],
+  .dialog input[type="time"] {
+    display: block !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+
+    margin: 0 !important;
+    padding: 0 0.8rem !important;
+
+    border-radius: var(--radius-small) !important;
+    box-sizing: border-box !important;
+
+    font-size: 16px !important;
+    line-height: normal !important;
+
+    background: rgba(255, 255, 255, 0.84) !important;
+    color: var(--ink) !important;
+
+    -webkit-appearance: none !important;
+    appearance: none !important;
+
+    overflow: hidden !important;
+  }
+
+  .dialog input[type="date"]::-webkit-date-and-time-value,
+  .dialog input[type="time"]::-webkit-date-and-time-value {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+  }
+
+  .dialog input[type="date"]::-webkit-datetime-edit,
+  .dialog input[type="time"]::-webkit-datetime-edit {
+    display: flex;
+    align-items: center;
+    min-height: 0 !important;
+    padding: 0 !important;
+  }
+}
