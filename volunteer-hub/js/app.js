@@ -1955,7 +1955,7 @@ wireShiftCardButtons(list);
   `;
 }
 
-function wireShiftCardButtons(
+  function wireShiftCardButtons(
     container
   ) {
     container
@@ -3095,6 +3095,7 @@ function wireMyShiftActions(
       );
     }
   }
+
   function renderSpecificAvailability() {
     const list =
       requireElement(
@@ -3438,7 +3439,6 @@ function wireMyShiftActions(
         currentValue;
     }
   }
-
   function openHoursDialog() {
     requireElement(
       "hoursForm"
@@ -3895,6 +3895,15 @@ function wireMyShiftActions(
   renderManageShifts();
   renderPendingHours();
   updateManagementBadges();
+
+  refreshAvailabilityUpdateBadge().catch(
+    (error) => {
+      console.warn(
+        "Availability notifications could not be refreshed:",
+        error
+      );
+    }
+  );
 }
 
   function populatePendingShiftRequestPersonSelect() {
@@ -5863,7 +5872,173 @@ function openEditShiftDialog(
      ADMIN AVAILABILITY
      ======================================================= */
 
+function availabilityViewedStorageKey(
+  profileId
+) {
+  return [
+    "bth_availability_viewed",
+    state.profile.id,
+    profileId
+  ].join("_");
+}
 
+function latestAvailabilityTimestamp(
+  summary
+) {
+  const timestamps = [];
+
+  if (
+    summary?.weekly?.updated_at
+  ) {
+    timestamps.push(
+      summary.weekly.updated_at
+    );
+  }
+
+  if (
+    summary?.weekly?.created_at
+  ) {
+    timestamps.push(
+      summary.weekly.created_at
+    );
+  }
+
+  const specificRows =
+    Array.isArray(summary?.specific)
+      ? summary.specific
+      : [];
+
+  specificRows.forEach((row) => {
+    if (row.updated_at) {
+      timestamps.push(
+        row.updated_at
+      );
+    }
+
+    if (row.created_at) {
+      timestamps.push(
+        row.created_at
+      );
+    }
+  });
+
+  const validTimes =
+    timestamps
+      .map((value) =>
+        new Date(value).getTime()
+      )
+      .filter(
+        (value) =>
+          Number.isFinite(value)
+      );
+
+  return validTimes.length
+    ? Math.max(...validTimes)
+    : 0;
+}
+
+function markAvailabilityViewed(
+  profileId,
+  summary
+) {
+  if (!profileId) {
+    return;
+  }
+
+  const latestTimestamp =
+    latestAvailabilityTimestamp(
+      summary
+    );
+
+  if (!latestTimestamp) {
+    return;
+  }
+
+  localStorage.setItem(
+    availabilityViewedStorageKey(
+      profileId
+    ),
+    String(latestTimestamp)
+  );
+}
+
+async function refreshAvailabilityUpdateBadge() {
+  const badge = byId(
+    "availabilityUpdateBadge"
+  );
+
+  if (!badge) {
+    return;
+  }
+
+  const teamMembers =
+    appState.profiles.filter(
+      (profile) =>
+        profile.account_status ===
+          "active" &&
+        profile.id !==
+          state.profile.id
+    );
+
+  if (!teamMembers.length) {
+    badge.classList.add(
+      "is-hidden"
+    );
+
+    return;
+  }
+
+  const results =
+    await Promise.allSettled(
+      teamMembers.map(
+        async (profile) => {
+          const summary =
+            await dataApi
+              .getAvailabilitySummary(
+                profile.id
+              );
+
+          const latestTimestamp =
+            latestAvailabilityTimestamp(
+              summary
+            );
+
+          const viewedTimestamp =
+            Number(
+              localStorage.getItem(
+
+              availabilityViewedStorageKey(
+                  profile.id
+                )
+              ) || 0
+            );
+
+          return (
+            latestTimestamp >
+            viewedTimestamp
+          );
+        }
+      )
+    );
+
+  const updateCount =
+    results.filter(
+      (result) =>
+        result.status ===
+          "fulfilled" &&
+        result.value === true
+    ).length;
+
+  badge.textContent =
+    updateCount > 0
+      ? String(updateCount)
+      : "Updated";
+
+  badge.classList.toggle(
+    "is-hidden",
+    updateCount === 0
+  );
+}
 
   function populateAvailabilityVolunteerSelect() {
   const select = byId(
@@ -5968,49 +6143,56 @@ function openEditShiftDialog(
 }
 
   async function handleAvailabilityVolunteerChange() {
-  const profileId =
-    byId(
-      "availabilityVolunteerSelect"
-    ).value;
+    const profileId =
+      byId(
+        "availabilityVolunteerSelect"
+      ).value;
 
-  const container =
-    byId(
-      "adminAvailabilitySummary"
-    );
+    const container =
+      byId(
+        "adminAvailabilitySummary"
+      );
 
-  if (!profileId) {
+    if (!profileId) {
+      container.classList.add(
+        "empty-state"
+      );
+
+      container.textContent =
+        "Select a volunteer to view availability.";
+
+      return;
+    }
+
     container.classList.add(
       "empty-state"
     );
 
     container.textContent =
-      "Select a volunteer to view availability.";
+      "Loading availability…";
 
-    return;
-  }
-
-  container.classList.add(
-    "empty-state"
+    try {
+      const summary =
+  await dataApi.getAvailabilitySummary(
+    profileId
   );
 
-  container.textContent =
-    "Loading availability…";
+renderAdminAvailabilitySummary(
+  summary
+);
 
-  try {
-    const summary =
-      await dataApi.getAvailabilitySummary(
-        profileId
-      );
+markAvailabilityViewed(
+  profileId,
+  summary
+);
 
-    renderAdminAvailabilitySummary(
-      summary
-    );
-  } catch (error) {
-    container.textContent =
-      error.message ||
-      "Unable to load availability.";
+await refreshAvailabilityUpdateBadge();
+    } catch (error) {
+      container.textContent =
+        error.message ||
+        "Unable to load availability.";
+    }
   }
-}
 
   function renderAdminAvailabilitySummary(
     summary
@@ -6433,7 +6615,8 @@ function openEditShiftDialog(
         </body>
         </html>
       `);
-printWindow.document.close();
+
+      printWindow.document.close();
 
       printWindow.focus();
 
@@ -6813,7 +6996,8 @@ printWindow.document.close();
         renderSchedule();
       }
     );
-byId(
+
+  byId(
       "scheduleStaffingFilter"
     ).addEventListener(
       "change",
@@ -6962,7 +7146,8 @@ byId(
       updateDisplayName
     );
   }
-function wireAdmin() {
+
+  function wireAdmin() {
     byId(
       "openCreateShiftDialogButton"
     ).addEventListener(
@@ -7111,32 +7296,26 @@ byId(
       applyProfileToInterface();
 
       appState.calendarMonth =
-  startOfMonth(new Date());
+        startOfMonth(new Date());
 
-/*
- * Every authenticated session starts from Home.
- *
- * Never carry an administrative view from a previous
- * account/session into another user's application state.
- */
-appState.activeView =
-  "dashboard";
+      if (!appState.selectedDate) {
+        appState.selectedDate =
+          todayString();
+      }
 
-appState.selectedDate =
-  todayString();
-
-await refreshAll();
+      await refreshAll();
 
 if (hasAdministrativeAccess()) {
   setReportDefaultDates();
 }
 
       switchView(
-  "dashboard",
-  {
-    scroll: false
-  }
-);
+        appState.activeView ||
+          "dashboard",
+        {
+          scroll: false
+        }
+      );
     } catch (error) {
       console.error(
         "Application entry failed:",
