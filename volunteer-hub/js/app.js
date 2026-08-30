@@ -37,8 +37,9 @@
     messages: [],
     hours: [],
     profiles: [],
-    weeklyAvailability: null,
-    specificAvailability: [],
+pendingAccounts: [],
+weeklyAvailability: null,
+specificAvailability: [],
 
     activeShiftId: null,
 editingShiftId: null,
@@ -329,6 +330,13 @@ function shouldShowClosedRequest(request) {
       state.role
     );
   }
+
+function isAdministrator() {
+  return (
+    String(state.role || "")
+      .toLowerCase() === "admin"
+  );
+}
 
   function roleLabel() {
     return configHelpers.getRoleLabel(
@@ -761,48 +769,77 @@ function shouldShowClosedRequest(request) {
      ======================================================= */
 
   async function refreshAll() {
-    const profileId = state.profile.id;
+  const profileId =
+    state.profile.id;
 
-    const coreRequests = [
-      dataApi.listShifts({
-        includeCancelled: false
-      }),
-      dataApi.listShiftRequests(),
-      dataApi.listMessages(),
-      dataApi.listProfiles({
-        activeOnly: true
-      })
-    ];
+  const coreRequests = [
+    dataApi.listShifts({
+      includeCancelled: false
+    }),
 
-    const hoursRequest =
-      hasAdministrativeAccess()
-        ? dataApi.listHours()
-        : dataApi.listHours({
-            profileId
-          });
+    dataApi.listShiftRequests(),
 
-    const [
-      shifts,
-      shiftRequests,
-      messages,
-      profiles,
-      hours
-    ] = await Promise.all([
-      ...coreRequests,
-      hoursRequest
-    ]);
+    dataApi.listMessages(),
 
-    appState.shifts = shifts;
-    appState.shiftRequests =
-      shiftRequests;
-    appState.messages = messages;
-    appState.profiles = profiles;
-    appState.hours = hours;
+    dataApi.listProfiles({
+      activeOnly: true
+    })
+  ];
 
-    await refreshAvailabilityData();
+  const hoursRequest =
+    hasAdministrativeAccess()
+      ? dataApi.listHours()
+      : dataApi.listHours({
+          profileId
+        });
 
-    renderAll();
-  }
+  /*
+   * Pending account records are intentionally loaded
+   * only for full administrators.
+   *
+   * Coordinators continue to receive their existing
+   * management permissions but cannot review accounts.
+   */
+  const pendingAccountsRequest =
+    isAdministrator()
+      ? dataApi.listPendingAccounts()
+      : Promise.resolve([]);
+
+  const [
+    shifts,
+    shiftRequests,
+    messages,
+    profiles,
+    hours,
+    pendingAccounts
+  ] = await Promise.all([
+    ...coreRequests,
+    hoursRequest,
+    pendingAccountsRequest
+  ]);
+
+  appState.shifts =
+    shifts;
+
+  appState.shiftRequests =
+    shiftRequests;
+
+  appState.messages =
+    messages;
+
+  appState.profiles =
+    profiles;
+
+  appState.hours =
+    hours;
+
+  appState.pendingAccounts =
+    pendingAccounts;
+
+  await refreshAvailabilityData();
+
+  renderAll();
+}
 
   async function refreshAvailabilityData() {
     try {
@@ -1955,7 +1992,7 @@ wireShiftCardButtons(list);
   `;
 }
 
-  function wireShiftCardButtons(
+function wireShiftCardButtons(
     container
   ) {
     container
@@ -3078,8 +3115,7 @@ function wireMyShiftActions(
         "Specific date saved.",
         "success"
       );
-
-      await refreshAvailabilityData();
+await refreshAvailabilityData();
       renderAvailability();
     } catch (error) {
       console.error(
@@ -3095,7 +3131,6 @@ function wireMyShiftActions(
       );
     }
   }
-
   function renderSpecificAvailability() {
     const list =
       requireElement(
@@ -3439,6 +3474,7 @@ function wireMyShiftActions(
         currentValue;
     }
   }
+
   function openHoursDialog() {
     requireElement(
       "hoursForm"
@@ -3885,25 +3921,301 @@ function wireMyShiftActions(
   /* =======================================================
      ADMIN MANAGEMENT
      ======================================================= */
+function renderPendingAccounts() {
+  const panel =
+    byId(
+      "pendingAccountApprovalsPanel"
+    );
+
+  const list =
+    byId(
+      "pendingAccountApprovalsList"
+    );
+
+  const badge =
+    byId(
+      "pendingAccountBadge"
+    );
+
+  if (
+    !panel ||
+    !list ||
+    !badge
+  ) {
+    return;
+  }
+
+  /*
+   * Account approval is intentionally stricter than the
+   * rest of the Manage page.
+   *
+   * Coordinators can use ordinary management tools, but
+   * only administrators may activate accounts or grant
+   * administrator status.
+   */
+  if (!isAdministrator()) {
+    panel.classList.add(
+      "is-hidden"
+    );
+
+    return;
+  }
+
+  panel.classList.remove(
+    "is-hidden"
+  );
+
+  const rows =
+    [...appState.pendingAccounts]
+      .filter(
+        (profile) =>
+          profile.account_status ===
+          "pending"
+      )
+      .sort((a, b) =>
+        String(
+          a.created_at || ""
+        ).localeCompare(
+          String(
+            b.created_at || ""
+          )
+        )
+      );
+
+  badge.textContent =
+    `${rows.length} ${
+      rows.length === 1
+        ? "account"
+        : "accounts"
+    }`;
+
+  badge.classList.toggle(
+    "is-hidden",
+    rows.length === 0
+  );
+
+  badge.classList.toggle(
+    "has-alert",
+    rows.length > 0
+  );
+
+  setEmptyState(
+    list,
+    rows.length === 0
+  );
+
+  if (!rows.length) {
+    list.innerHTML =
+      "No accounts are awaiting approval.";
+
+    return;
+  }
+
+  list.innerHTML =
+    rows
+      .map(
+        (profile) => `
+          <article
+            class="management-row status-pending"
+            data-pending-account="${escapeHtml(
+              profile.id
+            )}"
+          >
+            <div class="management-row-main">
+              <strong>
+                ${escapeHtml(
+                  profile.display_name ||
+                  `${profile.first_name || ""} ${profile.last_name || ""}`.trim() ||
+                  "New volunteer"
+                )}
+              </strong>
+
+              <small>
+                ${escapeHtml(
+                  profile.email || ""
+                )}
+              </small>
+            </div>
+
+            <div class="management-row-detail">
+              <span class="management-status pending">
+                Awaiting approval
+              </span>
+
+              ${
+                profile.created_at
+                  ? `
+                    <small>
+                      Registered
+                      ${escapeHtml(
+                        formatDateTime(
+                          profile.created_at
+                        )
+                      )}
+                    </small>
+                  `
+                  : ""
+              }
+            </div>
+
+            <div class="management-row-actions">
+              <button
+                class="button button-primary button-small"
+                type="button"
+                data-approve-account="${escapeHtml(
+                  profile.id
+                )}"
+                data-account-role="volunteer"
+              >
+                Approve as Volunteer
+              </button>
+
+              <button
+                class="button button-secondary button-small"
+                type="button"
+                data-approve-account="${escapeHtml(
+                  profile.id
+                )}"
+                data-account-role="admin"
+              >
+                Approve as Administrator
+              </button>
+            </div>
+          </article>
+        `
+      )
+      .join("");
+
+  list
+    .querySelectorAll(
+      "[data-approve-account]"
+    )
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          approvePendingAccount(
+            button.dataset
+              .approveAccount,
+
+            button.dataset
+              .accountRole
+          );
+        }
+      );
+    });
+}
+
+
+async function approvePendingAccount(
+  profileId,
+  role
+) {
+  if (!isAdministrator()) {
+    showAppFeedback(
+      "Administrator access is required.",
+      "error"
+    );
+
+    return;
+  }
+
+  const profile =
+    appState.pendingAccounts.find(
+      (candidate) =>
+        candidate.id ===
+        profileId
+    );
+
+  if (!profile) {
+    showAppFeedback(
+      "The pending account could not be found.",
+      "error"
+    );
+
+    return;
+  }
+
+  const normalizedRole =
+    role === "admin"
+      ? "admin"
+      : "volunteer";
+
+  /*
+   * Administrator approval deserves an additional warning
+   * because this grants access to management functions.
+   */
+  const confirmationMessage =
+    normalizedRole === "admin"
+      ? `Approve ${profile.display_name || profile.email} as an Administrator? This will grant administrative access to the Volunteer Hub.`
+      : `Approve ${profile.display_name || profile.email} as a Volunteer?`;
+
+  const confirmed =
+    window.confirm(
+      confirmationMessage
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    showAppFeedback(
+      normalizedRole === "admin"
+        ? "Approving administrator account…"
+        : "Approving volunteer account…"
+    );
+
+    await dataApi.approvePendingAccount(
+      profileId,
+      normalizedRole
+    );
+
+    showAppFeedback(
+      normalizedRole === "admin"
+        ? "Account approved as Administrator."
+        : "Account approved as Volunteer."
+    );
+
+    /*
+     * Re-read the database immediately.
+     *
+     * The approved account disappears from Pending Accounts
+     * and becomes available as an active profile.
+     */
+    await refreshAll();
+
+    switchView(
+      "manage",
+      {
+        scroll: false
+      }
+    );
+  } catch (error) {
+    console.error(
+      "Account approval failed:",
+      error
+    );
+
+    showAppFeedback(
+      error.message ||
+        "Unable to approve the account.",
+      "error"
+    );
+  }
+}
+
 
   function renderManage() {
   if (!hasAdministrativeAccess()) {
     return;
   }
 
+  renderPendingAccounts();
   renderPendingShiftRequests();
   renderManageShifts();
   renderPendingHours();
   updateManagementBadges();
-
-  refreshAvailabilityUpdateBadge().catch(
-    (error) => {
-      console.warn(
-        "Availability notifications could not be refreshed:",
-        error
-      );
-    }
-  );
 }
 
   function populatePendingShiftRequestPersonSelect() {
@@ -4001,8 +4313,7 @@ function wireMyShiftActions(
       )
       .join("")}
   `;
-
-  select.disabled =
+    select.disabled =
     people.length === 0;
 
   const currentStillExists =
@@ -5210,8 +5521,7 @@ function populatePendingHoursPersonSelect() {
                     Pending approval
                   </small>
                 </div>
-
-                <div class="management-row-actions">
+<div class="management-row-actions">
                   <button
                     class="button button-primary button-small"
                     type="button"
@@ -5872,173 +6182,7 @@ function openEditShiftDialog(
      ADMIN AVAILABILITY
      ======================================================= */
 
-function availabilityViewedStorageKey(
-  profileId
-) {
-  return [
-    "bth_availability_viewed",
-    state.profile.id,
-    profileId
-  ].join("_");
-}
 
-function latestAvailabilityTimestamp(
-  summary
-) {
-  const timestamps = [];
-
-  if (
-    summary?.weekly?.updated_at
-  ) {
-    timestamps.push(
-      summary.weekly.updated_at
-    );
-  }
-
-  if (
-    summary?.weekly?.created_at
-  ) {
-    timestamps.push(
-      summary.weekly.created_at
-    );
-  }
-
-  const specificRows =
-    Array.isArray(summary?.specific)
-      ? summary.specific
-      : [];
-
-  specificRows.forEach((row) => {
-    if (row.updated_at) {
-      timestamps.push(
-        row.updated_at
-      );
-    }
-
-    if (row.created_at) {
-      timestamps.push(
-        row.created_at
-      );
-    }
-  });
-
-  const validTimes =
-    timestamps
-      .map((value) =>
-        new Date(value).getTime()
-      )
-      .filter(
-        (value) =>
-          Number.isFinite(value)
-      );
-
-  return validTimes.length
-    ? Math.max(...validTimes)
-    : 0;
-}
-
-function markAvailabilityViewed(
-  profileId,
-  summary
-) {
-  if (!profileId) {
-    return;
-  }
-
-  const latestTimestamp =
-    latestAvailabilityTimestamp(
-      summary
-    );
-
-  if (!latestTimestamp) {
-    return;
-  }
-
-  localStorage.setItem(
-    availabilityViewedStorageKey(
-      profileId
-    ),
-    String(latestTimestamp)
-  );
-}
-
-async function refreshAvailabilityUpdateBadge() {
-  const badge = byId(
-    "availabilityUpdateBadge"
-  );
-
-  if (!badge) {
-    return;
-  }
-
-  const teamMembers =
-    appState.profiles.filter(
-      (profile) =>
-        profile.account_status ===
-          "active" &&
-        profile.id !==
-          state.profile.id
-    );
-
-  if (!teamMembers.length) {
-    badge.classList.add(
-      "is-hidden"
-    );
-
-    return;
-  }
-
-  const results =
-    await Promise.allSettled(
-      teamMembers.map(
-        async (profile) => {
-          const summary =
-            await dataApi
-              .getAvailabilitySummary(
-                profile.id
-              );
-
-          const latestTimestamp =
-            latestAvailabilityTimestamp(
-              summary
-            );
-
-          const viewedTimestamp =
-            Number(
-              localStorage.getItem(
-
-              availabilityViewedStorageKey(
-                  profile.id
-                )
-              ) || 0
-            );
-
-          return (
-            latestTimestamp >
-            viewedTimestamp
-          );
-        }
-      )
-    );
-
-  const updateCount =
-    results.filter(
-      (result) =>
-        result.status ===
-          "fulfilled" &&
-        result.value === true
-    ).length;
-
-  badge.textContent =
-    updateCount > 0
-      ? String(updateCount)
-      : "Updated";
-
-  badge.classList.toggle(
-    "is-hidden",
-    updateCount === 0
-  );
-}
 
   function populateAvailabilityVolunteerSelect() {
   const select = byId(
@@ -6143,56 +6287,49 @@ async function refreshAvailabilityUpdateBadge() {
 }
 
   async function handleAvailabilityVolunteerChange() {
-    const profileId =
-      byId(
-        "availabilityVolunteerSelect"
-      ).value;
+  const profileId =
+    byId(
+      "availabilityVolunteerSelect"
+    ).value;
 
-    const container =
-      byId(
-        "adminAvailabilitySummary"
-      );
+  const container =
+    byId(
+      "adminAvailabilitySummary"
+    );
 
-    if (!profileId) {
-      container.classList.add(
-        "empty-state"
-      );
-
-      container.textContent =
-        "Select a volunteer to view availability.";
-
-      return;
-    }
-
+  if (!profileId) {
     container.classList.add(
       "empty-state"
     );
 
     container.textContent =
-      "Loading availability…";
+      "Select a volunteer to view availability.";
 
-    try {
-      const summary =
-  await dataApi.getAvailabilitySummary(
-    profileId
+    return;
+  }
+
+  container.classList.add(
+    "empty-state"
   );
 
-renderAdminAvailabilitySummary(
-  summary
-);
+  container.textContent =
+    "Loading availability…";
 
-markAvailabilityViewed(
-  profileId,
-  summary
-);
+  try {
+    const summary =
+      await dataApi.getAvailabilitySummary(
+        profileId
+      );
 
-await refreshAvailabilityUpdateBadge();
-    } catch (error) {
-      container.textContent =
-        error.message ||
-        "Unable to load availability.";
-    }
+    renderAdminAvailabilitySummary(
+      summary
+    );
+  } catch (error) {
+    container.textContent =
+      error.message ||
+      "Unable to load availability.";
   }
+}
 
   function renderAdminAvailabilitySummary(
     summary
@@ -6615,8 +6752,7 @@ await refreshAvailabilityUpdateBadge();
         </body>
         </html>
       `);
-
-      printWindow.document.close();
+printWindow.document.close();
 
       printWindow.focus();
 
@@ -6970,7 +7106,6 @@ await refreshAvailabilityUpdateBadge();
       "click",
       showNextMonth
     );
-
     byId(
       "todayButton"
     ).addEventListener(
@@ -6996,8 +7131,7 @@ await refreshAvailabilityUpdateBadge();
         renderSchedule();
       }
     );
-
-  byId(
+byId(
       "scheduleStaffingFilter"
     ).addEventListener(
       "change",
@@ -7146,8 +7280,7 @@ await refreshAvailabilityUpdateBadge();
       updateDisplayName
     );
   }
-
-  function wireAdmin() {
+function wireAdmin() {
     byId(
       "openCreateShiftDialogButton"
     ).addEventListener(
@@ -7296,26 +7429,32 @@ byId(
       applyProfileToInterface();
 
       appState.calendarMonth =
-        startOfMonth(new Date());
+  startOfMonth(new Date());
 
-      if (!appState.selectedDate) {
-        appState.selectedDate =
-          todayString();
-      }
+/*
+ * Every authenticated session starts from Home.
+ *
+ * Never carry an administrative view from a previous
+ * account/session into another user's application state.
+ */
+appState.activeView =
+  "dashboard";
 
-      await refreshAll();
+appState.selectedDate =
+  todayString();
+
+await refreshAll();
 
 if (hasAdministrativeAccess()) {
   setReportDefaultDates();
 }
 
       switchView(
-        appState.activeView ||
-          "dashboard",
-        {
-          scroll: false
-        }
-      );
+  "dashboard",
+  {
+    scroll: false
+  }
+);
     } catch (error) {
       console.error(
         "Application entry failed:",
