@@ -658,7 +658,7 @@ return data;
     }
 
     const redirectTo =
-  "https://blessthishome.github.io/blessthishome/set-password.html";
+  "https://blessthishome.github.io/blessthishome/volunteer-hub/set-password.html";
 
     const { error } =
       await state.supabase.auth
