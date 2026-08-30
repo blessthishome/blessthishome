@@ -203,6 +203,18 @@
     }
   }
 
+function requireFullAdministratorAccess() {
+  if (
+    String(state.role || "")
+      .trim()
+      .toLowerCase() !== "admin"
+  ) {
+    throw new Error(
+      "Administrator access is required."
+    );
+  }
+}
+
   function sortByDateAndTime(a, b) {
     const first =
       `${a.shift_date || a.entry_date || a.exception_date || ""}` +
@@ -846,6 +858,57 @@
       ) || null
     );
   }
+
+async function listPendingAccounts() {
+  requireFullAdministratorAccess();
+
+  /*
+   * Account approval is part of the production
+   * Volunteer Hub workflow.
+   *
+   * Demo storage is intentionally not used for
+   * real account approvals.
+   */
+  if (state.demoMode) {
+    return [];
+  }
+
+  const {
+    data,
+    error
+  } = await state.supabase
+    .from(TABLES.profiles)
+    .select(
+      `
+        id,
+        auth_user_id,
+        first_name,
+        last_name,
+        display_name,
+        email,
+        role,
+        account_status,
+        created_at,
+        updated_at
+      `
+    )
+    .eq(
+      "account_status",
+      "pending"
+    )
+    .order(
+      "created_at",
+      {
+        ascending: true
+      }
+    );
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
 
   /* =======================================================
      SHIFT HYDRATION
@@ -2296,15 +2359,25 @@
   }
 
 
-  async function approveVolunteerHubAccount(
+  async function approvePendingAccount(
   profileId,
   role = "volunteer"
 ) {
-  requireAdministrativeAccess();
+  requireFullAdministratorAccess();
 
   if (state.demoMode) {
     throw new Error(
       "Account approval is unavailable in demo mode."
+    );
+  }
+
+  const normalizedProfileId =
+    String(profileId || "")
+      .trim();
+
+  if (!normalizedProfileId) {
+    throw new Error(
+      "A pending account is required."
     );
   }
 
@@ -2317,7 +2390,9 @@
     ![
       "volunteer",
       "admin"
-    ].includes(normalizedRole)
+    ].includes(
+      normalizedRole
+    )
   ) {
     throw new Error(
       "Choose Volunteer or Administrator."
@@ -2330,8 +2405,11 @@
   } = await state.supabase.rpc(
     "approve_volunteer_hub_account",
     {
-      p_profile_id: profileId,
-      p_role: normalizedRole
+      p_profile_id:
+        normalizedProfileId,
+
+      p_role:
+        normalizedRole
     }
   );
 
@@ -2990,12 +3068,13 @@
     deleteMessage,
 
     listHours,
-    submitHours,
-    reviewHours,
+submitHours,
+reviewHours,
 
-    approveVolunteerHubAccount,
+listPendingAccounts,
+approvePendingAccount,
 
-    getWeeklyAvailability,
+getWeeklyAvailability,
     saveWeeklyAvailability,
 
     listSpecificAvailability,
