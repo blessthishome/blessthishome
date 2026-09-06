@@ -1216,3 +1216,29 @@
     padding: 0 !important;
   }
 }
+
+/* =========================================================
+   MOBILE CALENDAR STAFFING INDICATORS
+   ========================================================= */
+
+@media (max-width: 680px) {
+  .calendar-shift.status-critical {
+    background: var(--danger);
+  }
+
+  .calendar-shift.status-needs {
+    background: var(--warning);
+  }
+
+  .calendar-shift.status-almost {
+    background: var(--almost);
+  }
+
+  .calendar-shift.status-full {
+    background: var(--success);
+  }
+
+  .calendar-shift.status-closed {
+    background: var(--quiet);
+  }
+}
