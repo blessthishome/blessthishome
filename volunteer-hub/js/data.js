@@ -1032,64 +1032,168 @@ async function listPendingAccounts() {
     }
 
     let query = state.supabase
-      .from(TABLES.shifts)
-      .select(
-  `
-    *,
-    volunteer_shift_requests (*)
-  `
-)
-      .order("shift_date")
-      .order("start_time");
+  .from(TABLES.shifts)
+  .select(
+    `
+      *,
+      volunteer_shift_requests (*)
+    `
+  )
+  .order("shift_date")
+  .order("start_time");
 
-    if (options.status) {
-      query = query.eq(
-        "status",
-        options.status
-      );
-    } else if (
-      options.includeCancelled !== true
+if (options.status) {
+  query = query.eq(
+    "status",
+    options.status
+  );
+} else if (
+  options.includeCancelled !== true
+) {
+  query = query.neq(
+    "status",
+    "cancelled"
+  );
+}
+
+if (options.dateFrom) {
+  query = query.gte(
+    "shift_date",
+    options.dateFrom
+  );
+}
+
+if (options.dateTo) {
+  query = query.lte(
+    "shift_date",
+    options.dateTo
+  );
+}
+
+if (options.shiftType) {
+  query = query.eq(
+    "shift_type",
+    options.shiftType
+  );
+}
+
+/*
+ * Load shifts and the safe approved-participant directory
+ * at the same time.
+ *
+ * Ordinary volunteers are intentionally not allowed to read
+ * every volunteer_shift_requests row through RLS. The RPC
+ * exposes only approved participant identity information.
+ */
+const [
+  shiftResult,
+  approvedParticipantResult
+] = await Promise.all([
+  query,
+
+  state.supabase.rpc(
+    "list_approved_shift_participants"
+  )
+]);
+
+if (shiftResult.error) {
+  throw shiftResult.error;
+}
+
+if (approvedParticipantResult.error) {
+  throw approvedParticipantResult.error;
+}
+
+const approvedParticipants =
+  approvedParticipantResult.data || [];
+
+/*
+ * Group the safe approved participant rows by shift once,
+ * rather than repeatedly scanning the full list.
+ */
+const approvedByShift =
+  new Map();
+
+approvedParticipants.forEach(
+  (participant) => {
+    if (!participant.shift_id) {
+      return;
+    }
+
+    if (
+      !approvedByShift.has(
+        participant.shift_id
+      )
     ) {
-      query = query.neq(
-        "status",
-        "cancelled"
+      approvedByShift.set(
+        participant.shift_id,
+        []
       );
     }
 
-    if (options.dateFrom) {
-      query = query.gte(
-        "shift_date",
-        options.dateFrom
+    approvedByShift
+      .get(participant.shift_id)
+      .push({
+        shift_id:
+          participant.shift_id,
+
+        profile_id:
+          participant.profile_id,
+
+        display_name:
+          participant.display_name,
+
+        status:
+          "approved"
+      });
+  }
+);
+
+return (shiftResult.data || []).map(
+  (shift) => {
+    const visibleRequests =
+      ensureArray(
+        shift.volunteer_shift_requests
       );
-    }
 
-    if (options.dateTo) {
-      query = query.lte(
-        "shift_date",
-        options.dateTo
-      );
-    }
+    const safeApprovedRequests =
+      approvedByShift.get(
+        shift.id
+      ) || [];
 
-    if (options.shiftType) {
-      query = query.eq(
-        "shift_type",
-        options.shiftType
-      );
-    }
+    /*
+     * Safe approved rows provide the complete approved
+     * staffing list for every active user.
+     *
+     * Any request rows the caller is already permitted to
+     * read through normal RLS are then layered on top.
+     */
+    const requestMap =
+      new Map();
 
-    const { data, error } =
-      await query;
+    safeApprovedRequests.forEach(
+      (request) => {
+        requestMap.set(
+          `${request.profile_id}:approved`,
+          request
+        );
+      }
+    );
 
-    if (error) {
-      throw error;
-    }
+    visibleRequests.forEach(
+      (request) => {
+        requestMap.set(
+          `${request.profile_id}:${request.status}`,
+          request
+        );
+      }
+    );
 
-    return (data || []).map(
-  (shift) =>
-    hydrateShift(
+    return hydrateShift(
       shift,
-      shift.volunteer_shift_requests || []
-    )
+      [...requestMap.values()]
+    );
+  }
 );
   }
 
