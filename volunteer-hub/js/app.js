@@ -2394,13 +2394,19 @@ const rows =
       );
     })
       .map((request) => ({
-        ...request,
-        shift:
-          request.shift ||
-          getShiftById(
-            request.shift_id
-          )
-      }))
+  ...request,
+
+  /*
+   * My Shifts must use the same hydrated shift
+   * object as the live Schedule view so staffing
+   * counts and approved workers stay identical.
+   */
+  shift:
+    getShiftById(
+      request.shift_id
+    ) ||
+    request.shift
+}))
       .filter(
         (request) =>
           request.shift
