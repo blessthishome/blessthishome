@@ -2348,100 +2348,130 @@ function wireShiftCardButtons(
       "myShiftsList"
     );
 
+  const today =
+    todayString();
+
   const myRequests =
-  appState.shiftRequests.filter(
-    (request) =>
-      request.profile_id ===
-      state.profile.id
-  );
-
-const rows =
-  myRequests
-    .filter((request) => {
-      /*
-       * Always show active requests.
-       */
-      if (
-        ["pending", "approved"].includes(
-          request.status
-        )
-      ) {
-        return true;
-      }
-
-      /*
-       * Hide an older withdrawn or declined request when a
-       * newer active request exists for the same shift.
-       */
-      const hasActiveReplacement =
-        myRequests.some(
-          (otherRequest) =>
-            otherRequest.id !==
-              request.id &&
-            otherRequest.shift_id ===
-              request.shift_id &&
-            ["pending", "approved"].includes(
-              otherRequest.status
-            )
-        );
-
-      if (hasActiveReplacement) {
-        return false;
-      }
-
-      return shouldShowClosedRequest(
-        request
-      );
-    })
-      .map((request) => ({
-  ...request,
+    appState.shiftRequests.filter(
+      (request) =>
+        request.profile_id ===
+        state.profile.id
+    );
 
   /*
-   * My Shifts must use the same hydrated shift
-   * object as the live Schedule view so staffing
-   * counts and approved workers stay identical.
+   * Use the same hydrated shift objects as Schedule.
+   * This keeps staffing counts and approved volunteer
+   * names identical between Schedule and My Shifts.
    */
-  shift:
-    getShiftById(
-      request.shift_id
-    ) ||
-    request.shift
-}))
+  const hydratedRequests =
+    myRequests
+      .map((request) => ({
+        ...request,
+        shift:
+          getShiftById(
+            request.shift_id
+          ) ||
+          request.shift
+      }))
       .filter(
         (request) =>
           request.shift
-      )
-      .sort((a, b) => {
-        const statusOrder = {
-          approved: 0,
-          pending: 1,
-          withdrawn: 2,
-          declined: 3,
-          cancelled: 4
-        };
+      );
 
-        const statusDifference =
-          (statusOrder[a.status] ?? 99) -
-          (statusOrder[b.status] ?? 99);
-
+  /*
+   * If somebody withdrew or was declined and then
+   * submitted a new active request for the same shift,
+   * don't show the superseded closed request in history.
+   */
+  const rows =
+    hydratedRequests.filter(
+      (request) => {
         if (
-          statusDifference !== 0
+          ["pending", "approved"].includes(
+            request.status
+          )
         ) {
-          return statusDifference;
+          return true;
         }
 
-        return (
-          `${a.shift.shift_date}` +
-          `${a.shift.start_time}`
-        ).localeCompare(
-          `${b.shift.shift_date}` +
-          `${b.shift.start_time}`
-        );
-      });
+        const hasActiveReplacement =
+          hydratedRequests.some(
+            (otherRequest) =>
+              otherRequest.id !==
+                request.id &&
+              otherRequest.shift_id ===
+                request.shift_id &&
+              [
+                "pending",
+                "approved"
+              ].includes(
+                otherRequest.status
+              )
+          );
+
+        return !hasActiveReplacement;
+      }
+    );
+
+  /*
+   * Upcoming contains only active requests for today
+   * or a future date.
+   */
+  const upcomingRows =
+    rows
+      .filter(
+        (request) =>
+          request.shift.shift_date >=
+            today &&
+          [
+            "pending",
+            "approved"
+          ].includes(
+            request.status
+          )
+      )
+      .sort(
+        compareMyShiftDates
+      );
+
+  /*
+   * Everything that is no longer an upcoming active
+   * request belongs in Shift History.
+   *
+   * A past approved request remains "approved" in the
+   * database. We will present it as Completed in the UI
+   * without modifying the stored request.
+   */
+  const historyRows =
+    rows
+      .filter(
+        (request) =>
+          !(
+            request.shift.shift_date >=
+              today &&
+            [
+              "pending",
+              "approved"
+            ].includes(
+              request.status
+            )
+          )
+      )
+      .sort(
+        (a, b) =>
+          compareMyShiftDates(
+            b,
+            a
+          )
+      );
+
+  const totalRows =
+    upcomingRows.length +
+    historyRows.length;
 
   setEmptyState(
     list,
-    rows.length === 0
+    totalRows === 0
   );
 
   list.classList.remove(
@@ -2452,16 +2482,86 @@ const rows =
     "schedule-accordion-list"
   );
 
-  list.innerHTML =
-    rows.length
-      ? rows
+  if (!totalRows) {
+    list.innerHTML =
+      "You have no shift requests.";
+
+    return;
+  }
+
+  const upcomingMarkup =
+    upcomingRows.length
+      ? upcomingRows
           .map(
             myShiftRequestMarkup
           )
           .join("")
-      : "You have no active or recent shift requests.";
+      : `
+        <div class="empty-state">
+          You have no upcoming shifts.
+        </div>
+      `;
+
+  const historyMarkup =
+    historyRows.length
+      ? `
+        <details class="my-shifts-history">
+          <summary>
+            Shift History
+            (${historyRows.length})
+          </summary>
+
+          <div class="schedule-accordion-list">
+            ${historyRows
+              .map(
+                (request) =>
+                  myShiftRequestMarkup(
+                    request,
+                    {
+                      history: true
+                    }
+                  )
+              )
+              .join("")}
+          </div>
+        </details>
+      `
+      : "";
+
+  list.innerHTML = `
+    <div class="my-shifts-section">
+      <h3>
+        Upcoming Shifts
+      </h3>
+
+      ${upcomingMarkup}
+    </div>
+
+    ${historyMarkup}
+  `;
 
   wireMyShiftActions(list);
+}
+
+  function compareMyShiftDates(
+  a,
+  b
+) {
+  const aDateTime =
+    `${a.shift.shift_date}T${
+      a.shift.start_time ||
+      "00:00"
+    }`;
+
+  const bDateTime =
+    `${b.shift.shift_date}T${
+      b.shift.start_time ||
+      "00:00"
+    }`;
+
+  return aDateTime.localeCompare(
+    bDateTime
+  );
 }
 
   function myShiftRequestMarkup(
