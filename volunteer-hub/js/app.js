@@ -6460,8 +6460,8 @@ function openEditShiftDialog(
 }
 
   function renderAdminAvailabilitySummary(
-    summary
-  ) {
+  summary
+) {
     const container =
       byId(
         "adminAvailabilitySummary"
@@ -6469,6 +6469,19 @@ function openEditShiftDialog(
 
     const days =
       summary.weekly?.days || {};
+
+    const preferredContact =
+      {
+        email: "Email",
+        phone: "Phone",
+        text: "Text"
+      }[
+        summary.profile
+          .preferred_contact_method
+      ] ||
+      summary.profile
+        .preferred_contact_method ||
+      "Not specified";
 
     const weeklyMarkup =
       WEEKDAY_NAMES.map(
@@ -6580,24 +6593,70 @@ function openEditShiftDialog(
     );
 
     container.innerHTML = `
-      <article>
-        <strong>
-          ${escapeHtml(
-            summary.profile
-              .display_name
-          )}
-        </strong>
+  <article>
+    <strong>
+      ${escapeHtml(
+        summary.profile
+          .display_name
+      )}
+    </strong>
 
-        <small>
-          ${escapeHtml(
-            summary.weekly?.note ||
-              "No general note"
-          )}
-        </small>
-      </article>
+    <small>
+      ${escapeHtml(
+        summary.weekly?.note ||
+          "No general note"
+      )}
+    </small>
+  </article>
 
-      <div class="subsection">
-        <h3>
+  <div class="subsection">
+    <h3>
+      Contact
+    </h3>
+
+    <article>
+      <strong>
+        Email
+      </strong>
+
+      <small>
+        ${escapeHtml(
+          summary.profile.email ||
+          "Not provided"
+        )}
+      </small>
+    </article>
+
+    <article>
+      <strong>
+        Phone
+      </strong>
+
+      <small>
+        ${escapeHtml(
+          summary.profile.phone ||
+          "Not provided"
+        )}
+      </small>
+    </article>
+
+    <article>
+      <strong>
+        Preferred contact
+      </strong>
+
+      <small>
+        ${escapeHtml(
+          preferredContact
+        )}
+      </small>
+    </article>
+  </div>
+
+  <div class="subsection">
+    <h3>
+      Weekly availability
+    </h3>
           Weekly availability
         </h3>
 
