@@ -2719,6 +2719,17 @@ const rows =
             )}
             preferred
           </span>
+
+          <span>
+  <strong>
+    Working this shift:
+  </strong>
+  ${escapeHtml(
+    approvedNames.join(", ") ||
+    "No volunteers yet"
+  )}
+</span>
+
         </div>
 
         ${
