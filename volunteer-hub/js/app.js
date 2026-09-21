@@ -2473,6 +2473,17 @@ const rows =
   const status =
     request.status;
 
+  const approvedNames =
+    (shift.approved_requests || [])
+      .map(
+        (approvedRequest) =>
+          approvedRequest.display_name ||
+          getProfileName(
+            approvedRequest.profile_id
+          )
+      )
+      .filter(Boolean);
+
   const isFuture =
     shift.shift_date >=
     todayString();
