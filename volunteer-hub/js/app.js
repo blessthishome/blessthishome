@@ -1031,13 +1031,26 @@ function isAdministrator() {
     container.innerHTML = "";
 
     const baseDate = new Date();
-    baseDate.setHours(12, 0, 0, 0);
 
-    for (
-      let offset = 0;
-      offset < 7;
-      offset += 1
-    ) {
+baseDate.setHours(12, 0, 0, 0);
+
+baseDate.setDate(
+
+  baseDate.getDate() -
+
+  baseDate.getDay()
+
+);
+
+for (
+
+  let offset = 0;
+
+  offset < 7;
+
+  offset += 1
+
+) {
       const date = new Date(baseDate);
       date.setDate(
         baseDate.getDate() + offset
