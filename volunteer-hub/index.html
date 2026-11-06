@@ -2588,6 +2588,66 @@
         </div>
       </details>
 
+      <!-- ============================================
+           SHIFT VOLUNTEER MANAGEMENT
+
+           Visible only when editing an existing shift.
+           Populated by volunteer-app.js.
+           ============================================ -->
+
+      <section
+        id="editShiftVolunteersSection"
+        class="optional-section is-hidden"
+        aria-label="Manage assigned volunteers"
+      >
+        <h3>Assigned Volunteers</h3>
+
+        <p
+          id="editShiftVolunteerCount"
+          class="muted"
+          aria-live="polite"
+        >
+          Loading assignments...
+        </p>
+
+        <div
+          id="editShiftAssignedVolunteers"
+          class="shift-assigned-volunteers"
+        ></div>
+
+        <div class="field">
+          <label for="editShiftVolunteerSelect">
+            Add Volunteer
+          </label>
+
+          <select
+            id="editShiftVolunteerSelect"
+          >
+            <option value="">
+              Select an active volunteer
+            </option>
+          </select>
+        </div>
+
+        <div class="dialog-actions">
+          <button
+            id="editShiftAddVolunteerButton"
+            class="button button-secondary"
+            type="button"
+          >
+            Add Volunteer
+          </button>
+        </div>
+
+        <p
+          id="editShiftVolunteerFeedback"
+          class="form-feedback"
+          role="status"
+          aria-live="polite"
+        ></p>
+      </section>
+
+
       <div class="dialog-actions">
         <button
           class="button button-secondary"
