@@ -3386,10 +3386,12 @@ return (shiftResult.data || []).map(
     updateShift,
     cancelShift,
 
-    listShiftRequests,
+        listShiftRequests,
     createShiftRequest,
     withdrawShiftRequest,
     reviewShiftRequest,
+    assignVolunteerToShift,
+    removeVolunteerFromShift,
 
     listMessages,
     createMessage,
