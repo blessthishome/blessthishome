@@ -5783,6 +5783,16 @@ function populatePendingHoursPersonSelect() {
 
   appState.editingShiftId = null;
 
+    const volunteerSection = byId(
+  "editShiftVolunteersSection"
+);
+
+if (volunteerSection) {
+  volunteerSection.classList.add(
+    "is-hidden"
+  );
+}
+    
   const form = requireElement(
     "createShiftForm"
   );
@@ -6190,6 +6200,13 @@ function openEditShiftDialog(
     )
       ? shift.duties.join("\n")
       : "";
+
+  setFormFeedback(
+  "editShiftVolunteerFeedback",
+  ""
+);
+
+renderEditShiftVolunteers();
 
   openDialog(
     "createShiftDialog"
