@@ -1961,6 +1961,231 @@ return (shiftResult.data || []).map(
     return data;
   }
 
+  
+  /* =======================================================
+     ADMINISTRATIVE SHIFT ASSIGNMENTS
+     ======================================================= */
+
+  async function assignVolunteerToShift(
+    shiftId,
+    profileId
+  ) {
+    requireAdministrativeAccess();
+
+    if (!shiftId || !profileId) {
+      throw new Error(
+        "Choose a shift and a volunteer."
+      );
+    }
+
+    if (state.demoMode) {
+      const reviewer = currentProfile();
+
+      return clone(
+        updateStore((store) => {
+          const shift = store.shifts.find(
+            (item) => item.id === shiftId
+          );
+
+          if (
+            !shift ||
+            shift.status !== "published"
+          ) {
+            throw new Error(
+              "This shift is not available."
+            );
+          }
+
+          const profile = mergeProfiles(
+            store.directory_profiles,
+            readDemoAccountProfiles()
+          ).find(
+            (item) =>
+              item.id === profileId &&
+              item.account_status === "active"
+          );
+
+          if (!profile) {
+            throw new Error(
+              "Active volunteer account not found."
+            );
+          }
+
+          const requests =
+            store.shift_requests.filter(
+              (item) =>
+                item.shift_id === shiftId
+            );
+
+          if (
+            requests.some(
+              (item) =>
+                item.profile_id === profileId &&
+                item.status === "approved"
+            )
+          ) {
+            throw new Error(
+              "Volunteer is already assigned."
+            );
+          }
+
+          const approvedCount =
+            requests.filter(
+              (item) =>
+                item.status === "approved"
+            ).length;
+
+          if (
+            approvedCount >=
+            Number(shift.maximum_people)
+          ) {
+            throw new Error(
+              "Shift is at maximum capacity."
+            );
+          }
+
+          const timestamp = nowIso();
+
+          const pendingRequest =
+            requests
+              .filter(
+                (item) =>
+                  item.profile_id === profileId &&
+                  item.status === "pending"
+              )
+              .sort(sortNewestFirst)[0];
+
+          if (pendingRequest) {
+            Object.assign(pendingRequest, {
+              status: "approved",
+              reviewed_by: reviewer.id,
+              reviewed_at: timestamp,
+              updated_at: timestamp,
+              admin_note:
+                "Assigned directly by management"
+            });
+
+            return pendingRequest;
+          }
+
+          const record = {
+            id: generateId(),
+            shift_id: shiftId,
+            profile_id: profileId,
+            display_name:
+              profile.display_name,
+            request_type: "full",
+            start_time: shift.start_time,
+            end_time: shift.end_time,
+            note: "",
+            status: "approved",
+            admin_note:
+              "Assigned directly by management",
+            reviewed_by: reviewer.id,
+            reviewed_at: timestamp,
+            created_at: timestamp,
+            updated_at: timestamp
+          };
+
+          store.shift_requests.push(record);
+
+          return record;
+        })
+      );
+    }
+
+    const { data, error } =
+      await state.supabase.rpc(
+        "admin_assign_volunteer_to_shift",
+        {
+          p_shift_id: shiftId,
+          p_profile_id: profileId
+        }
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  }
+
+  async function removeVolunteerFromShift(
+    shiftId,
+    profileId
+  ) {
+    requireAdministrativeAccess();
+
+    if (!shiftId || !profileId) {
+      throw new Error(
+        "A shift and volunteer are required."
+      );
+    }
+
+    if (state.demoMode) {
+      const reviewer = currentProfile();
+
+      return clone(
+        updateStore((store) => {
+          const shift = store.shifts.find(
+            (item) => item.id === shiftId
+          );
+
+          if (!shift) {
+            throw new Error(
+              "The shift could not be found."
+            );
+          }
+
+          const assignments =
+            store.shift_requests.filter(
+              (item) =>
+                item.shift_id === shiftId &&
+                item.profile_id === profileId &&
+                item.status === "approved"
+            );
+
+          if (!assignments.length) {
+            throw new Error(
+              "Approved assignment not found."
+            );
+          }
+
+          const timestamp = nowIso();
+
+          assignments.forEach((request) => {
+            Object.assign(request, {
+              status: "cancelled",
+              reviewed_by: reviewer.id,
+              reviewed_at: timestamp,
+              updated_at: timestamp,
+              admin_note:
+                "Assignment removed by management"
+            });
+          });
+
+          return assignments;
+        })
+      );
+    }
+
+    const { data, error } =
+      await state.supabase.rpc(
+        "admin_remove_volunteer_from_shift",
+        {
+          p_shift_id: shiftId,
+          p_profile_id: profileId
+        }
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  }
+
+
   /* =======================================================
      MESSAGES
      ======================================================= */
