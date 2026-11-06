@@ -7757,13 +7757,150 @@ byId(
       printHoursReport
     );
 
+    
     byId(
       "downloadHoursCsvButton"
     ).addEventListener(
       "click",
       downloadHoursCsv
     );
+
+    /* ================================================
+       ADD VOLUNTEER TO SHIFT
+       ================================================ */
+
+    byId(
+      "editShiftAddVolunteerButton"
+    ).addEventListener(
+      "click",
+      async () => {
+        const shiftId =
+          appState.editingShiftId;
+
+        const profileId = byId(
+          "editShiftVolunteerSelect"
+        ).value;
+
+        if (!shiftId || !profileId) {
+          setFormFeedback(
+            "editShiftVolunteerFeedback",
+            "Select a volunteer first."
+          );
+          return;
+        }
+
+        const button = byId(
+          "editShiftAddVolunteerButton"
+        );
+
+        button.disabled = true;
+
+        try {
+          await dataApi.assignVolunteerToShift(
+            shiftId,
+            profileId
+          );
+
+          await refreshAll();
+
+          renderEditShiftVolunteers();
+
+          setFormFeedback(
+            "editShiftVolunteerFeedback",
+            "Volunteer assigned successfully."
+          );
+        } catch (error) {
+          console.error(
+            "Unable to assign volunteer:",
+            error
+          );
+
+          setFormFeedback(
+            "editShiftVolunteerFeedback",
+            error.message ||
+              "Unable to assign volunteer."
+          );
+        } finally {
+          if (
+            appState.editingShiftId === shiftId
+          ) {
+            renderEditShiftVolunteers();
+          }
+        }
+      }
+    );
+
+    /* ================================================
+       REMOVE VOLUNTEER FROM SHIFT
+       ================================================ */
+
+    byId(
+      "editShiftAssignedVolunteers"
+    ).addEventListener(
+      "click",
+      async (event) => {
+        const button = event.target.closest(
+          "[data-remove-shift-volunteer]"
+        );
+
+        if (!button) {
+          return;
+        }
+
+        const shiftId =
+          appState.editingShiftId;
+
+        const profileId =
+          button.getAttribute(
+            "data-remove-shift-volunteer"
+          );
+
+        if (!shiftId || !profileId) {
+          return;
+        }
+
+        if (
+          !window.confirm(
+            "Remove this volunteer from the shift?"
+          )
+        ) {
+          return;
+        }
+
+        button.disabled = true;
+
+        try {
+          await dataApi.removeVolunteerFromShift(
+            shiftId,
+            profileId
+          );
+
+          await refreshAll();
+
+          renderEditShiftVolunteers();
+
+          setFormFeedback(
+            "editShiftVolunteerFeedback",
+            "Volunteer removed successfully."
+          );
+        } catch (error) {
+          console.error(
+            "Unable to remove volunteer:",
+            error
+          );
+
+          setFormFeedback(
+            "editShiftVolunteerFeedback",
+            error.message ||
+              "Unable to remove volunteer."
+          );
+
+          button.disabled = false;
+        }
+      }
+    );
   }
+
 
   function wireInterface() {
     if (appState.initialized) {
