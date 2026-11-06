@@ -5853,6 +5853,161 @@ function populatePendingHoursPersonSelect() {
   );
 }
 
+  
+  /* =======================================================
+     EDIT SHIFT — VOLUNTEER ASSIGNMENTS
+     ======================================================= */
+
+  function renderEditShiftVolunteers() {
+    const section = byId(
+      "editShiftVolunteersSection"
+    );
+
+    if (!section) {
+      return;
+    }
+
+    const shiftId = appState.editingShiftId;
+
+    if (!shiftId) {
+      section.classList.add("is-hidden");
+      return;
+    }
+
+    const shift = getShiftById(shiftId);
+
+    if (!shift) {
+      section.classList.add("is-hidden");
+      return;
+    }
+
+    section.classList.remove("is-hidden");
+
+    const assignedContainer = byId(
+      "editShiftAssignedVolunteers"
+    );
+
+    const countElement = byId(
+      "editShiftVolunteerCount"
+    );
+
+    const select = byId(
+      "editShiftVolunteerSelect"
+    );
+
+    const addButton = byId(
+      "editShiftAddVolunteerButton"
+    );
+
+    const approved = (
+      shift.approved_requests || []
+    ).filter(
+      (request) =>
+        request.status === "approved"
+    );
+
+    const assignedIds = new Set(
+      approved.map(
+        (request) => request.profile_id
+      )
+    );
+
+    const maximum = Number(
+      shift.maximum_people || 0
+    );
+
+    const isFull =
+      approved.length >= maximum;
+
+    if (countElement) {
+      countElement.textContent =
+        `${approved.length} of ${maximum} positions filled`;
+    }
+
+    if (assignedContainer) {
+      assignedContainer.innerHTML =
+        approved.length
+          ? approved.map((request) => {
+              const name =
+                request.display_name ||
+                getProfileName(
+                  request.profile_id
+                );
+
+              return `
+                <div class="shift-assigned-volunteer">
+                  <span>${escapeHtml(name)}</span>
+
+                  <button
+                    type="button"
+                    class="button button-danger"
+                    data-remove-shift-volunteer="${escapeHtml(
+                      request.profile_id
+                    )}"
+                  >
+                    Remove
+                  </button>
+                </div>
+              `;
+            }).join("")
+          : `<p class="muted">
+               No volunteers assigned yet.
+             </p>`;
+    }
+
+    if (select) {
+      const availableProfiles = (
+        appState.profiles || []
+      )
+        .filter(
+          (profile) =>
+            profile.account_status === "active" &&
+            !assignedIds.has(profile.id)
+        )
+        .sort(
+          (a, b) =>
+            String(
+              a.display_name || ""
+            ).localeCompare(
+              String(
+                b.display_name || ""
+              )
+            )
+        );
+
+      select.innerHTML = `
+        <option value="">
+          ${
+            isFull
+              ? "Shift is at maximum capacity"
+              : "Select an active volunteer"
+          }
+        </option>
+
+        ${availableProfiles.map(
+          (profile) => `
+            <option value="${escapeHtml(
+              profile.id
+            )}">
+              ${escapeHtml(
+                profile.display_name ||
+                "Unnamed volunteer"
+              )}
+            </option>
+          `
+        ).join("")}
+      `;
+
+      select.disabled = isFull ||
+        availableProfiles.length === 0;
+    }
+
+    if (addButton) {
+      addButton.disabled = isFull;
+    }
+  }
+
+
 function openEditShiftDialog(
   shiftId
 ) {
